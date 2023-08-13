@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexbox pricing teble</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat&family=Dancing+Script&family=Edu+SA+Beginner:wght@500&family=Josefin+Sans&family=Libre+Baskerville&family=Lumanosimo&display=swap"
+        rel="stylesheet">
+
+    <style>
+        
+        body{
+           background-color: pink;
+           font-family: 'Bebas Neue', sans-serif;
+            font-family: 'Caveat', cursive;
+            font-family: 'Dancing Script', cursive;
+            font-family: 'Edu SA Beginner', cursive;
+            font-family: 'Josefin Sans', sans-serif;
+            font-family: 'Libre Baskerville', serif;
+            font-family: 'Lumanosimo', cursive;
+        }
+        .main{
+           
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            align-items: center;
+            
+            gap:2rem;
+        }
+        .price-plane{
+            flex:1;
+            background-color: #f2f2f2;
+            
+            max-width: 400px;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            line-height: 2;
+        }
+        .pack{
+            font-weight: bold;
+            
+            font-size: large;
+        }
+        .price{
+            font-weight: bolder;
+            font-size: 2.5rem;
+            
+        }
+        .packdetail{
+            list-style: none;
+            line-height: 2.5;
+            margin-top: 0px;
+        }
+        button{
+            background-color: rgb(255, 162, 0);
+            border: 10px solid rgb(255, 162, 2);
+            border-radius:20px ;
+            color: rgb(255, 255, 255);
+        }
+        @media (max-width:1250px){
+            .main{
+               
+                flex-direction: column;
+                
+                height: 100%;
+            }
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="price-plane">
+            <div class="pack">Basic</div>
+            <div class="price">$9.99/month</div>
+            <ul class="packdetail">
+                <li>✅ 10GB Storage</li>
+                <li>✅ 1 User</li>
+                <li>🚫 Support</li>
+            </ul>
+            <button type="button">sign up</button>
+        </div>
+        <div class="price-plane">
+            <div class="pack">Standard</div>
+            <div class="price">$19.99/month</div>
+            <ul class="packdetail">
+                <li>✅ 50GB Storage</li>
+                <li>✅ 5 User</li>
+                <li>✅ Phone & Email Support</li>
+            </ul>
+            <button type="button">sign up</button>
+        </div>
+        <div class="price-plane">
+            <div class="pack">Premium</div>
+            <div class="price">$49.99/month</div>
+            <ul class="packdetail">
+                <li>✅ 100GB Storage</li>
+                <li>✅ 10 User</li>
+                <li>✅ 24/7 Support</li>
+            </ul>
+            <button type="button">sign up</button>
+        </div>
+    </div>
+</body>
+
+</html>

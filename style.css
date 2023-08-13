@@ -1,0 +1,34 @@
+ .top-container{
+    font-family: serif;
+    color: rgb(185, 180, 175);
+ }
+ .top-container span{
+    color: rgb(49, 103, 114);
+ }
+.middle-container{
+
+    
+    height: 100vh;
+}
+.middle-container p{
+    font-family: 'Bebas Neue', sans-serif;
+font-family: 'Caveat', cursive;
+font-family: 'Dancing Script', cursive;
+font-family: 'Edu SA Beginner', cursive;
+font-family: 'Josefin Sans', sans-serif;
+font-family: 'Libre Baskerville', serif;
+font-family: 'Lumanosimo', cursive;
+font-family: 'Raleway', sans-serif;
+
+}
+.bottom-container{
+    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Caveat', cursive;
+    font-family: 'Dancing Script', cursive;
+    font-family: 'Edu SA Beginner', cursive;
+    font-family: 'Josefin Sans', sans-serif;
+    font-family: 'Kanit', sans-serif;
+    font-family: 'Libre Baskerville', serif;
+    font-family: 'Lumanosimo', cursive;
+    font-family: 'Raleway', sans-serif;
+}
