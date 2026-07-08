@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/*
+  Design tokens — Phase 4 direction:
+  Dark-mode-first, terminal/embedded-systems signature (amber phosphor accent),
+  grounded in the subject: payment terminal firmware + CLI-driven engineering.
+  Light mode is a genuine second mode, not an afterthought.
+*/
+
+:root {
+  /* Light mode: warm paper, not stark white */
+  --background: #F3F1EC;
+  --surface: #FFFFFF;
+  --surface-raised: #FAF9F5;
+  --foreground: #16181C;
+  --foreground-muted: #52565E;
+  --foreground-faint: #8A8E96;
+  --border: #DEDBD2;
+  --border-strong: #C7C3B7;
+
+  /* Signature accent: amber phosphor — the color of a terminal readout */
+  --accent: #B5720E;
+  --accent-strong: #8C5808;
+  --accent-soft: #F0DDB8;
+
+  --font-display: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+.dark {
+  --background: #0B0D0F;
+  --surface: #14171B;
+  --surface-raised: #1B1F24;
+  --foreground: #E7E4DC;
+  --foreground-muted: #9B9C97;
+  --foreground-faint: #64665F;
+  --border: #24282D;
+  --border-strong: #34393F;
+
+  --accent: #E8A33D;
+  --accent-strong: #FFC266;
+  --accent-soft: #3A2E15;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-faint: var(--foreground-faint);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Visible keyboard focus — required baseline, not optional polish */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Signature motif: terminal cursor, used sparingly (hero, command palette prompt) */
+.cursor-blink::after {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 1em;
+  margin-left: 0.15em;
+  background: var(--accent);
+  vertical-align: -0.15em;
+  animation: blink 1s steps(1) infinite;
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor-blink::after {
+    animation: none;
+    opacity: 1;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

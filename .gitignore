@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# Playwright artifacts
+playwright-report/
+test-results/
+test-output.log
+
+# Environment files (keep the documented example)
+.env*
+!.env.example
+
+# Local analysis and editor files
+playwright-analysis*.ipynb
+test_summary.py
+*.log
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# Local archives
+*.zip
