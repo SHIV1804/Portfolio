@@ -28,6 +28,7 @@
 
 ### Known issues / blocked items
 - None. Permissions issue resolved by user.
+- **Correction**: Two Sum is tagged pattern: two-pointers but solution.cpp is a hash-map solution, not a literal two-pointer walk. This is fine for Chunk 0-3 (no visualizer renders yet) but MUST be resolved before Chunk 4 builds TwoPointersVisualizer, since that visualizer will animate a left/right pointer walk that won't match this code. Resolve by either (a) retagging Two Sum to pattern: hash-map, or (b) adding a genuine two-pointers-solved problem (e.g. Valid Palindrome, Container With Most Water) before Chunk 4 starts.
 
 ### Next chunk to run
 - Chunk 1: Syncing more problems and potentially integrating the visualizer.
