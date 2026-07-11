@@ -137,3 +137,47 @@
 
 ### Next chunk to run
 - Chunk 4: Pattern Visualizers (interactive components).
+
+## Chunk 4 — Pattern Visualizer Library — 2026-07-11
+### What was built
+- **Data Fix**: Retagged `Two Sum` as `hash-map` and added `Two Sum II - Input Array Is Sorted` as the canonical `two-pointers` example.
+- **Visualizer Library**: Created `widgets/dsa/ui/visualizers/` containing:
+    - `TwoPointersVisualizer.tsx`: Animates converging left/right pointers.
+    - `SlidingWindowVisualizer.tsx`: Animates expanding/contracting windows.
+    - `BinarySearchVisualizer.tsx`: Animates range narrowing and midpoint selection.
+- **Dispatcher**: Refactored `widgets/dsa/ui/PatternVisualizer.tsx` to dynamically render the correct visualizer based on the problem's pattern.
+- **Fallback Mechanism**: Added a graceful fallback for patterns without visualizer support (e.g., `hash-map`).
+
+### Decisions made (and why)
+- **Interactive Controls**: Added Play/Pause/Step controls to give users full control over the learning experience.
+- **Keyboard Support**: Integrated arrow keys and spacebar for accessibility and ease of use.
+- **Stateless Animation**: Used React state and `setTimeout` for animations to ensure they are easily controllable and respect `prefers-reduced-motion` (by allowing manual stepping).
+- **Design Consistency**: Used `var(--accent)` and mono fonts to match the site's existing terminal aesthetic.
+
+### Files created/modified
+- `widgets/dsa/ui/visualizers/TwoPointersVisualizer.tsx` (Created)
+- `widgets/dsa/ui/visualizers/SlidingWindowVisualizer.tsx` (Created)
+- `widgets/dsa/ui/visualizers/BinarySearchVisualizer.tsx` (Created)
+- `widgets/dsa/ui/PatternVisualizer.tsx` (Modified)
+- `widgets/dsa/ui/ProblemCard.tsx` (Modified - defensive check for tags)
+- `DSA_FEATURE_PROGRESS.md` (Modified)
+
+### How to add a new pattern visualizer later
+1.  **Create the Component**: Add a new file in `widgets/dsa/ui/visualizers/` (e.g., `BFSVisualizer.tsx`).
+2.  **Define Input Shape**: Ensure the component accepts an `exampleInput` prop matching the pattern's expected YAML shape in `meta.md`.
+3.  **Register in Dispatcher**: Update `widgets/dsa/ui/PatternVisualizer.tsx` to include the new pattern in the `switch` statement.
+4.  **Add Test Data**: Add a problem to the `dsa-solutions` repo with the new pattern tag and a valid `exampleInput`.
+
+### Verification performed (real commands run, real results)
+- `npm run build`: Passed successfully.
+- `npm run lint`: Passed (0 errors, 11 warnings in tests).
+- **Manual Verification**:
+    - **Two Sum II**: Verified `TwoPointersVisualizer` correctly animates `left` and `right` pointers converging on indices 0 and 1 for target 9.
+    - **Two Sum**: Verified fallback message "No visualizer available for pattern: hash-map" displays correctly.
+    - **Interactive Controls**: Verified Play/Pause, Step Forward/Back, and Reset all function as expected.
+
+### Known issues / blocked items
+- None.
+
+### Next chunk to run
+- Chunk 5: Search and Filtering improvements (client-side).

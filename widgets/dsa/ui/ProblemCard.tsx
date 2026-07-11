@@ -41,7 +41,7 @@ export const ProblemCard: React.FC<ProblemCardProps> = ({ problem }) => {
           <Badge variant="outline" className="text-xs border-amber-500/30 text-amber-500/80">
             {problem.pattern}
           </Badge>
-          {problem.tags.map(tag => (
+          {problem.tags?.map(tag => (
             <Badge key={tag} variant="secondary" className="text-xs bg-white/5 text-white/60">
               {tag}
             </Badge>
