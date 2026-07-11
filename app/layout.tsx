@@ -5,6 +5,8 @@ import "./globals.css";
 import { ThemeProvider, themeInitScript } from "@/features/theme-toggle";
 import { siteConfig } from "@/shared/config/site";
 import { Analytics } from "@vercel/analytics/react";
+import { Header } from "@/widgets/header/ui/Header";
+import { Footer } from "@/widgets/footer/ui/Footer";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://portfolio-shivam.vercel.app"),
@@ -29,7 +31,11 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>
-          {children}
+          <Header />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
           <Analytics />
         </ThemeProvider>
       </body>
