@@ -65,3 +65,42 @@
 
 ### Next chunk to run
 - Chunk 2: Individual problem detail pages and code highlighting.
+
+## Chunk 2 — GitHub Webhook for Live Sync — 2026-07-11
+### What was built
+- **Webhook Route**: Built `app/api/dsa-webhook/route.ts` to handle GitHub push events.
+- **Security**: Implemented HMAC-SHA256 signature verification using `crypto.timingSafeEqual` to prevent timing attacks. Rejects unverified payloads with 401.
+- **Live Sync**: Integrated `revalidatePath('/dsa')` to trigger ISR revalidation on verified pushes to the main branch.
+- **Audit**: Reviewed contact form rate limiting implementation.
+
+### Decisions made (and why)
+- **Signature Verification**: Used `crypto.timingSafeEqual` for constant-time comparison, a security best practice for cryptographic signatures.
+- **Branch Filtering**: The webhook only triggers revalidation for pushes to the default branch (main) to avoid unnecessary builds on feature branches.
+- **Rate Limiting Caveat**: Noted that the current in-memory rate limiting in `app/api/contact/route.ts` is a "soft mitigation" because Vercel's serverless functions are stateless and memory is not shared or persisted between invocations.
+
+### Files created/modified
+- `app/api/dsa-webhook/route.ts` (Created)
+- `DSA_FEATURE_PROGRESS.md` (Modified)
+
+### Verification performed (real commands run, real results)
+- `npm run build`: Passed successfully.
+- `npm run lint`: Passed (0 errors, 11 warnings in tests).
+- **Signature Verification Tests**:
+    - **Test 1: Valid Signature**
+        - Input: Valid HMAC-SHA256 for payload.
+        - Result: `VALID` (Correctly accepted).
+    - **Test 2: Invalid Signature (Wrong Secret)**
+        - Input: HMAC generated with incorrect secret.
+        - Result: `INVALID` (Correctly rejected).
+    - **Test 3: Invalid Signature (Tampered Payload)**
+        - Input: Valid signature but payload modified after signing.
+        - Result: `INVALID` (Correctly rejected).
+    - **Test 4: Invalid Signature (Garbage)**
+        - Input: `sha256=abcdef1234567890`.
+        - Result: `INVALID` (Correctly rejected).
+
+### Known issues / blocked items
+- **Rate Limiting**: The in-memory `rateLimitMap` in the contact form is unreliable on Vercel. For production-grade rate limiting, a persistent store like Redis (Upstash) should be used.
+
+### Next chunk to run
+- Chunk 3: Individual problem detail pages and code highlighting.
