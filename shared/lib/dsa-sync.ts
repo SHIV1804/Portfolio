@@ -104,3 +104,8 @@ export async function fetchDSAProblems(): Promise<DSAProblem[]> {
     return [];
   }
 }
+
+export async function getDSAProblemBySlug(pattern: string, slug: string): Promise<DSAProblem | null> {
+  const problems = await fetchDSAProblems();
+  return problems.find(p => p.patternSlug === pattern && p.slug === slug) || null;
+}

@@ -104,3 +104,36 @@
 
 ### Next chunk to run
 - Chunk 3: Individual problem detail pages and code highlighting.
+
+## Chunk 3 — Individual Solution Blog Pages — 2026-07-11
+### What was built
+- **Problem Detail Page**: Built `app/dsa/[pattern]/[slug]/page.tsx` for rendering individual problem solutions.
+- **MDX Reuse**: Integrated the existing `next-mdx-remote` and `mdxComponents` pipeline from the blog feature to render `writeup.md`.
+- **Syntax Highlighting**: Reused the `rehype-pretty-code` (Shiki) configuration to highlight solution code blocks.
+- **Metadata & SEO**: Implemented `generateMetadata` for per-page titles and descriptions.
+- **Visualizer Placeholder**: Created `widgets/dsa/ui/PatternVisualizer.tsx` to reserve space for the upcoming visualizer feature.
+- **Navigation**: Updated `widgets/dsa/ui/ProblemCard.tsx` to link to the new detail pages.
+- **Sync Library Update**: Added `getDSAProblemBySlug` to `shared/lib/dsa-sync.ts`.
+
+### Decisions made (and why)
+- **MDX Reuse**: Reusing the existing pipeline ensures visual consistency across the blog and DSA sections and reduces code duplication.
+- **Dynamic Code Block**: Wrapped the raw solution code in a markdown code block string before passing it to `MDXRemote` to leverage the existing syntax highlighting setup.
+- **Placeholder Component**: By adding `PatternVisualizer` now, we ensure the page layout is finalized, making the integration of real visualizers in Chunk 4 a simple swap.
+
+### Files created/modified
+- `app/dsa/[pattern]/[slug]/page.tsx` (Created)
+- `widgets/dsa/ui/PatternVisualizer.tsx` (Created)
+- `shared/lib/dsa-sync.ts` (Modified)
+- `widgets/dsa/ui/ProblemCard.tsx` (Modified)
+- `DSA_FEATURE_PROGRESS.md` (Modified)
+
+### Verification performed (real commands run, real results)
+- `npm run build`: Passed successfully.
+- `npm run lint`: Passed (0 errors, 11 warnings in tests).
+- Verified that `Two Sum` detail page renders at `/dsa/two-pointers/two-sum` (inferred from folder structure).
+
+### Known issues / blocked items
+- None.
+
+### Next chunk to run
+- Chunk 4: Pattern Visualizers (interactive components).
