@@ -14,6 +14,7 @@ export interface DSAProblem {
   slug: string;
   patternSlug: string;
   solution: string;
+  solutionFileExtension: string;
   writeup: string;
 }
 
@@ -92,6 +93,7 @@ export async function fetchDSAProblems(): Promise<DSAProblem[]> {
             slug: problemDir.path.split('/').pop()!,
             patternSlug: problemDir.pattern,
             solution: solutionContent,
+            solutionFileExtension: solutionFile.name.split('.').pop() || 'cpp',
             writeup: writeupContent,
           } as DSAProblem);
         }

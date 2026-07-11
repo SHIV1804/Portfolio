@@ -39,8 +39,20 @@ export default async function DSAProblemPage({ params }: PageProps) {
     notFound();
   }
 
+  // Map file extensions to Shiki-supported language tags
+  const extensionMap: Record<string, string> = {
+    'cpp': 'cpp',
+    'py': 'python',
+    'js': 'javascript',
+    'ts': 'typescript',
+    'java': 'java',
+    'go': 'go',
+    'rs': 'rust',
+  };
+  const lang = extensionMap[problem.solutionFileExtension] || problem.solutionFileExtension || 'cpp';
+
   // Prepare the code block for MDX
-  const solutionMdx = `\`\`\`cpp\n${problem.solution}\n\`\`\``;
+  const solutionMdx = `\`\`\`${lang}\n${problem.solution}\n\`\`\``;
 
   return (
     <main className="min-h-screen pt-32 pb-20 px-6">
