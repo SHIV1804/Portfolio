@@ -9,8 +9,6 @@ export const HeroSection: React.FC = () => {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
-    let disposed = false;
-    let cleanupAnimations: (() => void) | undefined;
     // Check for reduced motion preference
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -23,23 +21,15 @@ export const HeroSection: React.FC = () => {
       // Lazy load GSAP
       const loadAnimations = async () => {
         const { initHeroAnimations } = await import("../lib/scrollAnimations");
-        if (!disposed && containerRef.current && parallaxRef.current) {
+        if (containerRef.current && parallaxRef.current) {
           const validBeats = beatsRef.current.filter((b): b is HTMLDivElement => b !== null);
-          cleanupAnimations = initHeroAnimations(
-            containerRef.current,
-            validBeats,
-            parallaxRef.current,
-          );
+          initHeroAnimations(containerRef.current, validBeats, parallaxRef.current);
         }
       };
       loadAnimations();
     }
 
-    return () => {
-      disposed = true;
-      mediaQuery.removeEventListener("change", handler);
-      cleanupAnimations?.();
-    };
+    return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
   const storyBeats = [
@@ -85,12 +75,12 @@ export const HeroSection: React.FC = () => {
   }
 
   return (
-    <section
-      ref={containerRef}
+    <section 
+      ref={containerRef} 
       className="relative w-full min-h-screen overflow-hidden bg-background"
     >
       {/* Parallax Background Layer */}
-      <div
+      <div 
         ref={parallaxRef}
         className="absolute inset-0 z-0 pointer-events-none opacity-20"
         style={{
@@ -106,8 +96,8 @@ export const HeroSection: React.FC = () => {
               key={beat.id}
               ref={(el) => { beatsRef.current[index] = el; }}
               className={`absolute inset-0 flex flex-col justify-center space-y-6 ${
-                index === 0 ? "relative" : "opacity-0 pointer-events-none md:pointer-events-auto"
-              } md:opacity-100`}
+                index === 0 ? "relative opacity-100" : "opacity-0 pointer-events-none md:pointer-events-auto"
+              }`}
             >
               <h1 className="text-5xl md:text-8xl font-bold tracking-tighter text-accent leading-none">
                 {beat.title}

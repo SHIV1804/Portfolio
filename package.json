@@ -7,26 +7,29 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "playwright test",
-    "test:debug": "playwright test --debug",
-    "test:headed": "playwright test --headed",
-    "test:ui": "playwright test --ui",
-    "test:chromium": "playwright test --project=chromium",
-    "test:firefox": "playwright test --project=firefox",
-    "test:webkit": "playwright test --project=webkit"
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
+    "@types/rss": "^0.0.32",
     "@vercel/analytics": "^2.0.1",
+    "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "geist": "^1.7.2",
+    "gray-matter": "^4.0.3",
     "gsap": "^3.15.0",
     "lucide-react": "^1.23.0",
     "next": "16.2.10",
+    "next-mdx-remote": "^6.0.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.81.0",
+    "recharts": "^3.9.2",
+    "rehype-pretty-code": "^0.14.4",
     "resend": "^6.17.1",
+    "rss": "^1.2.2",
+    "shiki": "^4.3.1",
+    "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -37,6 +40,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "lighthouse": "^12.8.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

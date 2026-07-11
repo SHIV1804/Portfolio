@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 type Theme = "light" | "dark";
 
@@ -32,21 +32,16 @@ export const themeInitScript = `
 `;
 
 function getInitialTheme(): Theme {
-  return "dark";
+  // On the server this just returns the default; on the client, the inline
+  // themeInitScript has already set the class on <html> before this runs,
+  // so reading it here (in the lazy initializer, not an effect) is safe and
+  // avoids a cascading extra render.
+  if (typeof document === "undefined") return "dark";
+  return document.documentElement.classList.contains("dark") ? "dark" : "light";
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme);
-
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      setThemeState(
-        document.documentElement.classList.contains("dark") ? "dark" : "light",
-      );
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, []);
 
   const setTheme = (next: Theme) => {
     setThemeState(next);

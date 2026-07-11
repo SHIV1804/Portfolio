@@ -6,10 +6,10 @@ interface SkillGroup {
   skills: string[];
 }
 
-const skillGroups: SkillGroup[] = [
+export const skillGroups: SkillGroup[] = [
   {
     title: "Languages",
-    skills: ["TypeScript", "JavaScript", "C", "C++", "Rust", "Python"],
+    skills: ["TypeScript", "JavaScript", "C", "C++", "Python"],
   },
   {
     title: "Domain Expertise",
@@ -17,8 +17,6 @@ const skillGroups: SkillGroup[] = [
       "Embedded Systems",
       "Payment Terminals",
       "Firmware Development",
-      "Real-time Operating Systems",
-      "Network Protocols",
     ],
   },
   {

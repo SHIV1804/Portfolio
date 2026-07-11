@@ -5,7 +5,6 @@ import "./globals.css";
 import { ThemeProvider, themeInitScript } from "@/features/theme-toggle";
 import { siteConfig } from "@/shared/config/site";
 import { Analytics } from "@vercel/analytics/react";
-import Script from "next/script";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://portfolio-shivam.vercel.app"),
@@ -26,11 +25,7 @@ export default function RootLayout({
     >
       <head>
         {/* Runs before paint to set the correct theme class — avoids flash of wrong theme */}
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: themeInitScript }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider>

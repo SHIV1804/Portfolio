@@ -1,5 +1,6 @@
 import React from "react";
 import { ProjectCard } from "@/entities/project/ui/ProjectCard";
+import { projects } from "@/entities/project/model/data";
 
 export const ProjectsPreview: React.FC = () => {
   return (
@@ -8,19 +9,18 @@ export const ProjectsPreview: React.FC = () => {
         04. Selected Projects
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <ProjectCard
-          title="Log Analyser"
-          description="A high-performance C++ utility for transaction-flow analysis in production environments. Processes 100k+ line logs in sub-second time."
-          tags={["C++", "mmap", "Regex", "Systems"]}
-          href="/projects/log-analyser"
-        />
-        <ProjectCard
-          title="Second project"
-          description="[PLACEHOLDER — project not yet selected]"
-          href="/projects/case-study-two"
-          isPlaceholder={true}
-        />
+        {projects.map((project) => (
+          <ProjectCard
+            key={project.slug}
+            title={project.title}
+            description={project.description}
+            tags={project.tags}
+            href={project.href}
+            isPlaceholder={project.isPlaceholder}
+          />
+        ))}
       </div>
     </section>
   );
 };
+

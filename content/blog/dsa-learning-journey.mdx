@@ -1,0 +1,25 @@
+---
+title: "The Systems Engineer's Approach to Data Structures"
+date: "2026-06-15"
+excerpt: "Moving beyond rote memorization to understand the mechanical sympathy between algorithms and hardware."
+tags: ["Learning", "Algorithms", "Systems"]
+draft: false
+---
+
+## Introduction
+
+In the world of modern web development, data structures and algorithms (DSA) are often treated as a hurdle for interviews rather than a tool for engineering. However, when building systems that operate close to the metal—like the payment terminal firmware I work on—the choice of a data structure isn't just about time complexity; it's about memory layout, cache locality, and predictability.
+
+## Beyond Big O
+
+While `O(1)` access is great on paper, a hash table might not always be the best choice in a resource-constrained environment. The overhead of hashing and the potential for cache misses due to non-contiguous memory access can make a simple sorted array with binary search (`O(log n)`) more performant in practice.
+
+### Key Learnings
+
+1. **Memory Matters**: Understanding how a `Linked List` differs from an `Array` in terms of CPU cache lines.
+2. **Predictability**: In embedded systems, worst-case performance is often more important than average-case.
+3. **Mechanical Sympathy**: Writing code that works with the hardware, not against it.
+
+## Conclusion
+
+My journey through DSA has been less about "cracking the code" and more about building a mental library of trade-offs. Every byte counts, and every cycle matters.

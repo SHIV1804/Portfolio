@@ -39,7 +39,7 @@ export const CaseStudyLayout: React.FC<CaseStudyLayoutProps> = ({
       >
         ← Back to Projects
       </Link>
-
+      
       <header className="mb-16">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">{title}</h1>
         <p className="text-xl text-foreground-muted">{subtitle}</p>

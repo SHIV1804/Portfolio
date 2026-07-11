@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   try {
     const ip = req.headers.get("x-forwarded-for") || "unknown";
     const now = Date.now();
-
+    
     // Basic Rate Limiting
     const limit = rateLimitMap.get(ip);
     if (limit) {
@@ -40,10 +40,10 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-
+    
     // Server-side validation
     const result = contactSchema.safeParse(body);
-
+    
     if (!result.success) {
       return NextResponse.json(
         { error: "Invalid form data", details: result.error.format() },

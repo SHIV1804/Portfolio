@@ -32,3 +32,36 @@
 
 ### Next chunk to run
 - Chunk 1: Syncing more problems and potentially integrating the visualizer.
+
+## Chunk 1 — Build-time GitHub Sync — 2026-07-09
+### What was built
+- **GitHub Sync Library**: Created `shared/lib/dsa-sync.ts` using the GitHub REST API to fetch problems from the `dsa-solutions` repository.
+- **DSA Listing Page**: Built `app/dsa/page.tsx` to display synced problems with filtering support (pattern and difficulty).
+- **Reusable UI**: Created `widgets/dsa/ui/ProblemCard.tsx` and `shared/ui/Badge.tsx` for consistent styling.
+- **Navigation**: Integrated `/dsa` into the site header navigation and sitemap.
+- **Environment**: Added `DSA_GITHUB_REPO` to `.env` and `.env.example`.
+
+### Decisions made (and why)
+- **REST API vs GraphQL**: Used the REST API for content fetching as it's more straightforward for directory tree traversal and raw file downloads (`download_url`).
+- **Incremental Static Regeneration (ISR)**: Set `revalidate: 3600` to match the existing GitHub stats pattern, ensuring fresh data without rebuilding the entire site.
+- **Fallback State**: Implemented a "no problems synced yet" state to handle empty repositories or fetch failures gracefully.
+
+### Files created/modified
+- `shared/lib/dsa-sync.ts` (Created)
+- `app/dsa/page.tsx` (Created)
+- `widgets/dsa/ui/ProblemCard.tsx` (Created)
+- `shared/ui/Badge.tsx` (Created)
+- `shared/config/site.ts` (Modified)
+- `app/sitemap.ts` (Modified)
+- `.env` & `.env.example` (Modified)
+
+### Verification performed (real commands run, real results)
+- `npm run lint`: Passed (0 errors, 11 warnings in tests).
+- `npm run build`: Passed successfully.
+- Verified that `Two Sum` renders correctly on the `/dsa` page during the build process (static generation).
+
+### Known issues / blocked items
+- None.
+
+### Next chunk to run
+- Chunk 2: Individual problem detail pages and code highlighting.

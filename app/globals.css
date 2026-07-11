@@ -14,13 +14,15 @@
   --surface-raised: #FAF9F5;
   --foreground: #16181C;
   --foreground-muted: #52565E;
-  --foreground-faint: #8A8E96;
+  /* Darkened from #8A8E96 to #6D727A for 4.5:1 contrast on #F3F1EC */
+  --foreground-faint: #6D727A;
   --border: #DEDBD2;
   --border-strong: #C7C3B7;
 
   /* Signature accent: amber phosphor — the color of a terminal readout */
-  --accent: #B5720E;
-  --accent-strong: #8C5808;
+  /* Darkened from #B5720E to #945D0B for 4.5:1 contrast on #F3F1EC */
+  --accent: #945D0B;
+  --accent-strong: #784B09;
   --accent-soft: #F0DDB8;
 
   --font-display: var(--font-geist-sans);
@@ -101,5 +103,6 @@ body {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    transition-delay: 0ms !important;
   }
 }

@@ -74,6 +74,4 @@ export const initHeroAnimations = (
       });
     });
   });
-
-  return () => mm.revert();
 };
