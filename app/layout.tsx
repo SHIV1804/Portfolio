@@ -7,9 +7,10 @@ import { siteConfig } from "@/shared/config/site";
 import { Analytics } from "@vercel/analytics/react";
 import { Header } from "@/widgets/header/ui/Header";
 import { Footer } from "@/widgets/footer/ui/Footer";
+import { AuthProvider } from "@/shared/lib/auth-provider";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://portfolio-shivam.vercel.app"),
+  metadataBase: new URL("https://portfolio-theta-ruby-31nqvqjqmc.vercel.app"),
   title: `${siteConfig.name} — ${siteConfig.role}`,
   description: siteConfig.description,
 };
@@ -30,14 +31,16 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <ThemeProvider>
-          <Header />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
-          <Analytics />
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <Header />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+            <Analytics />
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
