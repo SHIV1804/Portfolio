@@ -22,6 +22,30 @@ const handler = NextAuth({
       clientId: process.env.GITHUB_ID || "",
       clientSecret: process.env.GITHUB_SECRET || "",
       authorization: { params: { scope: "read:user user:email" } },
+      profile: async (profile, tokens) => {
+        // Fallback for private emails
+        if (!profile.email && tokens.access_token) {
+          const res = await fetch("https://api.github.com/user/emails", {
+            headers: { Authorization: `token \${tokens.access_token}` },
+          });
+          if (res.ok) {
+            const emails = (await res.json()) as Array<{
+              email: string;
+              primary: boolean;
+              verified: boolean;
+              visibility: string | null;
+            }>;
+            profile.email = (emails.find((e) => e.primary) ?? emails[0])?.email;
+          }
+        }
+
+        return {
+          id: profile.id.toString(),
+          name: profile.name || profile.login,
+          email: profile.email,
+          image: profile.avatar_url,
+        };
+      },
     }),
   ],
   callbacks: {
