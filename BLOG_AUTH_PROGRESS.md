@@ -164,3 +164,24 @@
 ### Verification performed (real commands run, real results)
 - `npm run lint`: Passed with 0 errors (11 pre-existing warnings in tests).
 - `npm run build`: Passed successfully. All routes compiled, and UI preservation (Header/Footer) was verified by inspecting the layout integration.
+
+## Chunk 0 — Fix: GitHub Sign-in Callback Error — 2026-07-15
+### What was built
+- Added `refresh_token_expires_in` field to the `Account` model in `prisma/schema.prisma` to support GitHub's OAuth token response.
+- Created and applied migration `20260715044722_add_refresh_token_expires_in`.
+- Cleaned up orphaned `User` row (`cmrlle2mq0000l704006zh588`) from the database.
+- Improved `app/auth-test/page.tsx` with a loading timeout and error messaging for better UX and easier debugging.
+
+### Decisions made (and why)
+- **Schema Update**: GitHub recently added `refresh_token_expires_in` to their OAuth response. Since Auth.js passes this field through to the adapter, Prisma requires a corresponding column to avoid validation errors during sign-in.
+- **Loading Timeout**: Added a 5-second timeout to the auth test page to prevent infinite silent loading states, providing users with actionable feedback if the session fails to load.
+
+### Files created/modified
+- `prisma/schema.prisma` (Modified)
+- `prisma/migrations/20260715044722_add_refresh_token_expires_in/` (Created)
+- `app/auth-test/page.tsx` (Modified)
+
+### Verification performed (real commands run, real results)
+- `npx prisma migrate dev`: Successfully applied the schema change to Neon.
+- `npx prisma db execute`: Successfully deleted the orphaned user row.
+- `npm run lint` & `npm run build`: Both passed successfully.
