@@ -61,17 +61,23 @@ export const initHeroAnimations = (
 
   // Mobile animation (simple reveals)
   mm.add("(max-width: 767px)", () => {
-    beats.forEach((beat) => {
-      gsap.from(beat, {
-        opacity: 0,
-        y: 30,
-        duration: 0.8,
-        scrollTrigger: {
-          trigger: beat,
-          start: "top 80%",
-          toggleActions: "play none none reverse",
-        },
-      });
+    beats.forEach((beat, index) => {
+      // Skip animation for first beat on mobile as it's already visible
+      if (index === 0) return;
+
+      gsap.fromTo(beat, 
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          scrollTrigger: {
+            trigger: beat,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
     });
   });
 };

@@ -89,14 +89,14 @@ export const HeroSection: React.FC = () => {
         }}
       />
 
-      <div className="relative z-10 container mx-auto px-4 h-full flex items-center justify-center">
-        <div className="w-full max-w-4xl relative min-h-[400px]">
+      <div className="relative z-10 container mx-auto px-4 h-full flex items-center justify-center py-20 md:py-0">
+        <div className="w-full max-w-4xl relative md:min-h-[400px] space-y-32 md:space-y-0">
           {storyBeats.map((beat, index) => (
             <div
               key={beat.id}
               ref={(el) => { beatsRef.current[index] = el; }}
-              className={`absolute inset-0 flex flex-col justify-center space-y-6 ${
-                index === 0 ? "relative opacity-100" : "opacity-0 pointer-events-none md:pointer-events-auto"
+              className={`flex flex-col justify-center space-y-6 md:absolute md:inset-0 ${
+                index === 0 ? "relative opacity-100" : "opacity-0 md:pointer-events-auto"
               }`}
             >
               <h1 className="text-5xl md:text-8xl font-bold tracking-tighter text-accent leading-none">
