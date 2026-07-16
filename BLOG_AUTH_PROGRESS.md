@@ -142,6 +142,34 @@
 ### Next chunk to run
 - Chunk 1: Post-writing form and database persistence (to be defined in the next chunk).
 
+## Chunk 1 — Blog moderation system: post creation UI — 2026-07-16
+### What was built
+- Added "Write a Post" button to the blog page header with authentication gating.
+- Built the protected `/blog/write` page UI with title and markdown content fields.
+- Verified that the `/blog/write` page correctly redirects to sign-in when unauthenticated.
+- Confirmed that the `/auth-test` page functionality remains intact.
+
+### Decisions made (and why)
+- **Authentication Gating**: Used `useSession` and `signIn` from `next-auth/react` to ensure only authenticated users can access the post creation form.
+- **Form UI**: Implemented a clean, minimalist form using existing design tokens and Tailwind CSS to match the site's aesthetic.
+- **Protected Route**: Added a client-side redirect in the `/blog/write` page to handle unauthenticated access gracefully.
+
+### Files created/modified
+- `app/blog/page.tsx` (Modified)
+- `app/blog/WritePostButton.tsx` (Created)
+- `app/blog/write/page.tsx` (Created)
+- `BLOG_AUTH_PROGRESS.md` (Modified)
+
+### Verification performed (real commands run, real results)
+- `npm run lint`: Passed with 0 errors (11 pre-existing warnings in tests).
+- `npm run build`: Passed successfully, confirming all routes and components are correctly configured.
+
+### Known issues / blocked items
+- **Database Persistence**: The form currently only logs to the console; database write logic will be implemented in Chunk 1b.
+
+### Next chunk to run
+- Chunk 1b: Database persistence and API route for post submission.
+
 ### Prisma Singleton Implementation
 - Created `shared/lib/prisma.ts` to implement the Prisma Client as a singleton, preventing multiple instances in development during hot-reloads.
 - Updated `app/api/auth/[...nextauth]/route.ts` to import and use the shared Prisma singleton instance.
