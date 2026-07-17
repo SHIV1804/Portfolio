@@ -16,7 +16,6 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    console.log('[DEBUG-BACKEND] Received id:', id, 'typeof:', typeof id);
     const body = await req.json();
     const { status } = body;
 
