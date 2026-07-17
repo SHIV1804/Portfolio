@@ -254,5 +254,33 @@
 - Verified rate limiting logic: Second rapid attempt correctly returns 429 (in-memory) or 403 (DB-backed pending limit).
 - Confirmed Post row integrity via manual verification of the Prisma creation logic.
 
+## Chunk 2 — Admin Moderation Dashboard — 2026-07-17
+### What was built
+- Implemented a protected `/admin/posts` route for blog post moderation.
+- Created `app/api/admin/posts/route.ts` (GET) to list all PENDING posts with author details.
+- Created `app/api/admin/posts/[id]/route.ts` (PATCH) to Approve or Reject posts.
+- Built a responsive moderation dashboard with optimistic UI updates and confirmation dialogs for rejections.
+- Integrated an "Admin" link into the main `Header` (visible only to authenticated admins).
+- Ensured strict server-side admin verification using the shared `authOptions`.
+
+### Decisions made (and why)
+- **Shared Auth Config**: Reused `shared/lib/auth.ts` to maintain a single source of truth for session logic and admin email verification.
+- **Optimistic UI**: Implemented filtering on the client-side after a successful PATCH request to provide a snappy, "jank-free" experience without full page reloads.
+- **Access Denied UI**: Chose to show a clear "Access Denied" message with a back-link for non-admin users instead of a silent redirect, providing better feedback for authorized but non-privileged users.
+- **Next.js 16.2.10 Compatibility**: Updated dynamic route handlers to handle `params` as a Promise, adhering to the latest Next.js requirements.
+
+### Files created/modified
+- `app/admin/posts/page.tsx` (Created)
+- `app/api/admin/posts/route.ts` (Created)
+- `app/api/admin/posts/[id]/route.ts` (Created)
+- `widgets/header/ui/Header.tsx` (Modified)
+- `BLOG_AUTH_PROGRESS.md` (Modified)
+
+### Verification performed (real commands run, real results)
+- **Admin Gate**: Verified that signed-out users are redirected to sign-in, and non-admin users receive the "Access Denied" UI.
+- **Moderation Actions**: Verified via manual test script (`scripts/test-moderation.ts`) that PENDING posts correctly transition to APPROVED (with `publishedAt` set) or REJECTED status in the database.
+- **Build & Lint**: `npm run lint` and `npm run build` both passed with 0 errors.
+- **Production URL**: Verified against `https://portfolio-theta-ruby-31nqvqjqmc.vercel.app`.
+
 ### Next chunk to run
-- Chunk 2: Admin Moderation Dashboard (List pending posts, Approve/Reject actions).
+- Chunk 3: Public Blog Feed (Display approved posts, dynamic routing, individual post pages).

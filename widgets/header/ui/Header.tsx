@@ -3,12 +3,14 @@
 import React from "react";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
+import { useSession } from "next-auth/react";
 import { siteConfig } from "@/shared/config/site";
 import { ThemeToggle } from "@/features/theme-toggle";
 import { CommandPalette } from "@/widgets/command-palette/ui/CommandPalette";
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, ShieldCheck } from "lucide-react";
 
 export const Header: React.FC = () => {
+  const { data: session } = useSession();
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -76,6 +78,15 @@ export const Header: React.FC = () => {
                 {item.label}
               </Link>
             ))}
+            {session?.user?.isAdmin && (
+              <Link
+                href="/admin/posts"
+                className="text-sm font-medium text-accent hover:text-accent/80 transition-colors flex items-center gap-1.5"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Admin
+              </Link>
+            )}
           </nav>
         </div>
         <div className="flex items-center gap-4">
@@ -142,6 +153,18 @@ export const Header: React.FC = () => {
                 {item.label}
               </Link>
             ))}
+
+            {/* Admin link */}
+            {session?.user?.isAdmin && (
+              <Link
+                href="/admin/posts"
+                className="text-sm font-medium text-accent hover:text-accent/80 transition-colors py-2 px-2 rounded hover:bg-surface flex items-center gap-2"
+                onClick={handleNavClick}
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Admin Dashboard
+              </Link>
+            )}
           </nav>
         </div>
       )}
