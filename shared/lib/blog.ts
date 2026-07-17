@@ -13,6 +13,8 @@ export interface BlogPost {
   draft: boolean;
   content: string;
   readingTime: string;
+  source?: 'mdx' | 'database';
+  authorName?: string;
 }
 
 export function calculateReadingTime(content: string): string {
@@ -40,6 +42,7 @@ export async function getAllPosts(): Promise<BlogPost[]> {
         slug: file.replace('.mdx', ''),
         content,
         readingTime: calculateReadingTime(content),
+        source: 'mdx',
       } as BlogPost;
     })
     .filter((post) => {

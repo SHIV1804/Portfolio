@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { BlogPost } from '@/shared/lib/blog';
+import { Badge } from '@/shared/ui/Badge';
 
 interface PostCardProps {
   post: BlogPost;
@@ -12,13 +13,18 @@ export function PostCard({ post }: PostCardProps) {
       className="group block p-6 bg-surface border border-border hover:border-accent transition-colors rounded-lg"
     >
       <div className="flex justify-between items-start mb-2">
-        <span className="text-xs text-foreground-faint font-mono">
-          {new Date(post.date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-          })}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-foreground-faint font-mono">
+            {new Date(post.date).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })}
+          </span>
+          {post.source === 'database' && (
+            <Badge variant="default" className="text-[10px] py-0">Community</Badge>
+          )}
+        </div>
         <span className="text-xs text-foreground-faint font-mono">
           {post.readingTime}
         </span>

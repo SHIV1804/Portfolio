@@ -3,9 +3,12 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import rehypePrettyCode from 'rehype-pretty-code';
-import { getPostBySlug, getAllPosts, BlogPost } from '@/shared/lib/blog';
+import { getPostBySlug, getAllPosts, BlogPost, calculateReadingTime } from '@/shared/lib/blog';
 import { TableOfContents, PostCard } from '@/widgets/blog';
 import { mdxComponents } from '../MdxComponents';
+import { prisma } from '@/shared/lib/prisma';
+import { PostStatus } from '@prisma/client';
+import { Badge } from '@/shared/ui/Badge';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -20,7 +23,32 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  
+  // Try MDX first
+  let post = await getPostBySlug(slug);
+  
+  // Try DB fallback
+  if (!post) {
+    const dbPost = await prisma.post.findUnique({
+      where: { slug, status: PostStatus.APPROVED },
+      include: { author: true }
+    });
+    if (dbPost) {
+      post = {
+        title: dbPost.title,
+        date: dbPost.publishedAt?.toISOString() || dbPost.createdAt.toISOString(),
+        excerpt: dbPost.content.slice(0, 160).replace(/\n/g, ' ') + '...',
+        tags: ['Community'],
+        slug: dbPost.slug,
+        draft: false,
+        content: dbPost.content,
+        readingTime: calculateReadingTime(dbPost.content),
+        source: 'database',
+        authorName: dbPost.author.name || dbPost.author.email || 'Anonymous',
+      };
+    }
+  }
+
   if (!post) return {};
 
   return {
@@ -31,13 +59,42 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: post.excerpt,
       type: 'article',
       publishedTime: post.date,
-      authors: ['Shivam'],
+      authors: [post.authorName || 'Shivam'],
     },
   };
 }
 
 async function getRelatedPosts(currentPost: BlogPost) {
-  const allPosts = await getAllPosts();
+  // 1. Fetch MDX posts
+  const mdxPosts = await getAllPosts();
+
+  // 2. Fetch approved DB posts
+  const dbPostsRaw = await prisma.post.findMany({
+    where: {
+      status: PostStatus.APPROVED,
+      NOT: { slug: currentPost.slug }
+    },
+    include: {
+      author: { select: { name: true, email: true } }
+    },
+    take: 10
+  });
+
+  const dbPosts: BlogPost[] = dbPostsRaw.map((post) => ({
+    title: post.title,
+    date: post.publishedAt?.toISOString() || post.createdAt.toISOString(),
+    excerpt: post.content.slice(0, 160).replace(/\n/g, ' ') + '...',
+    tags: ['Community'],
+    slug: post.slug,
+    draft: false,
+    content: post.content,
+    readingTime: calculateReadingTime(post.content),
+    source: 'database',
+    authorName: post.author.name || post.author.email || 'Anonymous',
+  }));
+
+  const allPosts = [...mdxPosts, ...dbPosts];
+
   return allPosts
     .filter((post) => post.slug !== currentPost.slug)
     .map((post) => ({
@@ -52,7 +109,31 @@ async function getRelatedPosts(currentPost: BlogPost) {
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  
+  // Try MDX first
+  let post = await getPostBySlug(slug);
+  
+  // Try DB fallback
+  if (!post) {
+    const dbPost = await prisma.post.findUnique({
+      where: { slug, status: PostStatus.APPROVED },
+      include: { author: true }
+    });
+    if (dbPost) {
+      post = {
+        title: dbPost.title,
+        date: dbPost.publishedAt?.toISOString() || dbPost.createdAt.toISOString(),
+        excerpt: dbPost.content.slice(0, 160).replace(/\n/g, ' ') + '...',
+        tags: ['Community'],
+        slug: dbPost.slug,
+        draft: false,
+        content: dbPost.content,
+        readingTime: calculateReadingTime(dbPost.content),
+        source: 'database',
+        authorName: dbPost.author.name || dbPost.author.email || 'Anonymous',
+      };
+    }
+  }
 
   if (!post) {
     notFound();
@@ -71,7 +152,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             >
               ← Back to Blog
             </Link>
-            <div className="flex gap-4 text-xs font-mono text-foreground-faint mb-4">
+            <div className="flex items-center gap-4 text-xs font-mono text-foreground-faint mb-4">
               <time dateTime={post.date}>
                 {new Date(post.date).toLocaleDateString('en-US', {
                   year: 'numeric',
@@ -81,6 +162,15 @@ export default async function BlogPostPage({ params }: PageProps) {
               </time>
               <span>•</span>
               <span>{post.readingTime}</span>
+              {post.source === 'database' && (
+                <>
+                  <span>•</span>
+                  <div className="flex items-center gap-2">
+                    <span>By {post.authorName}</span>
+                    <Badge variant="default" className="text-[10px] py-0">Community</Badge>
+                  </div>
+                </>
+              )}
             </div>
             <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
               {post.title}

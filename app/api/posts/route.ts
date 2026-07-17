@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/shared/lib/prisma";
 import { PostStatus } from "@prisma/client";
 import { authOptions } from "@/shared/lib/auth";
+import { getAllPosts } from "@/shared/lib/blog";
 
 // Simple in-memory rate limiting (resets on redeploy)
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
@@ -86,12 +87,18 @@ export async function POST(req: Request) {
     let slug = baseSlug;
     let slugCounter = 1;
 
-    // Ensure slug uniqueness
+    // Ensure slug uniqueness (checking both DB and MDX files)
+    const mdxPosts = await getAllPosts();
+    const mdxSlugs = new Set(mdxPosts.map(p => p.slug));
+
     while (true) {
-      const existing = await prisma.post.findUnique({
+      const existsInMdx = mdxSlugs.has(slug);
+      const existsInDb = await prisma.post.findUnique({
         where: { slug },
       });
-      if (!existing) break;
+      
+      if (!existsInMdx && !existsInDb) break;
+      
       slug = `\${baseSlug}-\${slugCounter}`;
       slugCounter++;
     }
