@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/shared/lib/prisma";
 import { PostStatus } from "@prisma/client";
+import { authOptions } from "@/shared/lib/auth";
 
 // Simple in-memory rate limiting (resets on redeploy)
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
@@ -21,7 +22,7 @@ function slugify(text: string) {
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
 
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
