@@ -9,11 +9,14 @@ export const metadata = {
   description: 'Thoughts on systems engineering, learning, and software development.',
 };
 
+export const revalidate = 60; // Revalidate every minute
+
 export default async function BlogPage() {
   // 1. Fetch MDX posts
   const mdxPosts = await getAllPosts();
 
   // 2. Fetch approved DB posts
+  console.log('[DEBUG-BLOG] Fetching APPROVED posts from DB...');
   const dbPostsRaw = await prisma.post.findMany({
     where: {
       status: PostStatus.APPROVED,
@@ -30,6 +33,7 @@ export default async function BlogPage() {
       publishedAt: 'desc',
     },
   });
+  console.log(`[DEBUG-BLOG] DB posts fetched: \${dbPostsRaw.length}`, dbPostsRaw.map(p => ({ id: p.id, slug: p.slug, status: p.status })));
 
   const dbPosts: BlogPost[] = dbPostsRaw.map((post) => ({
     title: post.title,
