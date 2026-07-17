@@ -56,7 +56,7 @@ export default function AdminPostsPage() {
 
     try {
       setActionLoading(id);
-      const response = await fetch(`/api/admin/posts/\${id}`, {
+      const response = await fetch(`/api/admin/posts/\${encodeURIComponent(id)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
