@@ -3,6 +3,11 @@ import { getServerSession } from "next-auth";
 import { prisma } from "@/shared/lib/prisma";
 import { PostStatus } from "@prisma/client";
 
+// Simple in-memory rate limiting (resets on redeploy)
+const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
+const RATE_LIMIT_WINDOW = 3600000; // 1 hour
+const MAX_PENDING_POSTS = 3;
+
 // Helper to generate slug from title
 function slugify(text: string) {
   return text
@@ -20,6 +25,42 @@ export async function POST(req: Request) {
 
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = (session.user as { id: string }).id;
+    const now = Date.now();
+
+    // 1. In-memory Rate Limiting (Cooldown/Abuse guard)
+    const limit = rateLimitMap.get(userId);
+    if (limit) {
+      if (now - limit.lastReset < RATE_LIMIT_WINDOW) {
+        if (limit.count >= MAX_PENDING_POSTS) {
+          return NextResponse.json(
+            { error: "Submission limit reached. Please try again in an hour." },
+            { status: 429 }
+          );
+        }
+        limit.count++;
+      } else {
+        rateLimitMap.set(userId, { count: 1, lastReset: now });
+      }
+    } else {
+      rateLimitMap.set(userId, { count: 1, lastReset: now });
+    }
+
+    // 2. Database-backed check: Max PENDING posts at once
+    const pendingCount = await prisma.post.count({
+      where: {
+        authorId: userId,
+        status: PostStatus.PENDING,
+      },
+    });
+
+    if (pendingCount >= MAX_PENDING_POSTS) {
+      return NextResponse.json(
+        { error: "You already have the maximum number of pending posts. Please wait for them to be reviewed." },
+        { status: 403 }
+      );
     }
 
     const body = await req.json();
@@ -53,7 +94,6 @@ export async function POST(req: Request) {
       slug = `\${baseSlug}-\${slugCounter}`;
       slugCounter++;
     }
-    console.log(`Generated slug: \${slug}`);
 
     const post = await prisma.post.create({
       data: {

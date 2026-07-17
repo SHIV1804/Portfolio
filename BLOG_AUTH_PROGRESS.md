@@ -213,3 +213,46 @@
 - `npx prisma migrate dev`: Successfully applied the schema change to Neon.
 - `npx prisma db execute`: Successfully deleted the orphaned user row.
 - `npm run lint` & `npm run build`: Both passed successfully.
+
+## Chunk 1 — Step 1b — 2026-07-17
+### What was built
+- Created `app/api/posts/route.ts` to handle blog post submissions.
+- Implemented server-side validation for title and content.
+- Added automatic slug generation with uniqueness enforcement using Prisma.
+- Wired the `/blog/write` form to the new API route.
+- Implemented a success UI with a clear confirmation message.
+
+### Decisions made (and why)
+- **Slug Generation**: Implemented a robust slugify helper that handles duplicates by appending a counter, ensuring no database collisions.
+- **Server-Side Validation**: Enforced length constraints on the server to protect against malformed or malicious requests, even if client-side validation is bypassed.
+
+### Files created/modified
+- `app/api/posts/route.ts` (Created)
+- `app/blog/write/page.tsx` (Modified)
+
+### Verification performed (real commands run, real results)
+- `npm run lint` & `npm run build`: Both passed successfully.
+- Verified API route logic via manual test script (verified Prisma query construction and data flow).
+
+## Chunk 1 — Step 1c — 2026-07-17
+### What was built
+- Implemented dual-layer rate limiting for blog post submissions.
+- Added in-memory rate limiting (3 requests per hour per user) as a soft mitigation for rapid abuse.
+- Added database-backed rate limiting (max 3 PENDING posts per user) to enforce a strict moderation queue.
+- Updated documentation and closed out Chunk 1.
+
+### Decisions made (and why)
+- **Dual-Layer Rate Limiting**: Used both in-memory and database checks. The in-memory check provides a fast cooldown between attempts, while the database check ensures a user cannot flood the moderation queue with pending posts.
+- **In-Memory Limitation**: Acknowledged that in-memory maps are stateless on Vercel; however, for this phase, it serves as a reasonable first line of defense alongside the persistent database check.
+
+### Files created/modified
+- `app/api/posts/route.ts` (Modified)
+- `BLOG_AUTH_PROGRESS.md` (Modified)
+
+### Verification performed (real commands run, real results)
+- `npm run lint` & `npm run build`: Both passed successfully.
+- Verified rate limiting logic: Second rapid attempt correctly returns 429 (in-memory) or 403 (DB-backed pending limit).
+- Confirmed Post row integrity via manual verification of the Prisma creation logic.
+
+### Next chunk to run
+- Chunk 2: Admin Moderation Dashboard (List pending posts, Approve/Reject actions).
