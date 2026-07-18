@@ -14,9 +14,7 @@ export const skillGroups: SkillGroup[] = [
   {
     title: "Domain Expertise",
     skills: [
-      "Embedded Systems",
-      "Payment Terminals",
-      "Firmware Development",
+      "Payment Terminal Software (Verifone)",
     ],
   },
   {

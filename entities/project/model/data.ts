@@ -12,8 +12,8 @@ export const projects: Project[] = [
     slug: "log-analyser",
     title: "Log Analyser",
     description:
-      "A C++ tool for parsing and analyzing production log files at scale.",
-    tags: ["C++", "Systems"],
+      "A planned C++ tool for parsing and analyzing production log files — architecture design in progress.",
+    tags: ["C++", "Systems", "Concept"],
     href: "/projects/log-analyser",
   },
   {

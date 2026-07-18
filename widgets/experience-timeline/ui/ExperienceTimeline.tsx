@@ -9,11 +9,11 @@ interface ExperienceItem {
 
 const experiences: ExperienceItem[] = [
   {
-    company: "Aurus Tech",
-    role: "Software Engineer (Embedded Systems)",
-    period: "2022 — Present",
+    company: "Payment Technology Company (name withheld)",
+    role: "Associate Software Developer",
+    period: "Oct 2025 — Present",
     description:
-      "Developing and maintaining production-grade software for payment terminals. Focused on optimizing system performance, ensuring high reliability for high-volume transaction processing, and implementing secure communication protocols across diverse retail environments.",
+      "Building software for Verifone payment terminal devices, working with clients in the US and UK. Collaborate with cross-functional teams and communicate directly with clients to ensure delivered software meets quality expectations.",
   },
 ];
 
