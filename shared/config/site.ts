@@ -4,8 +4,8 @@ export const siteConfig = {
   description:
     "Systems-minded software engineer building production payment terminal software.",
   links: {
-    email: "mailto:you@example.com",
-    linkedin: "https://linkedin.com/in/your-handle",
+    email: "mailto:shivamchourasiya766@gmail.com",
+    linkedin: "https://www.linkedin.com/in/shivam-chourasiya-a5a799247/",
     github: "https://github.com/SHIV1804",
   },
   nav: [

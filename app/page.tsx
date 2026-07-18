@@ -5,6 +5,7 @@ import { ExperienceTimeline } from "@/widgets/experience-timeline/ui/ExperienceT
 import { ProjectsPreview } from "@/widgets/projects-preview/ui/ProjectsPreview";
 import { GitHubStats } from "@/widgets/github-stats";
 import { ContactForm } from "@/features/contact-form/ui/ContactForm";
+import { siteConfig } from "@/shared/config/site";
 
 export const metadata = {
   title: "Shivam | Systems Engineer Portfolio",
@@ -30,13 +31,10 @@ export default function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
-    name: "Shivam",
-    jobTitle: "Software Engineer",
+    name: siteConfig.name,
+    jobTitle: siteConfig.role,
     url: "https://portfolio-shivam.vercel.app",
-    sameAs: [
-      "https://github.com/your-handle",
-      "https://linkedin.com/in/your-handle",
-    ],
+    sameAs: [siteConfig.links.github, siteConfig.links.linkedin],
   };
 
   return (

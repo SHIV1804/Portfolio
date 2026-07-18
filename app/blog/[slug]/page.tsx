@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import rehypePrettyCode from 'rehype-pretty-code';
 import { getPostBySlug, getAllPosts, BlogPost, calculateReadingTime } from '@/shared/lib/blog';
+import { renderSafeMarkdown } from '@/shared/lib/safe-markdown';
 import { TableOfContents, PostCard } from '@/widgets/blog';
 import { mdxComponents } from '../MdxComponents';
 import { prisma } from '@/shared/lib/prisma';
@@ -189,23 +190,35 @@ export default async function BlogPostPage({ params }: PageProps) {
           </header>
 
           <div className="prose prose-invert max-w-none">
-            <MDXRemote 
-              source={post.content} 
-              components={mdxComponents}
-              options={{
-                mdxOptions: {
-                  rehypePlugins: [
-                    [
-                      rehypePrettyCode,
-                      {
-                        theme: 'github-dark',
-                        keepBackground: true,
-                      },
+            {post.source === 'database' ? (
+              // SECURITY: untrusted, visitor-submitted content — rendered through
+              // the sanitized markdown pipeline, never through the MDX compiler.
+              // See shared/lib/safe-markdown.ts for why this distinction matters.
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: await renderSafeMarkdown(post.content),
+                }}
+              />
+            ) : (
+              // Trusted first-party content authored directly in content/blog/*.mdx
+              <MDXRemote
+                source={post.content}
+                components={mdxComponents}
+                options={{
+                  mdxOptions: {
+                    rehypePlugins: [
+                      [
+                        rehypePrettyCode,
+                        {
+                          theme: 'github-dark',
+                          keepBackground: true,
+                        },
+                      ],
                     ],
-                  ],
-                },
-              }}
-            />
+                  },
+                }}
+              />
+            )}
           </div>
 
           {relatedPosts.length > 0 && (

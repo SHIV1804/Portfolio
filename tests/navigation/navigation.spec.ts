@@ -116,7 +116,7 @@ test.describe('Navigation Tests', () => {
 
     // [PLACEHOLDER URL] - Link appears to be a template placeholder
     expect(href).toContain('github.com');
-    expect(href).toBe('https://github.com/your-handle');
+    expect(href).toBe('https://github.com/SHIV1804');
   });
 
   test('LinkedIn link opens with correct URL', async ({ page }) => {
@@ -127,7 +127,7 @@ test.describe('Navigation Tests', () => {
 
     // [PLACEHOLDER URL] - Link appears to be a template placeholder
     expect(href).toContain('linkedin.com');
-    expect(href).toBe('https://linkedin.com/in/your-handle');
+    expect(href).toBe('https://www.linkedin.com/in/shivam-chourasiya-a5a799247/');
   });
 
   test('email contact link uses mailto protocol', async ({ page }) => {
@@ -137,7 +137,7 @@ test.describe('Navigation Tests', () => {
     const href = await emailLink.getAttribute('href');
 
     expect(href).toContain('mailto:');
-    expect(href).toBe('mailto:you@example.com');
+    expect(href).toBe('mailto:shivamchourasiya766@gmail.com');
   });
 
   test('command palette trigger button is accessible', async ({ page }) => {

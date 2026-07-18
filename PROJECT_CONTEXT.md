@@ -42,3 +42,9 @@ Follows **Feature-Sliced Design (FSD)**:
 - **Navigation**: Added "Blog" and "GitHub" to the site header.
 - **Sitemap**: Updated to include blog posts.
 - **Testing**: Integrated Playwright for E2E testing, covering core site features and the new terminal easter egg.
+
+46	- **Security Hardening**: Fixed a stored-XSS vulnerability in community blog posts by implementing a sanitized Markdown pipeline (`safe-markdown.ts`).
+47	- **Content & Cleanup**: Removed public debug pages and draft internal-voice markers. Consolidated contact information into `siteConfig`.
+48	- **Build Fix**: Resolved Turbopack build issues by adding `"use client"` to the `useReducedMotion` hook.
+49	- **Repository Re-sync**: Re-established GitHub as the authoritative source of truth, reconciling drift across multiple agent sessions.
+50	

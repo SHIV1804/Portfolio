@@ -51,7 +51,7 @@ export const HeroSection: React.FC = () => {
     {
       id: 4,
       title: "Building the Future",
-      content: "[PERSONAL VOICE — OWNER SHOULD REVIEW/ADJUST, DRAFT ONLY: I'd rather ship something smaller that's genuinely correct than something impressive-looking that falls apart under a real test. Most of what I build, I try to verify — not just assume — before calling it done.]"
+      content: "[PLACEHOLDER: bio content pending owner review]"
     },
   ];
 
