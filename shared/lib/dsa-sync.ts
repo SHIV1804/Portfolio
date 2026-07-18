@@ -18,6 +18,34 @@ export interface DSAProblem {
   writeup: string;
 }
 
+export interface DSATraceStep {
+  line: number;
+  variables: Record<string, unknown>;
+  highlightIndices?: number[];
+  explanation: string;
+}
+
+export interface DSATracePhase {
+  code: string[];
+  complexity: string;
+  steps: DSATraceStep[];
+}
+
+export interface DSAPredictionQuestion {
+  stepIndex: number;
+  phase: 'bruteForce' | 'optimized';
+  question: string;
+  options: string[];
+  correctOptionIndex: number;
+}
+
+export interface DSATrace {
+  bruteForce: DSATracePhase;
+  optimized: DSATracePhase;
+  discoveryQuestions: string[];
+  predictionQuestions: DSAPredictionQuestion[];
+}
+
 interface GitHubContent {
   name: string;
   path: string;
@@ -110,4 +138,36 @@ export async function fetchDSAProblems(): Promise<DSAProblem[]> {
 export async function getDSAProblemBySlug(pattern: string, slug: string): Promise<DSAProblem | null> {
   const problems = await fetchDSAProblems();
   return problems.find(p => p.patternSlug === pattern && p.slug === slug) || null;
+}
+
+export async function fetchDSATrace(pattern: string, slug: string): Promise<DSATrace | null> {
+  const repo = process.env.DSA_GITHUB_REPO;
+  const token = process.env.GITHUB_TOKEN;
+
+  if (!repo || !token) {
+    console.error('Missing DSA_GITHUB_REPO or GITHUB_TOKEN');
+    return null;
+  }
+
+  try {
+    const tracePath = `problems/${pattern}/${slug}/trace.json`;
+    const response = await fetch(`${GITHUB_API_BASE}/repos/${repo}/contents/${tracePath}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+
+    if (!response.ok) return null;
+    const content: GitHubContent = await response.json();
+    
+    if (content.download_url) {
+      const traceResponse = await fetch(content.download_url);
+      if (traceResponse.ok) {
+        return await traceResponse.json();
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching DSA trace:', error);
+    return null;
+  }
 }

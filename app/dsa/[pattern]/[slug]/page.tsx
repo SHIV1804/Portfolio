@@ -58,12 +58,27 @@ export default async function DSAProblemPage({ params }: PageProps) {
     <main className="min-h-screen pt-32 pb-20 px-6">
       <div className="max-w-4xl mx-auto">
         <header className="mb-12">
-          <Link 
-            href="/dsa"
-            className="text-xs font-mono text-foreground-faint hover:text-accent transition-colors mb-8 inline-block uppercase tracking-widest"
-          >
-            ← Back to DSA Solutions
-          </Link>
+          <div className="flex justify-between items-start mb-8">
+            <Link 
+              href="/dsa"
+              className="text-xs font-mono text-foreground-faint hover:text-accent transition-colors uppercase tracking-widest"
+            >
+              ← Back to DSA Solutions
+            </Link>
+
+            {slug === 'two-sum' && (
+              <Link
+                href="/dsa/flagship/two-sum"
+                className="text-xs font-mono px-3 py-1.5 border border-accent/30 rounded bg-accent/5 text-accent hover:bg-accent/10 transition-all flex items-center gap-2"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                </span>
+                Try the full interactive walkthrough →
+              </Link>
+            )}
+          </div>
           
           <div className="flex items-center gap-3 mb-6">
             <span className="text-2xl font-mono text-accent">#{problem.leetcodeNumber}</span>
