@@ -9,13 +9,13 @@ export const AboutSection: React.FC = () => {
         </h2>
         <div className="space-y-6 text-lg leading-relaxed text-foreground-muted">
           <p>
-            [PLACEHOLDER: I am a software engineer with a focus on embedded systems and payment terminals. My journey began with a curiosity for how hardware and software intersect to solve real-world problems.]
+            I&apos;m a software engineer focused on full-stack web development and algorithmic problem-solving. My background is in computer science fundamentals — data structures, database systems, and object-oriented design — and I&apos;ve solved over 120 problems on LeetCode across Java, C++, and C, with particular depth in arrays, hash tables, and two-pointer techniques.
           </p>
           <p>
-            [PLACEHOLDER: I believe in building robust, reliable systems that operate seamlessly under the hood. My engineering philosophy centers on simplicity, performance, and clear communication—both in code and with the people who use it.]
+            I care about building things that actually work end-to-end, not just things that look finished. This site itself is an example: it syncs solved problems from GitHub through a signature-verified webhook, handles real user authentication and a moderated content-submission queue backed by a real database, and includes interactive algorithm visualizers built from hand-verified execution traces.
           </p>
           <p>
-            [PLACEHOLDER: When I&apos;m not diving into firmware or optimizing system architecture, I enjoy exploring the intricacies of low-level programming and building tools that make complex data more accessible.]
+            [PERSONAL VOICE — OWNER SHOULD REVIEW/ADJUST THIS PARAGRAPH, IT IS A DRAFT: I&apos;m early in my career and still building — currently working through coursework in database systems and Java, and using projects like this portfolio to practice building real, production-shaped systems rather than isolated exercises.]
           </p>
         </div>
       </div>

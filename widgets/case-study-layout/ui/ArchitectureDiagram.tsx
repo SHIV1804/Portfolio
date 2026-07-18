@@ -12,23 +12,23 @@ interface DiagramNode {
 const nodes: DiagramNode[] = [
   {
     id: "stage-1",
-    name: "[PLACEHOLDER: Parsing Stage 1]",
-    description: "[PLACEHOLDER: Description for stage 1 - e.g., File I/O and memory mapping strategy]",
+    name: "Planned: File I/O & Pre-processing",
+    description: "Design exploration for efficient file I/O, potentially using memory-mapped files for large log datasets.",
   },
   {
     id: "stage-2",
-    name: "[PLACEHOLDER: Parsing Stage 2]",
-    description: "[PLACEHOLDER: Description for stage 2 - e.g., Regex engine or state machine for line parsing]",
+    name: "Planned: Parsing Engine",
+    description: "Concept for a robust parsing engine, possibly leveraging a custom state machine or optimized regex for various log formats.",
   },
   {
     id: "stage-3",
-    name: "[PLACEHOLDER: Parsing Stage 3]",
-    description: "[PLACEHOLDER: Description for stage 3 - e.g., Transaction reconstruction and state tracking]",
+    name: "Planned: Transaction Reconstruction",
+    description: "Proposed logic for reconstructing transaction flows from parsed log entries, including state tracking and correlation across threads.",
   },
   {
     id: "output",
-    name: "[PLACEHOLDER: Output Layer]",
-    description: "[PLACEHOLDER: Description for output layer - e.g., Metric generation and reporting]",
+    name: "Planned: Visualization & Reporting",
+    description: "Envisioned output layer for generating metrics, interactive visualizations, and detailed reports of transaction flows."
   },
 ];
 

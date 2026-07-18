@@ -24,7 +24,7 @@ export default function LogAnalyserPage() {
       <main className="flex-grow">
         <CaseStudyLayout
           title="Log Analyser"
-          subtitle="A high-performance C++ utility for transaction-flow analysis in production environments."
+          subtitle="A planned utility for high-performance log parsing — architecture design in progress, not yet implemented."
           problem={
             <div className="space-y-4">
               <p>
@@ -46,16 +46,16 @@ export default function LogAnalyserPage() {
           architecture={
             <div className="space-y-4">
               <p>
-                The tool is built using modern C++, focusing on memory-mapped I/O for fast file access and a multi-pass parsing strategy. The first pass indexes the file and identifies transaction boundaries, while the second pass builds a directed acyclic graph (DAG) representing the event flow.
+                The planned utility would be built using modern C++, focusing on memory-mapped I/O for fast file access and a multi-pass parsing strategy. The design explores a first pass to index the file and identify transaction boundaries, while a second pass would build a directed acyclic graph (DAG) representing the event flow.
               </p>
               <div className="bg-surface border border-border p-4 rounded font-mono text-sm overflow-x-auto">
                 [PLACEHOLDER: Architecture Diagram Description - A flow diagram showing File I/O → Indexing Engine → Transaction Reconstructor → Visualization Layer]
               </div>
               <div className="mt-6">
-                <p className="mb-4">Key architectural components include:</p>
+                <p className="mb-4">Key architectural components under consideration include:</p>
                 <ul className="list-disc list-inside space-y-2">
-                  <li><strong>Lock-free Ring Buffer:</strong> Used for high-throughput event ingestion.</li>
-                  <li><strong>Custom Memory Pool:</strong> Minimizes allocations during the parsing of millions of small log entries.</li>
+                  <li><strong>Lock-free Ring Buffer:</strong> Planned for high-throughput event ingestion.</li>
+                  <li><strong>Custom Memory Pool:</strong> Designed to minimize allocations during the parsing of millions of small log entries.</li>
                 </ul>
               </div>
             </div>
@@ -66,13 +66,13 @@ export default function LogAnalyserPage() {
               <div>
                 <h4 className="font-bold text-foreground mb-2">Choice of C++ over Python</h4>
                 <p>
-                  While Python would have allowed for faster prototyping, the performance requirements for parsing 100k+ lines in sub-second time necessitated a compiled language with fine-grained control over memory and CPU usage.
+                  While Python would allow for faster prototyping, the anticipated performance requirements for parsing 100k+ lines in sub-second time suggest a compiled language with fine-grained control over memory and CPU usage would be necessary.
                 </p>
               </div>
               <div>
                 <h4 className="font-bold text-foreground mb-2">Memory-Mapped Files vs. Stream Reading</h4>
                 <p>
-                  I opted for `mmap` to leverage the OS page cache, which significantly improved performance when performing multiple passes over the same log file.
+                  The design explores using `mmap` to leverage the OS page cache, which is expected to significantly improve performance when performing multiple passes over the same log file.
                 </p>
               </div>
               <div className="bg-surface border border-border p-4 rounded font-mono text-sm overflow-x-auto">

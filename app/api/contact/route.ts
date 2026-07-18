@@ -60,9 +60,16 @@ export async function POST(req: NextRequest) {
     }
 
     // Send email via Resend
+    const contactEmail = process.env.CONTACT_EMAIL;
+    
+    if (!contactEmail) {
+      console.error("CONTACT_EMAIL environment variable is missing.");
+      return NextResponse.json({ error: "Service configuration error" }, { status: 500 });
+    }
+
     const { data, error } = await getResend().emails.send({
       from: "Portfolio Contact Form <onboarding@resend.dev>",
-      to: process.env.CONTACT_EMAIL || "[PLACEHOLDER: my email address]",
+      to: contactEmail,
       subject: `New Message from ${name}`,
       replyTo: email,
       text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,

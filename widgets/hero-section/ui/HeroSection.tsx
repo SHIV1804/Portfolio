@@ -36,22 +36,22 @@ export const HeroSection: React.FC = () => {
     {
       id: 1,
       title: "Precision at the Edge",
-      content: "[PLACEHOLDER: story beat 1 - focus on embedded systems and payment terminals]",
+      content: "A software engineer building real systems from the ground up — from solving 120+ algorithmic problems on LeetCode to shipping full-stack features with real infrastructure behind them."
     },
     {
       id: 2,
       title: "Scale and Reliability",
-      content: "[PLACEHOLDER: story beat 2 - processing millions of transactions daily]",
+      content: "This site's own DSA sync runs on a GitHub webhook with HMAC-SHA256 signature verification — rejecting any unverified request before it touches the database — plus rate limiting and graceful fallback states when external calls fail."
     },
     {
       id: 3,
       title: "The Human Element",
-      content: "[PLACEHOLDER: story beat 3 - solving real-world problems for enterprise retail]",
+      content: "The blog isn't just static writing — visitors can sign in with GitHub and submit posts through a real moderation queue, with every submission reviewed before it goes live. Real auth, real database, real human review."
     },
     {
       id: 4,
       title: "Building the Future",
-      content: "[PLACEHOLDER: story beat 4 - your engineering philosophy and vision]",
+      content: "[PERSONAL VOICE — OWNER SHOULD REVIEW/ADJUST, DRAFT ONLY: I'd rather ship something smaller that's genuinely correct than something impressive-looking that falls apart under a real test. Most of what I build, I try to verify — not just assume — before calling it done.]"
     },
   ];
 
