@@ -1,9 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
 import { CaseStudyLayout } from "@/widgets/case-study-layout/ui/CaseStudyLayout";
-import { Header } from "@/widgets/header/ui/Header";
-import { Footer } from "@/widgets/footer/ui/Footer";
-
 export const metadata: Metadata = {
   title: "Project Omega Case Study | Software Engineer Portfolio",
   description: "Coming soon: A detailed look at a new system architecture for distributed edge devices.",
@@ -19,7 +16,6 @@ export const metadata: Metadata = {
 export default function CaseStudyTwoPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <main className="flex-grow">
         <CaseStudyLayout
           title="Project Omega"
@@ -32,7 +28,6 @@ export default function CaseStudyTwoPage() {
           differently={<p>[TBD — project not yet selected]</p>}
         />
       </main>
-      <Footer />
     </div>
   );
 }

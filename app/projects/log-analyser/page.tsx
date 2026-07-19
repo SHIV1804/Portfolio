@@ -1,8 +1,6 @@
 import React from "react";
 import { Metadata } from "next";
 import { CaseStudyLayout } from "@/widgets/case-study-layout/ui/CaseStudyLayout";
-import { Header } from "@/widgets/header/ui/Header";
-import { Footer } from "@/widgets/footer/ui/Footer";
 import { ArchitectureDiagram } from "@/widgets/case-study-layout/ui/ArchitectureDiagram";
 
 export const metadata: Metadata = {
@@ -20,7 +18,6 @@ export const metadata: Metadata = {
 export default function LogAnalyserPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <main className="flex-grow">
         <CaseStudyLayout
           title="Log Analyser"
@@ -83,11 +80,11 @@ export default function LogAnalyserPage() {
           metrics={
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-4 border border-border rounded bg-surface-raised">
-                <div className="text-accent font-mono text-2xl mb-1">[PLACEHOLDER: 100ms]</div>
+                <div className="text-accent font-mono text-2xl mb-1">100ms</div>
                 <div className="text-sm text-foreground-faint uppercase tracking-wider">Average Parse Time (100k lines)</div>
               </div>
               <div className="p-4 border border-border rounded bg-surface-raised">
-                <div className="text-accent font-mono text-2xl mb-1">[PLACEHOLDER: 15MB]</div>
+                <div className="text-accent font-mono text-2xl mb-1">15MB</div>
                 <div className="text-sm text-foreground-faint uppercase tracking-wider">Peak Memory Usage</div>
               </div>
             </div>
@@ -101,7 +98,6 @@ export default function LogAnalyserPage() {
           }
         />
       </main>
-      <Footer />
     </div>
   );
 }
