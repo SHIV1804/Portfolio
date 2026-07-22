@@ -84,3 +84,11 @@ Next check to run: Check 3
 - **Conclusion**: The fixes are **already present** in the code after the reset to `origin/main`.
 
 Next check to run: Check 5 (skip straight to push/verify since no code change is needed)
+
+## Check 6 — COMPLETE
+### Actions Taken
+- Verified the live production site at `https://portfolio-theta-ruby-31nqvqjqmc.vercel.app/projects/log-analyser`.
+- **Header Check**: The header (navigation and search) appears exactly once at the top of the page.
+- **Footer Check**: The footer (author bio and social links) appears exactly once at the bottom of the page.
+- **Metrics Check**: The metrics section correctly displays `100ms` for Average Parse Time and `15MB` for Peak Memory Usage, with no raw `[PLACEHOLDER: ...]` text visible.
+- **Conclusion**: All reported issues have been successfully resolved in the production environment.
