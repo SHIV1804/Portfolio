@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Project Omega | Shivam Portfolio",
     description: "Coming soon: A detailed look at a new system architecture for distributed edge devices.",
-    url: "https://portfolio-shivam.vercel.app/projects/case-study-two",
+    url: "https://portfolio-theta-ruby-31nqvqjqmc.vercel.app/projects/case-study-two",
     images: [{ url: "/og-project-omega.png" }], // [PLACEHOLDER: OG image]
     type: "article",
   },

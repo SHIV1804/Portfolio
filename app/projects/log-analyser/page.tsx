@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Log Analyser Case Study | Shivam Portfolio",
     description: "Deep dive into a high-performance C++ tool for parsing and visualizing complex system logs.",
-    url: "https://portfolio-shivam.vercel.app/projects/log-analyser",
+    url: "https://portfolio-theta-ruby-31nqvqjqmc.vercel.app/projects/log-analyser",
     images: [{ url: "/og-log-analyser.png" }], // [PLACEHOLDER: OG image]
     type: "article",
   },
@@ -80,12 +80,14 @@ export default function LogAnalyserPage() {
           metrics={
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-4 border border-border rounded bg-surface-raised">
-                <div className="text-accent font-mono text-2xl mb-1">100ms</div>
+                <div className="text-accent font-mono text-2xl mb-1">—</div>
                 <div className="text-sm text-foreground-faint uppercase tracking-wider">Average Parse Time (100k lines)</div>
+                <div className="text-xs text-foreground-muted mt-1">(pending real benchmark)</div>
               </div>
               <div className="p-4 border border-border rounded bg-surface-raised">
-                <div className="text-accent font-mono text-2xl mb-1">15MB</div>
+                <div className="text-accent font-mono text-2xl mb-1">—</div>
                 <div className="text-sm text-foreground-faint uppercase tracking-wider">Peak Memory Usage</div>
+                <div className="text-xs text-foreground-muted mt-1">(pending real benchmark)</div>
               </div>
             </div>
           }

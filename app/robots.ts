@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://portfolio-shivam.vercel.app/sitemap.xml",
+    sitemap: "https://portfolio-theta-ruby-31nqvqjqmc.vercel.app/sitemap.xml",
   };
 }

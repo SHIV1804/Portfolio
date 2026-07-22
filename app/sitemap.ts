@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { getAllPosts } from "@/shared/lib/blog";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://portfolio-shivam.vercel.app"; // Placeholder base URL
+  const baseUrl = "https://portfolio-theta-ruby-31nqvqjqmc.vercel.app";
   
   const posts = await getAllPosts();
   const blogUrls = posts.map((post) => ({

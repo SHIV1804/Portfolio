@@ -13,7 +13,7 @@ export const metadata = {
   openGraph: {
     title: "Shivam | Systems Engineer Portfolio",
     description: "Systems-minded software engineer building production payment terminal software and high-performance C++ tools.",
-    url: "https://portfolio-shivam.vercel.app",
+    url: "https://portfolio-theta-ruby-31nqvqjqmc.vercel.app",
     siteName: "Shivam Portfolio",
     images: [
       {
@@ -33,7 +33,7 @@ export default function Home() {
     "@type": "Person",
     name: siteConfig.name,
     jobTitle: siteConfig.role,
-    url: "https://portfolio-shivam.vercel.app",
+    url: "https://portfolio-theta-ruby-31nqvqjqmc.vercel.app",
     sameAs: [siteConfig.links.github, siteConfig.links.linkedin],
   };
 
