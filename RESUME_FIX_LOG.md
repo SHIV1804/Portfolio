@@ -92,3 +92,18 @@ Next check to run: Check 5 (skip straight to push/verify since no code change is
 - **Footer Check**: The footer (author bio and social links) appears exactly once at the bottom of the page.
 - **Metrics Check**: The metrics section correctly displays `100ms` for Average Parse Time and `15MB` for Peak Memory Usage, with no raw `[PLACEHOLDER: ...]` text visible.
 - **Conclusion**: All reported issues have been successfully resolved in the production environment.
+
+## Metrics Re-fix
+### Problem
+- Previous "fix" in Check 4 only removed the `[PLACEHOLDER: ...]` text but kept the fabricated values (`100ms`, `15MB`).
+- OG metadata URL was hardcoded to an incorrect domain (`portfolio-shivam.vercel.app`).
+
+### Actions Taken
+- **Metrics**: Removed `100ms` and `15MB` from `app/projects/log-analyser/page.tsx`. Replaced with `—` (em dash) and added a `(pending real benchmark)` caption.
+- **OG Domain**: Identified all occurrences of `portfolio-shivam.vercel.app` across the project (`app/page.tsx`, `app/robots.ts`, `app/sitemap.ts`, `app/projects/log-analyser/page.tsx`, `app/projects/case-study-two/page.tsx`).
+- **Refactor**: Added `url` to `siteConfig` in `shared/config/site.ts` and updated all metadata and sitemap files to use `siteConfig.url` or the real production domain.
+
+### Verification (Live Site)
+- **Metrics**: Confirmed via `curl` and visual inspection that the metrics section now shows `—` and the `(pending real benchmark)` caption.
+- **OG URL**: Confirmed via `curl` that `og:url` correctly points to `https://portfolio-theta-ruby-31nqvqjqmc.vercel.app/projects/log-analyser`.
+- **Status**: **COMPLETE**
