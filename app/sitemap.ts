@@ -1,8 +1,9 @@
 import { MetadataRoute } from "next";
 import { getAllPosts } from "@/shared/lib/blog";
+import { siteConfig } from "@/shared/config/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://portfolio-theta-ruby-31nqvqjqmc.vercel.app";
+  const baseUrl = siteConfig.url;
   
   const posts = await getAllPosts();
   const blogUrls = posts.map((post) => ({

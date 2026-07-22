@@ -55,9 +55,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${post.title} | Shivam`,
     description: post.excerpt,
+    alternates: {
+      canonical: `https://portfolio-theta-ruby-31nqvqjqmc.vercel.app/blog/${post.slug}`,
+    },
     openGraph: {
       title: post.title,
       description: post.excerpt,
+      url: `https://portfolio-theta-ruby-31nqvqjqmc.vercel.app/blog/${post.slug}`,
       type: 'article',
       publishedTime: post.date,
       authors: [post.authorName || 'Shivam'],

@@ -2,6 +2,7 @@ import React from "react";
 import { Metadata } from "next";
 import { CaseStudyLayout } from "@/widgets/case-study-layout/ui/CaseStudyLayout";
 import { ArchitectureDiagram } from "@/widgets/case-study-layout/ui/ArchitectureDiagram";
+import { siteConfig } from "@/shared/config/site";
 
 export const metadata: Metadata = {
   title: "Log Analyser Case Study | Software Engineer Portfolio",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Log Analyser Case Study | Shivam Portfolio",
     description: "Deep dive into a high-performance C++ tool for parsing and visualizing complex system logs.",
-    url: "https://portfolio-theta-ruby-31nqvqjqmc.vercel.app/projects/log-analyser",
+    url: `${siteConfig.url}/projects/log-analyser`,
     images: [{ url: "/og-log-analyser.png" }], // [PLACEHOLDER: OG image]
     type: "article",
   },

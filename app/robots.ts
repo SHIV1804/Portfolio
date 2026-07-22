@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { siteConfig } from "@/shared/config/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://portfolio-theta-ruby-31nqvqjqmc.vercel.app/sitemap.xml",
+    sitemap: `${siteConfig.url}/sitemap.xml`,
   };
 }
