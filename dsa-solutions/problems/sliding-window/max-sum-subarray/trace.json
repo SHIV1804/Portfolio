@@ -1,0 +1,355 @@
+{
+  "bruteForce": {
+    "code": [
+      "def max_sum_subarray_brute_force(nums, k):",
+      "    max_sum = 0",
+      "    for i in range(len(nums) - k + 1):",
+      "        current_sum = 0",
+      "        for j in range(i, i + k):",
+      "            current_sum += nums[j]",
+      "        max_sum = max(max_sum, current_sum)",
+      "    return max_sum"
+    ],
+    "complexity": "O(N*K)",
+    "steps": []
+  },
+  "optimized": {
+    "code": [
+      "def max_sum_subarray_sliding_window(nums, k):",
+      "    max_sum = 0",
+      "    window_sum = 0",
+      "    window_start = 0",
+      "    for window_end in range(len(nums)):",
+      "        window_sum += nums[window_end]",
+      "        if window_end >= k - 1:",
+      "            max_sum = max(max_sum, window_sum)",
+      "            window_sum -= nums[window_start]",
+      "            window_start += 1",
+      "    return max_sum"
+    ],
+    "complexity": "O(N)",
+    "steps": [
+      {
+        "line": 5,
+        "variables": {
+          "window_sum": 2,
+          "window_start": 0,
+          "window_end": 0,
+          "max_sum": 0
+        },
+        "highlightIndices": [
+          0
+        ],
+        "explanation": "Add nums[0] (2) to window_sum. Current window_sum: 2"
+      },
+      {
+        "line": 5,
+        "variables": {
+          "window_sum": 3,
+          "window_start": 0,
+          "window_end": 1,
+          "max_sum": 0
+        },
+        "highlightIndices": [
+          0,
+          1
+        ],
+        "explanation": "Add nums[1] (1) to window_sum. Current window_sum: 3"
+      },
+      {
+        "line": 5,
+        "variables": {
+          "window_sum": 8,
+          "window_start": 0,
+          "window_end": 2,
+          "max_sum": 0
+        },
+        "highlightIndices": [
+          0,
+          1,
+          2
+        ],
+        "explanation": "Add nums[2] (5) to window_sum. Current window_sum: 8"
+      },
+      {
+        "line": 6,
+        "variables": {
+          "window_sum": 8,
+          "window_start": 0,
+          "window_end": 2,
+          "max_sum": 0
+        },
+        "highlightIndices": [
+          0,
+          1,
+          2
+        ],
+        "explanation": "Window size reached k. Current window_sum: 8"
+      },
+      {
+        "line": 7,
+        "variables": {
+          "window_sum": 8,
+          "window_start": 0,
+          "window_end": 2,
+          "max_sum": 8
+        },
+        "highlightIndices": [
+          0,
+          1,
+          2
+        ],
+        "explanation": "Update max_sum to 8"
+      },
+      {
+        "line": 8,
+        "variables": {
+          "window_sum": 6,
+          "window_start": 0,
+          "window_end": 2,
+          "max_sum": 8
+        },
+        "highlightIndices": [
+          1,
+          2
+        ],
+        "explanation": "Subtract nums[0] (2) from window_sum. New window_sum: 6"
+      },
+      {
+        "line": 9,
+        "variables": {
+          "window_sum": 6,
+          "window_start": 1,
+          "window_end": 2,
+          "max_sum": 8
+        },
+        "highlightIndices": [
+          1,
+          2
+        ],
+        "explanation": "Slide window by incrementing window_start to 1"
+      },
+      {
+        "line": 5,
+        "variables": {
+          "window_sum": 7,
+          "window_start": 1,
+          "window_end": 3,
+          "max_sum": 8
+        },
+        "highlightIndices": [
+          1,
+          2,
+          3
+        ],
+        "explanation": "Add nums[3] (1) to window_sum. Current window_sum: 7"
+      },
+      {
+        "line": 6,
+        "variables": {
+          "window_sum": 7,
+          "window_start": 1,
+          "window_end": 3,
+          "max_sum": 8
+        },
+        "highlightIndices": [
+          1,
+          2,
+          3
+        ],
+        "explanation": "Window size reached k. Current window_sum: 7"
+      },
+      {
+        "line": 7,
+        "variables": {
+          "window_sum": 7,
+          "window_start": 1,
+          "window_end": 3,
+          "max_sum": 8
+        },
+        "highlightIndices": [
+          1,
+          2,
+          3
+        ],
+        "explanation": "Update max_sum to 8"
+      },
+      {
+        "line": 8,
+        "variables": {
+          "window_sum": 6,
+          "window_start": 1,
+          "window_end": 3,
+          "max_sum": 8
+        },
+        "highlightIndices": [
+          2,
+          3
+        ],
+        "explanation": "Subtract nums[1] (1) from window_sum. New window_sum: 6"
+      },
+      {
+        "line": 9,
+        "variables": {
+          "window_sum": 6,
+          "window_start": 2,
+          "window_end": 3,
+          "max_sum": 8
+        },
+        "highlightIndices": [
+          2,
+          3
+        ],
+        "explanation": "Slide window by incrementing window_start to 2"
+      },
+      {
+        "line": 5,
+        "variables": {
+          "window_sum": 9,
+          "window_start": 2,
+          "window_end": 4,
+          "max_sum": 8
+        },
+        "highlightIndices": [
+          2,
+          3,
+          4
+        ],
+        "explanation": "Add nums[4] (3) to window_sum. Current window_sum: 9"
+      },
+      {
+        "line": 6,
+        "variables": {
+          "window_sum": 9,
+          "window_start": 2,
+          "window_end": 4,
+          "max_sum": 8
+        },
+        "highlightIndices": [
+          2,
+          3,
+          4
+        ],
+        "explanation": "Window size reached k. Current window_sum: 9"
+      },
+      {
+        "line": 7,
+        "variables": {
+          "window_sum": 9,
+          "window_start": 2,
+          "window_end": 4,
+          "max_sum": 9
+        },
+        "highlightIndices": [
+          2,
+          3,
+          4
+        ],
+        "explanation": "Update max_sum to 9"
+      },
+      {
+        "line": 8,
+        "variables": {
+          "window_sum": 4,
+          "window_start": 2,
+          "window_end": 4,
+          "max_sum": 9
+        },
+        "highlightIndices": [
+          3,
+          4
+        ],
+        "explanation": "Subtract nums[2] (5) from window_sum. New window_sum: 4"
+      },
+      {
+        "line": 9,
+        "variables": {
+          "window_sum": 4,
+          "window_start": 3,
+          "window_end": 4,
+          "max_sum": 9
+        },
+        "highlightIndices": [
+          3,
+          4
+        ],
+        "explanation": "Slide window by incrementing window_start to 3"
+      },
+      {
+        "line": 5,
+        "variables": {
+          "window_sum": 6,
+          "window_start": 3,
+          "window_end": 5,
+          "max_sum": 9
+        },
+        "highlightIndices": [
+          3,
+          4,
+          5
+        ],
+        "explanation": "Add nums[5] (2) to window_sum. Current window_sum: 6"
+      },
+      {
+        "line": 6,
+        "variables": {
+          "window_sum": 6,
+          "window_start": 3,
+          "window_end": 5,
+          "max_sum": 9
+        },
+        "highlightIndices": [
+          3,
+          4,
+          5
+        ],
+        "explanation": "Window size reached k. Current window_sum: 6"
+      },
+      {
+        "line": 7,
+        "variables": {
+          "window_sum": 6,
+          "window_start": 3,
+          "window_end": 5,
+          "max_sum": 9
+        },
+        "highlightIndices": [
+          3,
+          4,
+          5
+        ],
+        "explanation": "Update max_sum to 9"
+      },
+      {
+        "line": 8,
+        "variables": {
+          "window_sum": 5,
+          "window_start": 3,
+          "window_end": 5,
+          "max_sum": 9
+        },
+        "highlightIndices": [
+          4,
+          5
+        ],
+        "explanation": "Subtract nums[3] (1) from window_sum. New window_sum: 5"
+      },
+      {
+        "line": 9,
+        "variables": {
+          "window_sum": 5,
+          "window_start": 4,
+          "window_end": 5,
+          "max_sum": 9
+        },
+        "highlightIndices": [
+          4,
+          5
+        ],
+        "explanation": "Slide window by incrementing window_start to 4"
+      }
+    ]
+  },
+  "discoveryQuestions": [],
+  "predictionQuestions": []
+}
