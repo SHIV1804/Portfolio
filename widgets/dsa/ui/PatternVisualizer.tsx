@@ -29,6 +29,18 @@ export const PatternVisualizer: React.FC<PatternVisualizerProps> = ({ pattern, e
     case 'sliding-window':
       return <SlidingWindowVisualizer exampleInput={{ array, k, target }} />;
     case 'binary-search':
+      // Check if this is a flagship trace-driven visualizer
+      if (exampleInput.trace && typeof exampleInput.trace === 'object') {
+        const trace = (exampleInput.trace as { bruteForce: DSATracePhase }).bruteForce; // Default to bruteForce for visualizer
+        return (
+          <BinarySearchVisualizer 
+            trace={trace} 
+            initialArray={array} 
+            target={target} 
+          />
+        );
+      }
+      // Fallback to legacy non-trace mode (if any exist)
       return <BinarySearchVisualizer exampleInput={{ array, target }} />;
     default:
       return (
