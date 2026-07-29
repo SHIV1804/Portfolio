@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect, useCallback } from 'react';
 import { getDSAProblemBySlug, fetchDSATrace, DSATrace } from '@/shared/lib/dsa-sync';
 import { MDXRemote } from 'next-mdx-remote/rsc';

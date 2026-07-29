@@ -44,6 +44,10 @@ export const BinarySearchVisualizer: React.FC<BinarySearchVisualizerProps> = ({
   const low = isFlagship ? (currentStep?.variables.low as number) : legacyLow;
   const high = isFlagship ? (currentStep?.variables.high as number) : legacyHigh;
   const mid = isFlagship ? (currentStep?.variables.mid as number) : legacyMid;
+  const isFound = isFlagship ? (currentStep?.variables.found as boolean) : legacyFound;
+  const isNotFound = isFlagship 
+    ? (trace && currentStepIndex === trace.steps.length - 1 && !isFound) 
+    : (legacyLow > legacyHigh && !legacyFound);
 
   const reset = useCallback(() => {
     if (isFlagship) {
@@ -128,7 +132,7 @@ export const BinarySearchVisualizer: React.FC<BinarySearchVisualizerProps> = ({
           const isHigh = i === high;
           const isMid = i === mid;
           const isExcluded = i < low || i > high;
-          const isMatch = found && isMid;
+          const isMatch = isFound && isMid;
 
           return (
             <div key={i} className="relative flex flex-col items-center">

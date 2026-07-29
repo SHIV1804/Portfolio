@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { DSATracePhase } from '@/shared/lib/dsa-sync';
 import { TwoPointersVisualizer } from './visualizers/TwoPointersVisualizer';
 import { SlidingWindowVisualizer } from './visualizers/SlidingWindowVisualizer';
 import { BinarySearchVisualizer } from './visualizers/BinarySearchVisualizer';

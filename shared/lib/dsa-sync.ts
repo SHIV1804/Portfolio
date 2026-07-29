@@ -66,7 +66,7 @@ export async function fetchDSAProblems(): Promise<DSAProblem[]> {
     // 1. Fetch patterns (directories in /problems)
     const patternsResponse = await fetch(`${GITHUB_API_BASE}/repos/${repo}/contents/problems`, {
       headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
 
     if (!patternsResponse.ok) return [];
@@ -78,7 +78,7 @@ export async function fetchDSAProblems(): Promise<DSAProblem[]> {
       if (pattern.type === 'dir') {
         const problemsResponse = await fetch(`${GITHUB_API_BASE}/repos/${repo}/contents/${pattern.path}`, {
           headers: { Authorization: `Bearer ${token}` },
-          cache: "no-store",
+          next: { revalidate: 3600 },
         });
         if (problemsResponse.ok) {
           const problems: GitHubContent[] = await problemsResponse.json();
@@ -97,7 +97,7 @@ export async function fetchDSAProblems(): Promise<DSAProblem[]> {
     for (const problemDir of problemDirs) {
       const filesResponse = await fetch(`${GITHUB_API_BASE}/repos/${repo}/contents/${problemDir.path}`, {
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 3600 },
       });
 
       if (filesResponse.ok) {
@@ -153,7 +153,7 @@ export async function fetchDSATrace(pattern: string, slug: string): Promise<DSAT
     const tracePath = `problems/${pattern}/${slug}/trace.json`;
     const response = await fetch(`${GITHUB_API_BASE}/repos/${repo}/contents/${tracePath}`, {
       headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
 
     if (!response.ok) return null;
