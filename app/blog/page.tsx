@@ -1,8 +1,7 @@
 import { getAllPosts, BlogPost, calculateReadingTime } from '@/shared/lib/blog';
 import { WritePostButton } from './WritePostButton';
 import { BlogSearch } from './BlogSearch';
-import { prisma } from '@/shared/lib/prisma';
-import { PostStatus } from '@prisma/client';
+import { getApprovedCommunityPosts } from '@/shared/lib/blog-db';
 
 export const metadata = {
   title: 'Blog | Shivam',
@@ -15,25 +14,8 @@ export default async function BlogPage() {
   // 1. Fetch MDX posts
   const mdxPosts = await getAllPosts();
 
-  // 2. Fetch approved DB posts
-  console.log('[DEBUG-BLOG] Fetching APPROVED posts from DB...');
-  const dbPostsRaw = await prisma.post.findMany({
-    where: {
-      status: PostStatus.APPROVED,
-    },
-    include: {
-      author: {
-        select: {
-          name: true,
-          email: true,
-        },
-      },
-    },
-    orderBy: {
-      publishedAt: 'desc',
-    },
-  });
-  console.log(`[DEBUG-BLOG] DB posts fetched: \${dbPostsRaw.length}`, dbPostsRaw.map(p => ({ id: p.id, slug: p.slug, status: p.status })));
+  // 2. Fetch approved DB posts via fallback helper
+  const dbPostsRaw = await getApprovedCommunityPosts();
 
   const dbPosts: BlogPost[] = dbPostsRaw.map((post) => ({
     title: post.title,
@@ -45,7 +27,7 @@ export default async function BlogPage() {
     content: post.content,
     readingTime: calculateReadingTime(post.content),
     source: 'database',
-    authorName: post.author.name || post.author.email || 'Anonymous',
+    authorName: post.author.name || 'Anonymous',
   }));
 
   // 3. Merge and sort
