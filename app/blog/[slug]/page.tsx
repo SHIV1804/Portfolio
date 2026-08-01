@@ -7,8 +7,7 @@ import { getPostBySlug, getAllPosts, BlogPost, calculateReadingTime } from '@/sh
 import { renderSafeMarkdown } from '@/shared/lib/safe-markdown';
 import { TableOfContents, PostCard } from '@/widgets/blog';
 import { mdxComponents } from '../MdxComponents';
-import { prisma } from '@/shared/lib/prisma';
-import { PostStatus } from '@prisma/client';
+import { getApprovedCommunityPostBySlug, getApprovedCommunityPosts } from '@/shared/lib/blog-db';
 import { Badge } from '@/shared/ui/Badge';
 
 interface PageProps {
@@ -30,10 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   
   // Try DB fallback
   if (!post) {
-    const dbPost = await prisma.post.findUnique({
-      where: { slug, status: PostStatus.APPROVED },
-      include: { author: true }
-    });
+    const dbPost = await getApprovedCommunityPostBySlug(slug);
     if (dbPost) {
       post = {
         title: dbPost.title,
@@ -45,7 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         content: dbPost.content,
         readingTime: calculateReadingTime(dbPost.content),
         source: 'database',
-        authorName: dbPost.author.name || dbPost.author.email || 'Anonymous',
+        authorName: dbPost.author.name || 'Anonymous',
       };
     }
   }
@@ -73,17 +69,10 @@ async function getRelatedPosts(currentPost: BlogPost) {
   // 1. Fetch MDX posts
   const mdxPosts = await getAllPosts();
 
-  // 2. Fetch approved DB posts
-  const dbPostsRaw = await prisma.post.findMany({
-    where: {
-      status: PostStatus.APPROVED,
-      NOT: { slug: currentPost.slug }
-    },
-    include: {
-      author: { select: { name: true, email: true } }
-    },
-    take: 10
-  });
+  // 2. Fetch approved DB posts via fallback helper
+  const dbPostsRaw = (await getApprovedCommunityPosts())
+    .filter(p => p.slug !== currentPost.slug)
+    .slice(0, 10);
 
   const dbPosts: BlogPost[] = dbPostsRaw.map((post) => ({
     title: post.title,
@@ -95,7 +84,7 @@ async function getRelatedPosts(currentPost: BlogPost) {
     content: post.content,
     readingTime: calculateReadingTime(post.content),
     source: 'database',
-    authorName: post.author.name || post.author.email || 'Anonymous',
+    authorName: post.author.name || 'Anonymous',
   }));
 
   const allPosts = [...mdxPosts, ...dbPosts];
@@ -120,10 +109,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   
   // Try DB fallback
   if (!post) {
-    const dbPost = await prisma.post.findUnique({
-      where: { slug, status: PostStatus.APPROVED },
-      include: { author: true }
-    });
+    const dbPost = await getApprovedCommunityPostBySlug(slug);
     if (dbPost) {
       post = {
         title: dbPost.title,
@@ -135,7 +121,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         content: dbPost.content,
         readingTime: calculateReadingTime(dbPost.content),
         source: 'database',
-        authorName: dbPost.author.name || dbPost.author.email || 'Anonymous',
+        authorName: dbPost.author.name || 'Anonymous',
       };
     }
   }
