@@ -54,3 +54,17 @@
 
 ### Next chunk to run
 - Integrate the new Sliding Window visualizer into the main application navigation and ensure it renders correctly in a development environment.
+
+## Blog System Resilience Fix — 2026-08-01
+
+### What was built
+- **Graceful Fallback Helpers**: Implemented `shared/lib/blog-db.ts` which wraps Prisma calls for community posts in `try-catch` blocks.
+- **Resilient Blog Pages**: Updated `app/blog/page.tsx` and `app/blog/[slug]/page.tsx` to use these helpers, ensuring the site remains buildable and functional even when the database (`DATABASE_URL`) is unavailable.
+
+### Decisions made (and why)
+- **Decoupling DB from Build**: By catching `PrismaClientInitializationError` at the helper level, we prevent the entire Next.js build process from crashing when environment variables are missing.
+- **Fail-Soft UI**: The system now returns empty arrays or nulls instead of throwing errors, allowing MDX-based content to render normally while community content is gracefully omitted.
+
+### Verification performed
+- **Database-less Build**: Successfully ran `npm run build` with `DATABASE_URL` unset. The build completed without crashing, confirming that the fallback logic correctly handles database connection failures.
+- **Linting**: Verified that `npm run lint` passes without errors.
