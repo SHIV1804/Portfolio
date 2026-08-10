@@ -11,10 +11,10 @@ export const metadata = {
 export const revalidate = 60; // Revalidate every minute
 
 export default async function BlogPage() {
-  // 1. Fetch MDX posts
+  // 1. Fetch MDX posts from the local filesystem
   const mdxPosts = await getAllPosts();
 
-  // 2. Fetch approved DB posts via fallback helper
+  // 2. Fetch approved community posts from the database using the graceful fallback helper
   const dbPostsRaw = await getApprovedCommunityPosts();
 
   const dbPosts: BlogPost[] = dbPostsRaw.map((post) => ({
