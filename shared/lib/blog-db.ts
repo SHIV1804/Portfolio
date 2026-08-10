@@ -1,3 +1,6 @@
+/**
+ * Database utility for blog-related queries with graceful error handling.
+ */
 import { prisma } from "./prisma";
 import { PostStatus } from "@prisma/client";
 
