@@ -1,6 +1,7 @@
 /**
  * Database utility for blog-related queries with graceful error handling.
  */
+// Verifying graceful DB fallback behavior on this branch
 import { prisma } from "./prisma";
 import { PostStatus } from "@prisma/client";
 
