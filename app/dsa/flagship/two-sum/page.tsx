@@ -58,7 +58,13 @@ export default async function TwoSumFlagshipPage() {
 
       <div className="mb-12">
         <h2 className="text-2xl font-bold text-foreground mb-6">Watch the Brute-Force Attempt</h2>
-        <ExecutionPanel phase={trace.bruteForce} nums={nums} title="Brute-Force Walkthrough" />
+        <ExecutionPanel
+          phase={trace.bruteForce}
+          nums={nums}
+          title="Brute-Force Walkthrough"
+          phaseKey="bruteForce"
+          predictionQuestions={trace.predictionQuestions}
+        />
       </div>
 
       <div className="mb-12">
@@ -71,7 +77,13 @@ export default async function TwoSumFlagshipPage() {
 
       <div id="optimized-walkthrough" className="mb-12 scroll-mt-8">
         <h2 className="text-2xl font-bold text-foreground mb-6">Watch the Optimized Approach</h2>
-        <ExecutionPanel phase={trace.optimized} nums={nums} title="Optimized Walkthrough" />
+        <ExecutionPanel
+          phase={trace.optimized}
+          nums={nums}
+          title="Optimized Walkthrough"
+          phaseKey="optimized"
+          predictionQuestions={trace.predictionQuestions}
+        />
       </div>
     </div>
   );

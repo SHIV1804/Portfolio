@@ -175,3 +175,29 @@ The task assumed the optimized trace has `mapState` per step. **It does not, in 
 
 ### Next chunk to run
 - Chunk 5: prediction questions + final polish + Playwright tests (also where the "confirm no Map section on real data" state should be re-checked if the GDB pipeline gets updated to emit mapState before Chunk 5 runs).
+
+## Chunk 5 — Prediction Questions + Final Polish + Tests — 2026-08-16
+
+### What was built
+- `ExecutionPanel.tsx` now accepts `phaseKey` ('bruteForce' | 'optimized') and `predictionQuestions` props. At any step matching a `predictionQuestions` entry's `stepIndex` + `phase`, the panel gates: it shows only the question card (options as buttons) and hides the array/code/variables/explanation panels, with a "Answer the question above to reveal this step" placeholder. Step-forward and Play are disabled while gated. Picking an option immediately reveals the real step content plus a "Correct!" / "Not quite — the correct answer is highlighted above" indicator, and locks the options (correct one highlighted green, any wrong pick highlighted red). Autoplay auto-pauses on arriving at a gated step rather than skipping past it. Revisiting an already-answered step (via step-back) shows it un-gated with its prior answer state, not re-gated.
+- `page.tsx` passes `phaseKey` + `trace.predictionQuestions` to both the brute-force and optimized panel instances.
+- New `tests/dsa-flagship/two-sum-execution-panel.spec.ts`: page load, step-forward button, keyboard stepping, `prefers-reduced-motion` (autoplay disabled, manual stepping still works), and a prediction-question render + answer test — following the existing repo's Playwright conventions (`page.emulateMedia`, `getByRole`, patterns matched against `tests/architecture-diagram` and `tests/reduced-motion`).
+
+### Files created/modified
+- `app/dsa/flagship/two-sum/ExecutionPanel.tsx` (modified — prediction gating)
+- `app/dsa/flagship/two-sum/page.tsx` (modified — new props wired through)
+- `tests/dsa-flagship/two-sum-execution-panel.spec.ts` (created)
+
+### Verification performed (real commands run, real results)
+- `npm run lint`: 0 errors (same 14 pre-existing warnings, unchanged; one new `react-hooks/set-state-in-effect` error was introduced and fixed during this chunk — the gated-autoplay-pause branch now defers via `setTimeout(..., 0)` like the existing end-of-playback branch).
+- Isolated `tsc --noEmit` on the touched app files and separately on the new spec file: 0 type errors in both.
+- Interactive jsdom test against the **real** `predictionQuestions` + `bruteForce` trace data: confirmed step 1's real question text renders, confirmed the real explanation is hidden until answered, confirmed the forward button is disabled while gated; answered incorrectly and confirmed the explanation then reveals, the "Not quite" message shows, forward re-enables, and options lock; advanced to step 2 (also gated) and confirmed it gates independently; answered correctly and confirmed "Correct!"; stepped back to step 1 and confirmed it stays un-gated with its prior (incorrect) answer still shown — i.e. answered state persists across navigation rather than re-blocking.
+
+### Known issues / blocked items — full Playwright suite could NOT be run
+- **`npx playwright install chromium` fails in this sandbox**: `cdn.playwright.dev` is not in the network egress allowlist (confirmed directly — `403 Host not in allowlist`). Without browser binaries, no Playwright test — new or pre-existing — can actually execute here, so **I could not run the new tests, and could not run the full existing suite to check for regressions, as the task required.** The new spec file is written to compile, lint clean, and match the accessible-name/testid contract the components actually render (verified via the jsdom tests above standing in as a proxy), but it has not been executed against a real browser.
+- Same pre-existing, unrelated `npm run build` blocker as prior chunks (Prisma engine download blocked).
+- I also attempted to spin up a real `next dev` server (with the actual `DSA_GITHUB_REPO`/`GITHUB_TOKEN` set locally, gitignored, never committed) to get genuine end-to-end verification instead of jsdom proxies — the server started and reported "Ready", but background processes don't survive between tool calls in this sandbox, so it was unreachable by the time I could curl it. Reverted to the jsdom approach used in Chunks 2–4.
+- **This chunk, and really the whole flagship feature, needs a human (or an agent session with real deploy/browser access) to: run `npx playwright test` for real, run the full pre-existing suite for regressions, and do the final manual walkthrough on the dev Preview URL before merging dev → main.** None of that happened in this session.
+
+### Status
+Chunks 2–5 are implemented, individually lint/type-check clean, and functionally verified via targeted jsdom render/interaction tests against real trace data (not fabricated) — but **not one of the four chunks has been seen by a human on an actual running page**, and Chunk 5's Playwright tests have never been executed. Treat the checkpoints as code-complete, not verification-complete.
