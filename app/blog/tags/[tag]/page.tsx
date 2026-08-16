@@ -27,7 +27,7 @@ export default async function TagPage({ params }: PageProps) {
   const posts = await getPostsByTag(tag);
 
   return (
-    <main className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto">
+    <div className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto">
       <header className="mb-12">
         <Link 
           href="/blog"
@@ -48,6 +48,6 @@ export default async function TagPage({ params }: PageProps) {
           <PostCard key={post.slug} post={post} />
         ))}
       </div>
-    </main>
+    </div>
   );
 }

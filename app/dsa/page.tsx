@@ -11,7 +11,7 @@ export default async function DSAPage() {
   const problems = await fetchDSAProblems();
 
   return (
-    <main className="min-h-screen py-24 px-6">
+    <div className="min-h-screen py-24 px-6">
       <div className="max-w-6xl mx-auto">
         <header className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
@@ -36,6 +36,6 @@ export default async function DSAPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

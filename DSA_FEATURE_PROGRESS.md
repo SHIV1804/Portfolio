@@ -181,3 +181,18 @@
 
 ### Next chunk to run
 - Chunk 5: Search and Filtering improvements (client-side).
+
+## Chunk 5 — UI/UX Polish & Accessibility Fix — 2026-08-10
+### What was built
+- **Accessibility Fix**: Removed duplicate `<main>` landmarks from `/dsa` and `/dsa/[pattern]/[slug]` pages. These pages now correctly inherit the primary `<main>` wrapper from the root layout, resolving Playwright test failures.
+### Decisions made (and why)
+- **Landmark Consistency**: Ensured that the site follows WAI-ARIA best practices by having only one primary `<main>` element per page.
+### Files created/modified
+- `app/dsa/page.tsx`
+- `app/dsa/[pattern]/[slug]/page.tsx`
+### Verification performed
+- `npm run build`: Passed.
+- `npm run lint`: Passed.
+- **DOM Inspection**: Verified `document.querySelectorAll('main').length === 1` on DSA routes.
+### Next chunk to run
+- Chunk 6: Advanced visualizer features or performance optimizations.

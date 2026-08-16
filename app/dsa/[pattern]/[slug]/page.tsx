@@ -55,7 +55,7 @@ export default async function DSAProblemPage({ params }: PageProps) {
   const solutionMdx = `\`\`\`${lang}\n${problem.solution}\n\`\`\``;
 
   return (
-    <main className="min-h-screen pt-32 pb-20 px-6">
+    <div className="min-h-screen pt-32 pb-20 px-6">
       <div className="max-w-4xl mx-auto">
         <header className="mb-12">
           <div className="flex justify-between items-start mb-8">
@@ -159,6 +159,6 @@ export default async function DSAProblemPage({ params }: PageProps) {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

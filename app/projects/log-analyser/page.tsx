@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 export default function LogAnalyserPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-grow">
+      <div className="flex-grow">
         <CaseStudyLayout
           title="Log Analyser"
           subtitle="A planned utility for high-performance log parsing — architecture design in progress, not yet implemented."
@@ -100,7 +100,7 @@ export default function LogAnalyserPage() {
             </div>
           }
         />
-      </main>
+      </div>
     </div>
   );
 }
