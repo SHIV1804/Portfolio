@@ -68,6 +68,11 @@ export default async function TwoSumFlagshipPage() {
           exampleSize={nums.length}
         />
       </div>
+
+      <div id="optimized-walkthrough" className="mb-12 scroll-mt-8">
+        <h2 className="text-2xl font-bold text-foreground mb-6">Watch the Optimized Approach</h2>
+        <ExecutionPanel phase={trace.optimized} nums={nums} title="Optimized Walkthrough" />
+      </div>
     </div>
   );
 }

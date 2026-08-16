@@ -217,6 +217,30 @@ export const ExecutionPanel: React.FC<ExecutionPanelProps> = ({ phase, nums, tit
               </div>
             ))}
           </div>
+
+          {currentStep.mapState && (
+            <div className="border-t border-accent/30">
+              <div className="px-4 py-2 text-xs uppercase tracking-widest text-accent bg-accent/10">
+                Map
+              </div>
+              <div className="p-4 font-mono text-sm">
+                {Object.keys(currentStep.mapState).length === 0 ? (
+                  <span className="text-foreground-faint">{'{ }'}</span>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(currentStep.mapState).map(([key, value]) => (
+                      <span
+                        key={key}
+                        className="px-2 py-1 rounded bg-accent/15 border border-accent/30 text-foreground"
+                      >
+                        {key}: {String(value)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

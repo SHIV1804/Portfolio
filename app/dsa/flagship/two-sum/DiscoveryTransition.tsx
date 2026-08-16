@@ -72,14 +72,13 @@ export const DiscoveryTransition: React.FC<DiscoveryTransitionProps> = ({
           <p className="text-foreground-muted mb-4">
             Keep those trade-offs in mind — here&apos;s how the optimized approach handles it.
           </p>
-          <button
-            disabled
-            title="Coming in the next chunk"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-accent text-background font-bold rounded-lg text-lg opacity-50 cursor-not-allowed"
+          <a
+            href="#optimized-walkthrough"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-accent text-background font-bold rounded-lg text-lg hover:bg-accent/90 transition-colors"
           >
             Watch the Optimized Approach
             <ArrowRight size={18} />
-          </button>
+          </a>
         </div>
       )}
     </div>

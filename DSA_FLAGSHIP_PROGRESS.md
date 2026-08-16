@@ -141,3 +141,37 @@
 
 ### Next chunk to run
 - Chunk 4: optimized execution panel, reusing the `ExecutionPanel` component (already verified to handle the `optimized` phase shape during Chunk 2's testing).
+
+## Chunk 4 — Optimized Execution Panel — 2026-08-16
+
+### What was built
+- `app/dsa/flagship/two-sum/page.tsx` now renders a second `<ExecutionPanel>` instance for `trace.optimized`, right below the discovery transition, under an `id="optimized-walkthrough"` anchor — reusing the exact same component from Chunk 2, just different `phase` props. No new/duplicate execution-panel component was created.
+- Made the Chunk 3 CTA functional: it's now a real `<a href="#optimized-walkthrough">` link (was a disabled button) that scrolls to this new panel.
+- Extended `DSATraceStep` (`shared/lib/dsa-sync.ts`) with an optional `mapState?: Record<string, unknown>` field, and extended `ExecutionPanel`'s variable tracker to render a visually distinct "Map" section (amber-tinted, key:value chips) whenever a step has `mapState`.
+
+### Important finding — reported, not silently worked around
+The task assumed the optimized trace has `mapState` per step. **It does not, in the real GDB-verified `trace.json` for two-sum** (pulled directly from `SHIV1804/dsa-solutions`, `problems/hash-map/two-sum/trace.json`) — its `optimized.steps` only have `line`, `variables`, `highlightIndices`, `explanation`. I did not fabricate map contents to fill this gap. Instead:
+- The `mapState` field and its rendering are fully implemented and tested (see below) and will work correctly the moment the trace-generation pipeline starts emitting it.
+- For now, the optimized walkthrough renders exactly as Chunk 2 does for brute-force — code, variables (`i`, `nums_i`, `complement`, and `matchIndex` on the final step), array highlighting, explanation — with no Map section, since there's no real data for it.
+- **This needs a decision from you**: either (a) extend the GDB trace-generation driver for two-sum's optimized solution to also dump the `unordered_map`'s contents at each breakpoint (a Section B-style task against `dsa-solutions`), or (b) accept the optimized panel without a live map view for now. Not something I should decide unilaterally.
+
+### Files created/modified
+- `app/dsa/flagship/two-sum/page.tsx` (modified — added optimized panel)
+- `app/dsa/flagship/two-sum/ExecutionPanel.tsx` (modified — added conditional Map section)
+- `app/dsa/flagship/two-sum/DiscoveryTransition.tsx` (modified — CTA now a real anchor link, not disabled)
+- `shared/lib/dsa-sync.ts` (modified — added optional `mapState` to `DSATraceStep`)
+
+### Verification performed (real commands run, real results)
+- `npm run lint`: 0 errors (same 14 pre-existing warnings elsewhere, unchanged).
+- Isolated `tsc --noEmit` scoped to touched files (temp tsconfig, removed after): 0 type errors.
+- Rendered and interacted with `ExecutionPanel` fed the **real** `trace.optimized` data in jsdom: stepped through all 4 steps forward, confirmed each step's real explanation text appeared in order, confirmed the forward button correctly disables on the final step, and confirmed **no** Map section renders (since the real data has no `mapState` — proving the fallback doesn't fabricate anything).
+- Separately, fed `ExecutionPanel` **clearly-labeled synthetic** step data containing `mapState` (not claimed as real trace data) to prove the new rendering logic itself is correct: confirmed the map renders as `{ }` when empty, then correctly shows `3: 0` after one insert, then both `3: 0` and `2: 1` after a second — i.e. it builds up entry by entry as expected, exactly like the task's example (`{} -> {3:0} -> {3:0,2:1} -> match`) would look once real `mapState` data exists.
+- Confirmed via component reuse (no new panel component, single `ExecutionPanel` handles both phases via props only).
+- Test scripts were temporary (local `.smoketest/`, deleted after use); `git status` shows only the four intended file changes.
+
+### Known issues / blocked items
+- Same sandbox limitations as Chunks 2–3: no browser/Vercel Preview access, so this was verified via jsdom rendering/interaction against real (and, for the mapState-specific logic, synthetic) data rather than a live page load.
+- **mapState is not present in current real data — see "Important finding" above. This blocks step 3 of the original Chunk 4 task ("confirm mapState displays and updates correctly... should show building up: {} -> {3:0} -> {3:0,2:1} -> match") from being verifiable against real production data until the trace pipeline is updated.** The panel and code are ready for it.
+
+### Next chunk to run
+- Chunk 5: prediction questions + final polish + Playwright tests (also where the "confirm no Map section on real data" state should be re-checked if the GDB pipeline gets updated to emit mapState before Chunk 5 runs).
