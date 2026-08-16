@@ -78,3 +78,37 @@
 - **Database-less Build (Final)**: Ran `npm run build` with `DATABASE_URL` explicitly unset. The build completed successfully (30/30 pages), with the console correctly logging `PrismaClientInitializationError` warnings instead of crashing.
 - **Linting (Final)**: Ran `npm run lint` which passed with 0 errors.
 - **Commit History**: Verified that subtasks 1a-1c are now fully committed to the main branch.
+
+## Chunk 2 — Brute-Force Execution Panel — 2026-08-16
+
+### What was built
+- `app/dsa/flagship/two-sum/ExecutionPanel.tsx` (new client component, `'use client'`): synced code panel, variable tracker, array highlighting (extends `ArrayBox`), explanation text, and play/pause/step-forward/step-back/reset controls, keyboard-operable (←/→/space/R), scoped to the panel via a focusable `role="group"` container.
+- `app/dsa/flagship/two-sum/page.tsx` updated to render `<ExecutionPanel phase={trace.bruteForce} nums={nums} title="Brute-Force Walkthrough" />` in place of the old disabled placeholder button. `page.tsx` remains an async Server Component (unchanged fetch logic); only the new panel is a Client Component — no server/client mixing.
+
+### Decisions made (and why)
+- Code line highlighting matches `step.line` (1-indexed) directly against the `code` array index (`line - 1`) — confirmed this alignment against the real trace.json (e.g. line 6 = `if (nums[i] + nums[j] == target)`, matching step 0's "Comparing nums[0] + nums[1]" explanation).
+- Autoplay's `setIsPlaying(false)` on reaching the last step is called inside the `setTimeout` callback (deferred), not synchronously in the effect body, to satisfy `react-hooks/set-state-in-effect` (this was the one lint error hit and fixed during this chunk).
+- Reduced-motion: the Play/Pause button is disabled entirely (not just silently inert) when `prefersReducedMotion` is true, and manual step-forward/back/reset remain fully functional — verified both behaviors directly (see below).
+- `ExecutionPanel` takes a generic `phase: DSATracePhase` prop rather than being hardcoded to `bruteForce`, so it already renders the `optimized` phase correctly too (verified) — sets up Chunk 4 to reuse it without new component logic, per that chunk's requirement.
+
+### Files created/modified
+- `app/dsa/flagship/two-sum/ExecutionPanel.tsx` (created)
+- `app/dsa/flagship/two-sum/page.tsx` (modified)
+
+### Verification performed (real commands run, real results)
+- `npm run lint`: 0 errors in touched files (1 pre-existing error was introduced then fixed during this chunk; remaining lint output is pre-existing warnings in unrelated files).
+- Isolated `tsc --noEmit` scoped to the touched files (via a temporary tsconfig, since project-wide `npm run build` fails on an unrelated pre-existing issue — see Known issues): 0 type errors.
+- Rendered `ExecutionPanel` with the real, GDB-verified `trace.json` (`bruteForce` and `optimized` phases both) via `react-dom/server` — confirmed correct output at step 1 for both phases.
+- Rendered and interacted with `ExecutionPanel` in jsdom via `react-dom/client` + `act`, using real trace data:
+  - Step-forward through all 4 brute-force steps: explanation text, and forward-button disabled state at the last step, updated correctly at each step.
+  - Step-back from the last step returned to step 3's explanation correctly.
+  - Reset returned to step 1 and correctly disabled the back button.
+  - Keyboard `ArrowRight` on the focused panel advanced from step 1 to step 2's explanation, confirming keyboard operability.
+  - Under simulated `prefers-reduced-motion: reduce`, the Play/Pause button was disabled while manual step-forward still worked.
+- These test scripts were temporary (written to a local `.smoketest/` dir, deleted after use) and are not part of the commit; `git status` shows only the two intended file changes.
+
+### Known issues / blocked items
+- **Could not run a clean `npm run build` or `npm run lint` against the full project, and could not push to `dev` or check a Vercel Preview URL**, because this session ran in a sandboxed environment without: (a) network access to `binaries.prisma.sh` (blocked by egress allowlist), which breaks `prisma generate` and causes an unrelated pre-existing type error in `app/admin/posts/page.tsx` (`PostStatus` not exported) during full builds — this is an environment limitation, not a defect in this chunk's code; (b) push credentials for the `SHIV1804/Portfolio` remote; (c) a browser to load the Preview URL. All verification above was done via isolated type-checking and direct component rendering/interaction with the real trace data instead. **This chunk still needs a human (or a session with deploy access) to push to `dev`, load the Preview URL, and do the manual walkthrough the original task specified before treating this checkpoint as fully closed.**
+
+### Next chunk to run
+- Chunk 3: "why is this slow" transition + discovery questions.
