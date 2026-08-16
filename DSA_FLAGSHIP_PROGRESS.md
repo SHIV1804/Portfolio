@@ -112,3 +112,32 @@
 
 ### Next chunk to run
 - Chunk 3: "why is this slow" transition + discovery questions.
+
+## Chunk 3 — "Why Is This Slow" Transition + Discovery Questions — 2026-08-16
+
+### What was built
+- `app/dsa/flagship/two-sum/DiscoveryTransition.tsx` (new client component): displays `bruteForce.complexity` prominently with framing text extrapolating to a 10,000-element array, then renders `discoveryQuestions` one at a time via a "reveal next" button (starts as "Start thinking it through", becomes "Next question"), stacking each revealed question rather than replacing it. Once all questions are revealed, a disabled CTA ("Watch the Optimized Approach") appears in their place — functional wiring is explicitly deferred to Chunk 4, per the task.
+- `app/dsa/flagship/two-sum/page.tsx` updated to render `<DiscoveryTransition>` beneath the Chunk 2 execution panel, passing `trace.bruteForce.complexity`, `trace.discoveryQuestions`, and the example array's length.
+
+### Decisions made (and why)
+- Reused the existing accent/surface-raised card styling and the `bg-accent text-background` solid-button pattern already used elsewhere in the codebase (confirmed via grep across `app/`) rather than the `text-accent-foreground` class used in the original Chunk 1 placeholder button, which doesn't correspond to any defined design token in `app/globals.css`.
+- The reveal button's label changes on the first click ("Start thinking it through" → "Next question") to read naturally as a guided sequence rather than a generic "next" control from the start.
+
+### Files created/modified
+- `app/dsa/flagship/two-sum/DiscoveryTransition.tsx` (created)
+- `app/dsa/flagship/two-sum/page.tsx` (modified)
+
+### Verification performed (real commands run, real results)
+- `npm run lint`: 0 errors on touched files (14 pre-existing warnings elsewhere, unchanged).
+- Isolated `tsc --noEmit` scoped to touched files (temporary tsconfig, removed after use, project-wide build still blocked by the unrelated pre-existing Prisma issue noted in Chunk 2): 0 type errors.
+- Rendered and interacted with `DiscoveryTransition` in jsdom via `react-dom/client` + `act`, using the real `discoveryQuestions` array (4 questions) from `trace.json`:
+  - Confirmed the complexity ("O(n²)") renders and no questions or CTA are visible before any interaction.
+  - Clicked the reveal button 4 times: at each click confirmed the new question's exact text appeared AND all previously revealed questions remained visible (sequence stacks rather than replaces).
+  - After the 4th reveal, confirmed the reveal button disappeared, the CTA ("Watch the Optimized Approach") appeared, and the CTA is disabled.
+- Test scripts were temporary (local `.smoketest/` dir, deleted after use); `git status` shows only the two intended file changes.
+
+### Known issues / blocked items
+- Same sandbox limitations as Chunk 2: no browser/Vercel Preview access from this session, so the guided-reveal interaction and framing text were verified via jsdom rendering against real data rather than a live page load. **Needs a human check on the actual dev Preview URL before this checkpoint is fully closed.**
+
+### Next chunk to run
+- Chunk 4: optimized execution panel, reusing the `ExecutionPanel` component (already verified to handle the `optimized` phase shape during Chunk 2's testing).
