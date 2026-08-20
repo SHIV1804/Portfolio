@@ -228,3 +228,51 @@ Chunks 2–5 are implemented, individually lint/type-check clean, and functional
 
 ### Next chunk to run
 - Get a sandbox/session with `cdn.playwright.dev` and `binaries.prisma.sh` allowlisted (or run locally) to execute the Playwright suite for real and close out Chunks 2-6's verification gap.
+
+## Chunk 7 — Fix Keyboard Test's Focus-Loss Regression — 2026-08-20
+
+### What was built
+- Follow-up fix to Chunk 6's `answerCurrentQuestion` helper in
+  `tests/dsa-flagship/two-sum-execution-panel.spec.ts` — not a new feature.
+  A real Playwright run (owner's local machine) on Chunk 6's commit showed
+  2 of the 3 previously-gated tests now passing ("via the step-forward
+  button" and "prefers-reduced-motion..."), but "steps through the
+  brute-force panel via keyboard" still failed:
+  `expect(locator).toBeVisible() failed ... after page.keyboard.press('ArrowRight')`.
+- Root cause: `answerCurrentQuestion` clicks the first prediction-question
+  option, which puts DOM focus on that button. React then re-renders the
+  clicked option `disabled={hasAnswered}`, and browsers auto-blur an
+  element the instant it becomes disabled — focus silently falls back to
+  `<body>`. The subsequent `page.keyboard.press('ArrowRight')` therefore
+  fires on `<body>`, never reaching `ExecutionPanel.tsx`'s `containerRef`
+  keydown listener (which only handles events bubbling from inside the
+  panel container), so nothing advances and the test times out.
+- Fix: added a single `await panel.focus();` line inside
+  `answerCurrentQuestion` itself (after the existing `not.toBeVisible()`
+  assertion), so every call site — button-click tests included — re-focuses
+  the panel after answering. Harmless for the button-click tests (they
+  don't depend on focus location) and fixes the keyboard test's dropped
+  focus.
+
+### Files created/modified
+- `tests/dsa-flagship/two-sum-execution-panel.spec.ts` (modified — 6-line
+  addition inside `answerCurrentQuestion`, nothing else touched)
+- `DSA_FLAGSHIP_PROGRESS.md` (this entry)
+
+### Verification performed
+- `pnpm run lint`: 0 errors (same 14 pre-existing warnings, unchanged).
+- **No Playwright run performed in this session** — this sandbox still has
+  no browser binaries (`cdn.playwright.dev` not in the egress allowlist,
+  confirmed in the prior chunk). The owner will run the real Playwright
+  suite locally after this lands, per their explicit instruction for this
+  chunk; no "passed" result is claimed or simulated here.
+
+### Known issues / blocked items
+- Same as every prior chunk: this sandbox cannot execute Playwright or a
+  full `next build` (Prisma engine host blocked). Needs a session/machine
+  with real browser + network access to close out verification.
+
+### Next chunk to run
+- Owner to run the real Playwright suite locally against this commit and
+  report back; no further test-file changes anticipated unless that run
+  surfaces something new.

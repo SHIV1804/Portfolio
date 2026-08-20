@@ -15,6 +15,12 @@ const answerCurrentQuestion = async (panel: import('@playwright/test').Locator) 
   await expect(
     panel.getByText('Answer the question above to reveal this step.')
   ).not.toBeVisible();
+  // Clicking the option moves DOM focus onto that button; React then
+  // re-renders it disabled, and the browser auto-blurs a disabled element,
+  // silently dropping focus to <body>. Re-focus the panel so a subsequent
+  // keyboard press (e.g. ArrowRight) still reaches its containerRef keydown
+  // listener instead of firing on <body>.
+  await panel.focus();
 };
 
 test.describe('DSA Flagship — Two Sum Execution Panel', () => {
