@@ -69,7 +69,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, setOpen })
       open={open}
       onOpenChange={setOpen}
       label="Command Palette"
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] p-4 bg-background/40 backdrop-blur-sm"
+      contentClassName="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] p-4 bg-background/40 backdrop-blur-sm"
     >
       <div className="w-full max-w-2xl bg-surface border border-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="flex items-center px-4 border-b border-border">

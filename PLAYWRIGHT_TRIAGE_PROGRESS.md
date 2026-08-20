@@ -147,3 +147,61 @@ text):
   decision), G5 (scroll-pin click interception — flagged, possible real
   UX bug), G6 (4 independent responsive/theme failures — flagged, needs
   decision) remain pending per the triage doc's checkpoints.
+
+## G1-followup — Real App Bug Surfaced by the Selector Fix — 2026-08-20
+
+### What was built
+- The owner ran the real Playwright suite locally against G1+G3's commit
+  (`7643cd8`). The selector fix itself was confirmed correct — the
+  locator now resolves to a single real dialog element (not the header
+  button, not zero matches) — but all 9 of G1's originally-targeted tests
+  still failed, now with `expect(locator).toBeVisible()` → `Received:
+  hidden` instead of "not found". A second, previously-masked bug was
+  exposed.
+- Root cause (verified via `cmdk`'s actual source,
+  `node_modules/cmdk/dist/index.mjs`): `Command.Dialog` only recognizes
+  `overlayClassName` and `contentClassName` as explicit props — a plain
+  `className` isn't destructured out and falls into the rest-spread,
+  landing on the *inner* `cmdk-root` div instead of the outer
+  `role="dialog"` element that carries `aria-label="Command Palette"`.
+  `widgets/command-palette/ui/CommandPalette.tsx:72` was passing plain
+  `className="fixed inset-0 z-[100] flex items-start justify-center
+  pt-[15vh] p-4 bg-background/40 backdrop-blur-sm"`, so those positioning
+  classes ended up one DOM level too deep. Since the outer dialog
+  element's only child was `position: fixed` (removed from normal flow),
+  the outer dialog collapsed to a zero-size box — invisible to Playwright
+  (and any other strict visibility/AT check against that specific
+  element), even though a sighted human still sees the palette fine
+  (the fixed-position descendant paints regardless of its ancestor's
+  box).
+- This is a genuine **app bug**, not a test bug — confirmed with the
+  owner before touching app code (per the checkpoint pattern used
+  throughout this triage). Fix: renamed the prop from `className` to
+  `contentClassName` on `Command.Dialog` in `CommandPalette.tsx` — a
+  one-line change, confirmed valid against cmdk's TypeScript types
+  (`contentClassName?: string` at `cmdk/dist/index.d.mts:203`).
+
+### Files created/modified
+- `widgets/command-palette/ui/CommandPalette.tsx` (1 line: `className` →
+  `contentClassName`) — **app code, changed with explicit owner sign-off**
+- `PLAYWRIGHT_TRIAGE_PROGRESS.md` (this entry)
+
+### Verification performed
+- `pnpm run lint`: 0 errors (same 14 pre-existing warnings, unchanged).
+- `npx tsc --noEmit`: 9 pre-existing errors, all in unrelated
+  Prisma/blog/admin files (the same `@prisma/client` generation blocker
+  every prior chunk hit) — zero errors related to `CommandPalette.tsx` or
+  the prop rename, confirming the type is valid.
+- **Playwright was NOT run** in this sandbox (still no browser access).
+  The owner will need to re-run the same command as before to confirm
+  this closes out G1 for real:
+  `npx playwright test tests/command-palette/command-palette.spec.ts
+  tests/reduced-motion/reduced-motion.spec.ts
+  tests/responsive/responsive.spec.ts --reporter=list`
+
+### Known issues / blocked items
+- Still needs the owner's real Playwright run to confirm the 9
+  originally-targeted tests now pass for real.
+- G2 (URL nav), G6-item-1 (tablet overflow) both reproduced in the
+  owner's run exactly as previously diagnosed — untouched, unresolved,
+  still pending decisions per the triage doc.
