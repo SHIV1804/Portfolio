@@ -1,4 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+// `button[aria-expanded]` alone is page-wide and also matches the header's
+// mobile-menu toggle (widgets/header/ui/Header.tsx), which renders before
+// <main> in app/layout.tsx and therefore comes first in DOM order. That
+// button is hidden at desktop viewport (`md:hidden`), so `.first()` picks
+// an invisible element and every click/focus on it times out. Scope to the
+// diagram's own container (the same `.bg-surface-raised` container the
+// "architecture diagram renders on page" test below already uses) so only
+// the diagram's actual node buttons are matched.
+const diagramNodes = (page: Page) =>
+  page.locator('.bg-surface-raised').last().locator('button[aria-expanded]');
 
 test.describe('Architecture Diagram Tests', () => {
   test('navigate to log-analyser project page', async ({ page }) => {
@@ -19,7 +30,7 @@ test.describe('Architecture Diagram Tests', () => {
   test('diagram contains interactive nodes (buttons)', async ({ page }) => {
     await page.goto('/projects/log-analyser');
 
-    const nodes = page.locator('button[aria-expanded]');
+    const nodes = diagramNodes(page);
     const nodeCount = await nodes.count();
 
     expect(nodeCount).toBeGreaterThan(0);
@@ -28,7 +39,7 @@ test.describe('Architecture Diagram Tests', () => {
   test('clicking a node reveals its details', async ({ page }) => {
     await page.goto('/projects/log-analyser');
 
-    const nodes = page.locator('button[aria-expanded]');
+    const nodes = diagramNodes(page);
     const firstNode = nodes.first();
 
     // Initially should not be expanded
@@ -53,7 +64,7 @@ test.describe('Architecture Diagram Tests', () => {
   test('clicking a node again collapses its details', async ({ page }) => {
     await page.goto('/projects/log-analyser');
 
-    const firstNode = page.locator('button[aria-expanded]').first();
+    const firstNode = diagramNodes(page).first();
 
     // Open the node
     await firstNode.click();
@@ -71,7 +82,7 @@ test.describe('Architecture Diagram Tests', () => {
   }) => {
     await page.goto('/projects/log-analyser');
 
-    const nodes = page.locator('button[aria-expanded]');
+    const nodes = diagramNodes(page);
 
     // Toggle each node
     const nodeCount = await nodes.count();
@@ -93,7 +104,7 @@ test.describe('Architecture Diagram Tests', () => {
   test('aria-controls references valid elements', async ({ page }) => {
     await page.goto('/projects/log-analyser');
 
-    const nodes = page.locator('button[aria-expanded]');
+    const nodes = diagramNodes(page);
     const nodeCount = await nodes.count();
 
     for (let i = 0; i < nodeCount; i++) {
@@ -113,7 +124,7 @@ test.describe('Architecture Diagram Tests', () => {
   test('switching between nodes works correctly', async ({ page }) => {
     await page.goto('/projects/log-analyser');
 
-    const nodes = page.locator('button[aria-expanded]');
+    const nodes = diagramNodes(page);
 
     // Open first node
     const firstNode = nodes.first();
@@ -138,7 +149,7 @@ test.describe('Architecture Diagram Tests', () => {
   test('nodes are keyboard focusable', async ({ page }) => {
     await page.goto('/projects/log-analyser');
 
-    const nodes = page.locator('button[aria-expanded]');
+    const nodes = diagramNodes(page);
     const firstNode = nodes.first();
 
     // Focus on the node
@@ -152,7 +163,7 @@ test.describe('Architecture Diagram Tests', () => {
   test('Enter and Space keys activate nodes', async ({ page }) => {
     await page.goto('/projects/log-analyser');
 
-    const firstNode = page.locator('button[aria-expanded]').first();
+    const firstNode = diagramNodes(page).first();
 
     // Focus the node
     await firstNode.focus();
@@ -161,7 +172,7 @@ test.describe('Architecture Diagram Tests', () => {
     const initialExpanded = await firstNode.getAttribute('aria-expanded');
 
     // Press Space to activate
-    await page.press('button[aria-expanded]', 'Space');
+    await diagramNodes(page).first().press('Space');
 
     // Should have toggled
     const afterSpace = await firstNode.getAttribute('aria-expanded');
@@ -176,7 +187,7 @@ test.describe('Architecture Diagram Tests', () => {
     await page.goto('/projects/log-analyser');
 
     // Open a node
-    const firstNode = page.locator('button[aria-expanded]').first();
+    const firstNode = diagramNodes(page).first();
     await firstNode.click();
 
     // Details should become visible (possibly without animation)
@@ -201,7 +212,7 @@ test.describe('Architecture Diagram Tests', () => {
     await expect(diagram).toBeVisible();
 
     // Should be able to click and expand nodes
-    const firstNode = page.locator('button[aria-expanded]').first();
+    const firstNode = diagramNodes(page).first();
     if (await firstNode.isVisible()) {
       await firstNode.click();
 
@@ -228,7 +239,7 @@ test.describe('Architecture Diagram Tests', () => {
   test('diagram nodes have visual focus indicator', async ({ page }) => {
     await page.goto('/projects/log-analyser');
 
-    const firstNode = page.locator('button[aria-expanded]').first();
+    const firstNode = diagramNodes(page).first();
 
     // Tab to focus the button
     await firstNode.focus();
@@ -250,7 +261,7 @@ test.describe('Architecture Diagram Tests', () => {
   }) => {
     await page.goto('/projects/log-analyser');
 
-    const firstNode = page.locator('button[aria-expanded]').first();
+    const firstNode = diagramNodes(page).first();
     await firstNode.click();
 
     // Details should be visible
@@ -267,7 +278,7 @@ test.describe('Architecture Diagram Tests', () => {
   test('all nodes are accessible', async ({ page }) => {
     await page.goto('/projects/log-analyser');
 
-    const nodes = page.locator('button[aria-expanded]');
+    const nodes = diagramNodes(page);
     const nodeCount = await nodes.count();
 
     // Should have at least 1 node
@@ -293,7 +304,7 @@ test.describe('Architecture Diagram Tests', () => {
     await page.goto('/projects/log-analyser');
 
     // Open a node
-    const firstNode = page.locator('button[aria-expanded]').first();
+    const firstNode = diagramNodes(page).first();
     await firstNode.click();
 
     const expanded = await firstNode.getAttribute('aria-expanded');
@@ -312,7 +323,7 @@ test.describe('Architecture Diagram Tests', () => {
     await page.waitForLoadState('networkidle');
 
     // Component state should be reset (nodes should be closed) - this is normal behavior
-    const firstNodeAfter = page.locator('button[aria-expanded]').first();
+    const firstNodeAfter = diagramNodes(page).first();
     const expandedAfter = await firstNodeAfter.getAttribute('aria-expanded');
     expect(expandedAfter).toBe('false'); // Fresh page load resets state
   });

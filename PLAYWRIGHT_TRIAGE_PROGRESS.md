@@ -74,3 +74,76 @@ text):
 - G2 (Command Palette navigation URL bug) and G3 (Architecture Diagram
   wrong node) are separate, already-diagnosed-elsewhere or pending
   investigations — not part of this entry.
+
+## G3 — Architecture Diagram: wrong node selected (9 tests) — 2026-08-20
+
+### What was built
+- Scoped `tests/architecture-diagram/architecture-diagram.spec.ts`'s node
+  locator to the diagram's own container instead of a bare page-wide
+  `page.locator('button[aria-expanded]')`. Added a `diagramNodes(page)`
+  helper — `page.locator('.bg-surface-raised').last().locator('button[aria-expanded]')`
+  — and replaced all 17 call sites with it, including converting the one
+  `page.press('button[aria-expanded]', 'Space')` (raw-selector API) to
+  `diagramNodes(page).first().press('Space')` (scoped locator API), since
+  `page.press(selector, key)` can't be scoped the same way a `Locator` can.
+
+### Root cause (verified, not assumed)
+- Confirmed `widgets/header/ui/Header.tsx:109-116` — the mobile menu
+  toggle button really does carry `aria-expanded={isMobileMenuOpen}`,
+  `aria-controls="mobile-nav"`, and a `md:hidden` class (hidden at ≥768px,
+  the exact desktop-Chrome viewport this repo's `playwright.config.ts`
+  uses via `devices['Desktop Chrome']`, default 1280×720).
+- Confirmed `app/layout.tsx:36-37` renders `<Header />` before `<main>`,
+  so the header button is always earlier in DOM order than anything on
+  the page, including the diagram's own nodes.
+- Confirmed the diagram's own node buttons
+  (`widgets/case-study-layout/ui/ArchitectureDiagram.tsx:41-52`) also
+  carry `aria-expanded`/`aria-controls` — they're legitimate matches for
+  the bare selector too, just not the *first* one.
+- Net effect: `page.locator('button[aria-expanded]').first()` resolves to
+  the header's mobile-menu button, which is present in the DOM but
+  `display:none` at desktop viewport. Playwright's actionability checks
+  (visible/stable/enabled) then time out on click/focus attempts against
+  it — exactly the reported error. The hypothesis in the triage doc was
+  correct.
+- **Not a regression from day one** — checked via `git log --follow` on
+  both files: the test file and the original `ArchitectureDiagram.tsx`
+  were both added in the same commit (`f078bda`, 2026-07-08), and at that
+  point `Header.tsx` had **no** `aria-expanded` anywhere (confirmed via
+  `git show f078bda:widgets/header/ui/Header.tsx`) — the bare selector was
+  unambiguous when the test was written. The mobile menu button (with its
+  own `aria-expanded`) was added 3 days later in `76cd5ca` ("fix: missing
+  header on routes and add mobile menu", 2026-07-11), which is what broke
+  this test as an unrelated side effect. So this test did pass originally
+  and regressed due to an unrelated header change, not "always broken."
+
+### Files created/modified
+- `tests/architecture-diagram/architecture-diagram.spec.ts` (added
+  `diagramNodes(page)` helper; replaced all 17 raw-selector call sites)
+- `PLAYWRIGHT_TRIAGE_PROGRESS.md` (this entry)
+- No app code touched (`Header.tsx`, `ArchitectureDiagram.tsx`,
+  `app/layout.tsx` all read-only for diagnosis, not modified) — this was
+  a test-only fix, consistent with every prior chunk's precedent.
+
+### Verification performed
+- `pnpm run lint`: 0 errors (same 14 pre-existing warnings; 3 of them —
+  `initialExpanded`, `isVisible`, `context` unused-vars — are inside this
+  same spec file but pre-date this change and are unrelated to the
+  selector fix).
+- **Playwright was NOT run.** `npx playwright install chromium` failed
+  again in this sandbox (browser download blocked), consistent with every
+  prior chunk. The fix rests on the code-level DOM/CSS evidence above, not
+  a live run.
+
+### Known issues / blocked items
+- Same as G1: needs a session/machine with real browser access to run
+  `tests/architecture-diagram/architecture-diagram.spec.ts` for real and
+  confirm all 9 previously-failing tests (plus the file's other,
+  previously-passing tests) still pass with the scoped locator.
+
+### Next
+- G2 (Command Palette navigation URL bug — flagged as needing a decision,
+  not fixed yet), G4 (footer placeholder-URL test — flagged, needs
+  decision), G5 (scroll-pin click interception — flagged, possible real
+  UX bug), G6 (4 independent responsive/theme failures — flagged, needs
+  decision) remain pending per the triage doc's checkpoints.
