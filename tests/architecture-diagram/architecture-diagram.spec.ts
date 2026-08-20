@@ -4,12 +4,28 @@ import { test, expect, type Page } from '@playwright/test';
 // mobile-menu toggle (widgets/header/ui/Header.tsx), which renders before
 // <main> in app/layout.tsx and therefore comes first in DOM order. That
 // button is hidden at desktop viewport (`md:hidden`), so `.first()` picks
-// an invisible element and every click/focus on it times out. Scope to the
-// diagram's own container (the same `.bg-surface-raised` container the
-// "architecture diagram renders on page" test below already uses) so only
-// the diagram's actual node buttons are matched.
+// an invisible element and every click/focus on it times out.
+//
+// `.bg-surface-raised` is NOT unique to the diagram either — it's a shared
+// design-token utility class also used by the page's own metric cards
+// (app/projects/log-analyser/page.tsx, "05. Metrics" section) and by the
+// site-wide <Footer> (widgets/footer/ui/Footer.tsx), which renders after
+// <main> in app/layout.tsx. Both come *after* the diagram in DOM order, so
+// `page.locator('.bg-surface-raised').last()` resolves to the Footer (which
+// has no buttons at all), not the diagram. Scope to the "03. Architecture"
+// <section> first, then take the last `.bg-surface-raised` within it — that
+// correctly resolves to the diagram's own wrapper
+// (widgets/case-study-layout/ui/ArchitectureDiagram.tsx), nested inside the
+// section's outer raised-surface container
+// (widgets/case-study-layout/ui/CaseStudyLayout.tsx).
+const architectureSection = (page: Page) =>
+  page.locator('section', { has: page.locator('h2', { hasText: '03. Architecture' }) });
+
+const diagramContainer = (page: Page) =>
+  architectureSection(page).locator('.bg-surface-raised').last();
+
 const diagramNodes = (page: Page) =>
-  page.locator('.bg-surface-raised').last().locator('button[aria-expanded]');
+  diagramContainer(page).locator('button[aria-expanded]');
 
 test.describe('Architecture Diagram Tests', () => {
   test('navigate to log-analyser project page', async ({ page }) => {
@@ -23,7 +39,7 @@ test.describe('Architecture Diagram Tests', () => {
   test('architecture diagram renders on page', async ({ page }) => {
     await page.goto('/projects/log-analyser');
 
-    const diagram = page.locator('.bg-surface-raised').last(); // Diagram is in a raised surface container
+    const diagram = diagramContainer(page); // Diagram is in a raised surface container, scoped to the Architecture section
     await expect(diagram).toBeVisible();
   });
 
@@ -208,7 +224,7 @@ test.describe('Architecture Diagram Tests', () => {
     await page.goto('/projects/log-analyser');
 
     // Diagram should still render
-    const diagram = page.locator('.bg-surface-raised').last();
+    const diagram = diagramContainer(page);
     await expect(diagram).toBeVisible();
 
     // Should be able to click and expand nodes
