@@ -2,6 +2,21 @@ import { test, expect } from '@playwright/test';
 
 const PAGE_URL = '/dsa/flagship/two-sum';
 
+// The brute-force phase has a prediction-question gate on steps 0, 1, and 2
+// (only the last step, 3, is ungated). ExecutionPanel.tsx blocks both the
+// forward button and the stepForward() handler while a step's question is
+// unanswered, so any test advancing past a gated step must answer it first.
+// Answering with any option lifts the gate: isAnswered is `stepIndex in
+// answers`, independent of which option index was picked.
+const answerCurrentQuestion = async (panel: import('@playwright/test').Locator) => {
+  const question = panel.getByTestId('prediction-question');
+  const firstOption = question.getByRole('button').first();
+  await firstOption.click();
+  await expect(
+    panel.getByText('Answer the question above to reveal this step.')
+  ).not.toBeVisible();
+};
+
 test.describe('DSA Flagship — Two Sum Execution Panel', () => {
   test('page loads and the brute-force execution panel is visible', async ({ page }) => {
     const response = await page.goto(PAGE_URL);
@@ -19,8 +34,14 @@ test.describe('DSA Flagship — Two Sum Execution Panel', () => {
     const forwardBtn = panel.getByRole('button', { name: 'Step forward' });
 
     await expect(panel.getByText('Step 1 of 4')).toBeVisible();
+    // Step 1 (index 0) is gated — answer before stepping forward.
+    await answerCurrentQuestion(panel);
+    await expect(forwardBtn).toBeEnabled();
     await forwardBtn.click();
     await expect(panel.getByText('Step 2 of 4')).toBeVisible();
+    // Step 2 (index 1) is gated — answer before stepping forward.
+    await answerCurrentQuestion(panel);
+    await expect(forwardBtn).toBeEnabled();
     await forwardBtn.click();
     await expect(panel.getByText('Step 3 of 4')).toBeVisible();
   });
@@ -32,8 +53,11 @@ test.describe('DSA Flagship — Two Sum Execution Panel', () => {
     await panel.focus();
 
     await expect(panel.getByText('Step 1 of 4')).toBeVisible();
+    // Step 1 (index 0) is gated — answer before crossing it with ArrowRight.
+    await answerCurrentQuestion(panel);
     await page.keyboard.press('ArrowRight');
     await expect(panel.getByText('Step 2 of 4')).toBeVisible();
+    // stepBack() is not gated, so ArrowLeft back to step 1 needs no answer.
     await page.keyboard.press('ArrowLeft');
     await expect(panel.getByText('Step 1 of 4')).toBeVisible();
   });
@@ -49,6 +73,9 @@ test.describe('DSA Flagship — Two Sum Execution Panel', () => {
     await expect(playBtn).toBeDisabled();
 
     const forwardBtn = panel.getByRole('button', { name: 'Step forward' });
+    // Step 1 (index 0) is gated — answer before stepping forward.
+    await answerCurrentQuestion(panel);
+    await expect(forwardBtn).toBeEnabled();
     await forwardBtn.click();
     await expect(panel.getByText('Step 2 of 4')).toBeVisible();
   });

@@ -201,3 +201,30 @@ The task assumed the optimized trace has `mapState` per step. **It does not, in 
 
 ### Status
 Chunks 2–5 are implemented, individually lint/type-check clean, and functionally verified via targeted jsdom render/interaction tests against real trace data (not fabricated) — but **not one of the four chunks has been seen by a human on an actual running page**, and Chunk 5's Playwright tests have never been executed. Treat the checkpoints as code-complete, not verification-complete.
+
+## Chunk 6 — Fix 3 Failing Prediction-Gate Tests — 2026-08-20
+
+### What was built
+- Updated the 3 failing tests in `tests/dsa-flagship/two-sum-execution-panel.spec.ts` so each answers the prediction-question gate at every gated step (stepIndex 0, 1, 2 — only the last step, 3, is ungated per the real `trace.json`) before advancing past it, using the existing `[data-testid="prediction-question"]` locator and its option buttons, matching the working pattern already in the file's 5th test ("a prediction question renders and can be answered"). No app code (`ExecutionPanel.tsx`, `page.tsx`) was touched — this is a test-file-only fix, per the confirmed diagnosis that the gating itself is intentional.
+- Added a small shared `answerCurrentQuestion(panel)` helper at the top of the spec file instead of duplicating the click-first-option-and-assert-gate-lifted pattern three times.
+
+### Decisions made (and why)
+- Confirmed from `ExecutionPanel.tsx` (not re-derived, but re-read to justify the fix): `isAnswered` is `currentQuestion ? stepIndex in answers : true` (line 50), and `answerQuestion(optionIndex)` does `setAnswers(prev => ({ ...prev, [stepIndex]: optionIndex }))` (lines 82-87) — i.e. the gate lifts as soon as `stepIndex` is a key in `answers`, regardless of which option index was clicked. So clicking the *first* option (as the existing 5th test already does) is sufficient to lift the gate at every step; there was no need to pick the "correct" option.
+- `stepBack()` (line 60-62) has no `isGated` check at all — only `stepForward()` (line 55-58) and the keyboard `ArrowRight` path route through it. So the keyboard test's `ArrowLeft` back to step 1 needed no additional answer, matching the task's instructions.
+
+### Files created/modified
+- `tests/dsa-flagship/two-sum-execution-panel.spec.ts` (modified — 3 tests updated, 1 helper added)
+- `DSA_FLAGSHIP_PROGRESS.md` (this entry)
+
+### Verification performed (real commands run, real results) — and what could NOT be verified
+- `pnpm run lint`: 0 errors (same 14 pre-existing warnings in unrelated files, unchanged).
+- `pnpm run build`: **still fails**, for the same pre-existing, unrelated reason Chunks 2-5 already documented: `prisma generate` cannot run because `binaries.prisma.sh` returns `403 Forbidden` / `Host not in allowlist` in this sandbox's network egress policy, so `@prisma/client`'s generated `.prisma/client` module doesn't exist, and `next build` fails resolving it from `app/admin/posts/page.tsx` — nothing to do with this test-file change.
+- **Playwright execution: NOT achieved, despite this session's task description asserting real Playwright access.** `npx playwright install chromium` failed with the identical error prior sessions already logged: `403 Host not in allowlist: cdn.playwright.dev`. No browser binary could be downloaded, so neither the 3 fixed tests nor the full suite could actually be executed in this sandbox. This is an unresolved, environment-level limitation, not something the test-file diff can work around.
+- Also confirmed (as prior chunks did) that `DSA_GITHUB_REPO`/`GITHUB_TOKEN` are not set in this sandbox, so even with a browser, `fetchDSATrace` would return `null` and the page would render "Problem Not Found" rather than the real panel — a second, independent reason a live run isn't currently possible here.
+- The fix's correctness instead rests on static reasoning against the real `ExecutionPanel.tsx` gating logic (see above) plus the existing, already-passing 5th test's proven click-first-option pattern, reused verbatim.
+
+### Known issues / blocked items
+- Same as every prior chunk: no Playwright browser binaries, no live trace data, no working `prisma generate` in this sandbox. **A session with real browser + `DSA_GITHUB_REPO`/`GITHUB_TOKEN` + prisma-engine network access still needs to run `npx playwright test tests/dsa-flagship/two-sum-execution-panel.spec.ts` and the full suite for real before this fix can be treated as verification-complete.**
+
+### Next chunk to run
+- Get a sandbox/session with `cdn.playwright.dev` and `binaries.prisma.sh` allowlisted (or run locally) to execute the Playwright suite for real and close out Chunks 2-6's verification gap.
