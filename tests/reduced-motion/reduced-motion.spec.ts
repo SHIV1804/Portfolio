@@ -129,7 +129,7 @@ test.describe('Reduced Motion (prefers-reduced-motion: reduce)', () => {
     await page.press('body', 'Control+k');
 
     // Palette should open (possibly without animation)
-    const dialog = page.locator('[label="Command Palette"]');
+    const dialog = page.locator('[aria-label="Command Palette"]');
     await expect(dialog).toBeVisible();
 
     // Should be able to use it

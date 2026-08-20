@@ -69,7 +69,7 @@ test.describe('Responsive Design Tests', () => {
       // Open palette
       await page.press('body', 'Control+k');
 
-      const dialog = page.locator('[label="Command Palette"]');
+      const dialog = page.locator('[aria-label="Command Palette"]');
       await expect(dialog).toBeVisible();
 
       // Dialog should fit in viewport
