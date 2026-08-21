@@ -272,7 +272,7 @@ test.describe('Architecture Diagram Tests', () => {
     expect([true, false]).toContain(hasFocusVisible);
   });
 
-  test('description content is present and placeholder-based', async ({
+  test('description content is present and substantive', async ({
     page,
   }) => {
     await page.goto('/projects/log-analyser');
@@ -286,8 +286,14 @@ test.describe('Architecture Diagram Tests', () => {
       const details = page.locator(`#${detailsId}`);
       const text = await details.textContent();
 
-      // Should have PLACEHOLDER text (this is by design)
-      expect(text).toContain('[PLACEHOLDER');
+      // The node descriptions are genuine descriptive copy about a
+      // conceptual/planned feature (see ArchitectureDiagram.tsx), not
+      // "[PLACEHOLDER: ...]" markers like the ones elsewhere on this page
+      // (app/projects/log-analyser/page.tsx). Assert the content is
+      // present and reasonably substantive rather than requiring the
+      // literal "[PLACEHOLDER" string.
+      expect(text).toBeTruthy();
+      expect(text!.trim().length).toBeGreaterThan(20);
     }
   });
 
