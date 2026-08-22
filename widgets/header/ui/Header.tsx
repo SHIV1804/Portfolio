@@ -62,7 +62,7 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-sm border-b border-border">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between min-w-0">
         <div className="flex items-center gap-8">
           <Link href="/" className="text-lg font-bold tracking-tight hover:text-accent transition-colors">
             {siteConfig.name}
@@ -96,10 +96,10 @@ export const Header: React.FC = () => {
             aria-label="Open command palette"
           >
             <Search className="w-4 h-4 text-foreground-faint group-hover:text-accent" />
-            <span className="hidden sm:inline text-xs font-medium text-foreground-muted group-hover:text-foreground">
+            <span className="hidden lg:inline text-xs font-medium text-foreground-muted group-hover:text-foreground">
               Search...
             </span>
-            <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-border-strong bg-surface text-[10px] font-mono text-foreground-faint">
+            <kbd className="hidden lg:flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-border-strong bg-surface text-[10px] font-mono text-foreground-faint">
               <span className="text-[8px]">⌘</span>K
             </kbd>
           </button>
