@@ -238,3 +238,10 @@ text):
   routes) unblocks a real production build for testing purposes. Never
   commit these — they're a diagnostic workaround, not a real Prisma
   client, and were reverted before finishing this session.
+
+**Status: RESOLVED.** G2 is not a real app bug — the original
+navigation-URL symptom was a dev-server/hydration-timing artifact,
+confirmed absent on a real production build (25 attempts across three
+scenarios, 24/25 succeeded, the 1 miss consistent with ordinary
+cold-start variance rather than a reproducible defect). No further
+action planned.
