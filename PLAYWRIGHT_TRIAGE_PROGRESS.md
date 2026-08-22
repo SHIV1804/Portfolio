@@ -205,3 +205,36 @@ text):
 - G2 (URL nav), G6-item-1 (tablet overflow) both reproduced in the
   owner's run exactly as previously diagnosed — untouched, unresolved,
   still pending decisions per the triage doc.
+
+### G2 follow-up: root cause reclassified, downgraded to low-priority
+- Earlier sessions' "Command Palette navigation URL bug" framing for G2
+  turned out to be incomplete: the silent no-op (no pushState, no error,
+  URL unchanged) reproduces identically with a plain, unmodified
+  `next/link` click — not just `router.push()` from CommandPalette. It
+  also isn't a hash-vs-path distinction; both styles could fail depending
+  on timing. The actual pattern: navigation attempted very soon after
+  page load (before client hydration settles) can silently no-op, in
+  `next dev` (Turbopack, unminified).
+- **Confirmed on a real production build** (`npm run build && npm run
+  start`) that this is dev-server-specific: clicking the log-analyser
+  project link immediately after `page.goto('/')` (zero wait) succeeded
+  **10/10** runs; the same zero-wait click routed through the command
+  palette succeeded **10/10**; a hash-style link (`/#about`) clicked
+  immediately after landing on `/projects/log-analyser` succeeded **4/5**
+  (1 failure, first run only — consistent with ordinary cold-start
+  variance, not a reproducible defect).
+- Per the standing decision rule for this item: rare/nonexistent on
+  production → **downgraded to low-priority**. Root cause is dev-server
+  hydration slowness (Turbopack dev, unminified bundles), not a real
+  defect users would hit on the production (Vercel) build. Not pursuing
+  further (no hydration-gate or other fix planned) unless new evidence
+  from production surfaces.
+- Local diagnostic note for future sessions: this sandbox cannot run
+  `prisma generate` (binaries.prisma.sh is unreachable — network
+  policy), which blocks `npm run build` out of the box via
+  `app/admin/posts` and the blog DB fallback. A local-only stub for
+  `node_modules/.prisma/client/{default,index-browser}.{js,d.ts}` (plus
+  `typescript.ignoreBuildErrors` in `next.config.ts` for prisma-typed
+  routes) unblocks a real production build for testing purposes. Never
+  commit these — they're a diagnostic workaround, not a real Prisma
+  client, and were reverted before finishing this session.
