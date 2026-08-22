@@ -179,7 +179,11 @@ test.describe('Theme Toggle Tests', () => {
   test('localStorage is updated when theme changes', async ({ page }) => {
     await page.goto('/');
 
-    // Get initial stored value
+    // Before any interaction, nothing has written to localStorage yet —
+    // themeInitScript only reads localStorage/system preference to set
+    // the initial class, it doesn't persist a default. So the stored
+    // value can legitimately be null here; that's not what this test
+    // is checking.
     const initialStored = await page.evaluate(() =>
       localStorage.getItem('portfolio-theme'),
     );
@@ -192,11 +196,8 @@ test.describe('Theme Toggle Tests', () => {
       localStorage.getItem('portfolio-theme'),
     );
 
-    // Values should be different
-    expect(initialStored).not.toBe(newStored);
-
-    // Both should be valid theme values
-    expect(['light', 'dark']).toContain(initialStored);
+    // The toggle should have written a real value, different from before
+    expect(newStored).not.toBe(initialStored);
     expect(['light', 'dark']).toContain(newStored);
   });
 
