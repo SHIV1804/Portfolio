@@ -105,21 +105,26 @@ test.describe('Theme Toggle Tests', () => {
   test('theme toggle is keyboard accessible', async ({ page }) => {
     await page.goto('/');
 
-    // Tab to the theme toggle button
-    let focusedElement = await page.evaluate(() => document.activeElement?.tagName);
+    // Tab to the theme toggle button, reading focus state directly via
+    // document.activeElement instead of an auto-waiting locator — a
+    // locator like `button:focus` retries for the full default timeout
+    // whenever focus isn't currently on a button, which stalls the loop.
+    let focusInfo = await page.evaluate(() => {
+      const el = document.activeElement;
+      return { tag: el?.tagName, ariaLabel: el?.getAttribute('aria-label') };
+    });
 
     // Press Tab multiple times until we reach the theme button or timeout
     let attempts = 0;
     while (
-      focusedElement !== 'BUTTON' &&
-      attempts < 20 &&
-      (await page
-        .locator('button:focus')
-        .getAttribute('aria-label'))
-        ?.includes('Switch to') === false
+      !(focusInfo.tag === 'BUTTON' && focusInfo.ariaLabel?.includes('Switch to')) &&
+      attempts < 20
     ) {
       await page.press('body', 'Tab');
-      focusedElement = await page.evaluate(() => document.activeElement?.tagName);
+      focusInfo = await page.evaluate(() => {
+        const el = document.activeElement;
+        return { tag: el?.tagName, ariaLabel: el?.getAttribute('aria-label') };
+      });
       attempts++;
     }
 
