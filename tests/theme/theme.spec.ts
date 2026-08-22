@@ -154,11 +154,26 @@ test.describe('Theme Toggle Tests', () => {
   test('body class reflects theme state', async ({ page }) => {
     await page.goto('/');
 
-    // Get body class
-    const bodyClass = await page.locator('body').getAttribute('class');
+    // Theme state lives on <html> (theme-provider.tsx toggles the `dark`
+    // class on document.documentElement), not on <body> — body's class
+    // attribute is static layout styling unrelated to theme and should
+    // stay constant across a theme toggle.
+    const bodyClassBefore = await page.locator('body').getAttribute('class');
+    const initialDark = await page.locator('html').evaluate((el) =>
+      el.classList.contains('dark'),
+    );
 
-    // Body should have text color classes that reflect theme
-    expect(bodyClass).toBeFalsy(); // Body class is applied to html, not body in this app
+    await page.click('[aria-label*="Switch to"]');
+
+    const bodyClassAfter = await page.locator('body').getAttribute('class');
+    const afterDark = await page.locator('html').evaluate((el) =>
+      el.classList.contains('dark'),
+    );
+
+    // The theme toggle should flip the `dark` class on <html>...
+    expect(afterDark).toBe(!initialDark);
+    // ...and leave <body>'s class attribute completely unaffected.
+    expect(bodyClassAfter).toBe(bodyClassBefore);
   });
 
   test('localStorage is updated when theme changes', async ({ page }) => {
