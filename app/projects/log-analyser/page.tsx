@@ -6,10 +6,10 @@ import { siteConfig } from "@/shared/config/site";
 
 export const metadata: Metadata = {
   title: "Log Analyser Case Study | Software Engineer Portfolio",
-  description: "A deep dive into the architecture and performance of a high-performance C++ tool for parsing and visualizing complex system logs.",
+  description: "A look at the planned architecture for a C++ tool designed to parse and visualize complex system logs — design in progress, not yet built.",
   openGraph: {
     title: "Log Analyser Case Study | Shivam Portfolio",
-    description: "Deep dive into a high-performance C++ tool for parsing and visualizing complex system logs.",
+    description: "Planned architecture for a C++ tool to parse and visualize complex system logs — design in progress, not yet built.",
     url: `${siteConfig.url}/projects/log-analyser`,
     images: [{ url: "/og-log-analyser.png" }], // [PLACEHOLDER: OG image]
     type: "article",
@@ -22,6 +22,11 @@ export default function LogAnalyserPage() {
       <div className="flex-grow">
         <CaseStudyLayout
           title="Log Analyser"
+          // VERIFIED: confirmed via direct GitHub API query against the real
+          // account (github.com/SHIV1804) that no log-parsing/C++ tooling
+          // repo or matching code exists anywhere — "not yet implemented" is
+          // an accurate status claim, not a hedge. See
+          // CONTENT_VERIFICATION_PROGRESS.md, Step 2, finding #3.
           subtitle="A planned utility for high-performance log parsing — architecture design in progress, not yet implemented."
           problem={
             <div className="space-y-4">
@@ -53,7 +58,7 @@ export default function LogAnalyserPage() {
                 <p className="mb-4">Key architectural components under consideration include:</p>
                 <ul className="list-disc list-inside space-y-2">
                   <li><strong>Lock-free Ring Buffer:</strong> Planned for high-throughput event ingestion.</li>
-                  <li><strong>Custom Memory Pool:</strong> Designed to minimize allocations during the parsing of millions of small log entries.</li>
+                  <li><strong>Custom Memory Pool:</strong> Designed to minimize allocations while parsing large volumes of small log entries (the 100,000+ line target described above).</li>
                 </ul>
               </div>
             </div>
@@ -80,6 +85,13 @@ export default function LogAnalyserPage() {
           }
           metrics={
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* VERIFIED: these are intentionally unmeasured. Earlier
+                  fabricated values (100ms / 15MB) were removed for real in
+                  commits 53b8f03/5108f06 — confirmed by git history, and
+                  re-confirmed here that they haven't regressed. No benchmark
+                  exists because no implementation exists (see subtitle's
+                  VERIFIED note above). See
+                  CONTENT_VERIFICATION_PROGRESS.md, Step 2, findings #17–18. */}
               <div className="p-4 border border-border rounded bg-surface-raised">
                 <div className="text-accent font-mono text-2xl mb-1">—</div>
                 <div className="text-sm text-foreground-faint uppercase tracking-wider">Average Parse Time (100k lines)</div>
@@ -94,8 +106,13 @@ export default function LogAnalyserPage() {
           }
           differently={
             <div className="space-y-4">
+              {/* VERIFIED: reframed from "rebuild this today" — that phrasing
+                  implies a prior completed build, which contradicts this
+                  project's actual status (planned/concept, not yet built —
+                  confirmed via GitHub API, no implementation exists). See
+                  CONTENT_VERIFICATION_PROGRESS.md, Step 2, finding #19. */}
               <p>
-                If I were to rebuild this today, I would explore using a SIMD-accelerated regex engine to further optimize the parsing pass. Additionally, I would consider a plugin-based architecture for log formatters to make it easier for other engineers to contribute patterns for new systems.
+                If I were to take this design further, I would explore using a SIMD-accelerated regex engine to further optimize the parsing pass. Additionally, I would consider a plugin-based architecture for log formatters to make it easier for other engineers to contribute patterns for new systems.
               </p>
             </div>
           }
