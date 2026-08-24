@@ -245,3 +245,107 @@ confirmed absent on a real production build (25 attempts across three
 scenarios, 24/25 succeeded, the 1 miss consistent with ordinary
 cold-start variance rather than a reproducible defect). No further
 action planned.
+
+## G2 Fix — Step 1 — 2026-08-24
+
+### What was done
+- Fresh clone of `SHIV1804/Portfolio`, checked out `dev`
+  (`552f96d`, matching the tip recorded in the previous entry above).
+- Before touching anything, checked whether this session's briefing
+  matched reality:
+  - Briefing claims: "An earlier fix added explicit `value` props to
+    all 10 Command.Item elements in CommandPalette.tsx... This fix is
+    real, already committed."
+  - `git log --oneline -- widgets/command-palette/ui/CommandPalette.tsx`
+    → only two commits touch this file: `552f96d` (`contentClassName`
+    prop rename, documented above) and the original `f078bda`. No
+    commit adds `value` props.
+  - `grep -n "value=" widgets/command-palette/ui/CommandPalette.tsx` →
+    zero matches. Full file view confirms: none of the 10 `Command.Item`
+    elements has a `value` prop on `dev` right now.
+  - This directly contradicts the briefing's "already committed" claim.
+    (A prior chat session in this same conversation did draft that
+    exact 10-item `value`-prop diff, but it was never pushed/committed
+    to this repo — it only existed locally in that session's sandbox.)
+- Also checked this session's other core claim — that G2 is an open,
+  reproducible bug — against this file's own prior entry
+  ("G2 follow-up," directly above this one, commits `552f96d`→`9c62ba6`):
+  that entry documents G2 as **investigated to resolution already**,
+  with a different root cause than "onSelect/keyboard wiring"
+  (`className` vs `contentClassName` on `Command.Dialog`, fixed in
+  `552f96d`), and the *remaining* URL-not-updating symptom traced to
+  dev-server hydration timing, confirmed absent in 24/25 production-build
+  attempts, and explicitly marked **RESOLVED / no further action
+  planned**.
+- This session's briefing states the 3 navigation tests fail
+  "confirmed on two separate machines/environments" via
+  `npx playwright test tests/command-palette --reporter=list`. I
+  attempted the same real repro command myself, first via `npm install`:
+  - `npm install` → runs; `postinstall` (`prisma generate`) fails:
+    `Error: Failed to fetch sha256 checksum at
+    https://binaries.prisma.sh/... - 403 Forbidden` (same blocker noted
+    in the prior entry's "Local diagnostic note").
+  - `npx playwright install chromium` → fails:
+    `Error: Download failed: server returned code 403 body 'Host not in
+    allowlist: cdn.playwright.dev...'`. No browser binary is available
+    or installable in this sandbox — same limitation every prior entry
+    in this file records.
+  - Net result: **I cannot run `npx playwright test` at all in this
+    environment** (no browser binary exists), so I cannot produce the
+    real pass/fail output Step 1 asks for, and I cannot independently
+    confirm or refute the "3 failing tests" claim from this sandbox.
+
+### Decisions made (and why)
+- Not applying any code fix this step. The briefing's premise (a
+  currently-committed `value`-prop fix, plus an open onSelect/keyboard
+  wiring bug) doesn't match either the actual repo state or this file's
+  own prior conclusion that G2 was closed as a non-reproducible
+  dev-server artifact. Proceeding to "fix" `onSelect` wiring now would
+  mean redoing work this file says was already done differently, on
+  the strength of a claim I can't verify and that conflicts with
+  recorded evidence — that's exactly the kind of re-diagnosis-without-
+  real-repro this triage has consistently avoided elsewhere in this
+  log. Flagging for the owner instead of guessing.
+
+### Files created/modified
+- `PLAYWRIGHT_TRIAGE_PROGRESS.md` (Modified — this entry)
+
+### Verification performed (real commands run, real results)
+- `git log --oneline -- widgets/command-palette/ui/CommandPalette.tsx` →
+  `552f96d fix(app): pass contentClassName instead of className to cmdk Command.Dialog` /
+  `f078bda Build accessible portfolio website` (no `value`-prop commit)
+- `grep -n "value=" widgets/command-palette/ui/CommandPalette.tsx` → no output (0 matches)
+- `npm install` → completes with `npm error code 1` from the `postinstall` hook:
+  `Error: Failed to fetch sha256 checksum at https://binaries.prisma.sh/all_commits/4123509d24aa4dede1e864b46351bf2790323b69/debian-openssl-3.0.x/libquery_engine.so.node.gz.sha256 - 403 Forbidden`
+- `npx playwright install chromium` →
+  `Error: Download failed: server returned code 403 body 'Host not in allowlist: cdn.playwright.dev. Add this host to your network egress settings to allow access.'`
+
+### Known issues / blocked items
+- Cannot install a Playwright browser in this sandbox (`cdn.playwright.dev`
+  not allowlisted) — same as every prior entry in this file. No
+  `npx playwright test` output is possible from here, real or otherwise.
+- Cannot run `prisma generate` (`binaries.prisma.sh` not allowlisted),
+  which also blocks a real `npm run build`.
+- **Premise conflict, unresolved:** this session's briefing (open
+  onSelect/keyboard-wiring bug, prior value-prop fix already committed)
+  does not match (a) the actual `dev` branch content, or (b) this same
+  log file's own prior entry, which marked G2 RESOLVED via a different
+  mechanism and explicitly decided not to pursue it further absent new
+  production evidence. I have not been able to independently reproduce
+  the 3 failing tests described, so I can't tell whether this reflects
+  a genuine regression since the last entry, a different environment's
+  results, or a mismatch in the briefing itself.
+
+### Next step
+- Needs the owner to clarify before more code changes happen:
+  1. Was the 10-item `value`-prop fix committed somewhere I'm not
+     seeing (different branch/remote/PR), or is "already committed"
+     inaccurate?
+  2. Is there new evidence (e.g., a production-build repro, not just
+     dev-server) that reopens G2 despite the prior RESOLVED entry —
+     and if so, could the raw output from that repro be shared, since
+     I can't generate my own here?
+  3. Given the sandbox can't install a Playwright browser or complete
+     `prisma generate`, should verification for this fix happen in an
+     environment with broader network access, with this sandbox doing
+     source-level diagnosis + diff only (as G1/G3 did)?
