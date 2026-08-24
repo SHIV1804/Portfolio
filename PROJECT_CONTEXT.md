@@ -32,7 +32,7 @@ Follows **Feature-Sliced Design (FSD)**:
 ## Known Issues Log
 1. **Unverified Claims**: `app/projects/log-analyser/page.tsx` contains unverified technical claims.
 2. **Placeholder Content**: "About" section and "Project Omega" are placeholders.
-3. **Lighthouse**: Scores were previously self-estimated; real measurement needed.
+3. **Lighthouse**: Scores were previously self-estimated. Real measurement attempted 2026-08-25 — blocked in that sandbox by network restrictions (no access to `binaries.prisma.sh` for `prisma generate`, so the production build fails; no full Chrome binary either). No real score exists yet. See `LIGHTHOUSE_AUDIT_PROGRESS.md` for the full attempt log and what's needed to unblock it.
 4. **Resend**: API keys not yet configured.
 
 ## Recent Changes
