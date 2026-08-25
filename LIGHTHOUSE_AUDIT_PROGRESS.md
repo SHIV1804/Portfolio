@@ -126,3 +126,67 @@ session without one of:
 I have **not** updated `PROJECT_CONTEXT.md`'s Lighthouse line with any
 score, because I don't have one. I'll update it once a real number
 exists.
+
+---
+
+## Session 2 — 2026-08-25 (reported by user)
+
+**Attribution note:** everything below was run and reported by the repo
+owner on their own machine (network access this sandbox doesn't have),
+not measured directly by me in this session. I was not given the raw
+`.json`/`.html` Lighthouse output files to inspect (fetchTime,
+`lighthouseVersion`, environment fields, etc. — the way I verified the
+pre-existing `lighthouse-reports/` files in Session 1), so I can't
+independently corroborate these numbers the way I would data I generated
+myself. Recording them as reported, clearly labeled as such. If the raw
+report files get added to `lighthouse-reports/`, this note should be
+updated to reflect that they were verified.
+
+### What was done
+- `npm run build && npm run start` (Next.js production mode, Windows
+  machine, real network access to `binaries.prisma.sh`).
+- `npx lighthouse` (headless Chrome) against 4 pages.
+
+### Environment caveats (as reported)
+- `DATABASE_URL` unset for this run — `/blog`'s community-post section
+  rendered in its empty/fallback state, not with live DB data. Scores
+  reflect the MDX/static content paths, not a populated blog.
+- Local production build, not the live Vercel edge deployment — CDN
+  caching and edge latency aren't reflected.
+
+### Results (as reported — Performance / Accessibility / Best Practices / SEO)
+| Page | Performance | Accessibility | Best Practices | SEO |
+|---|---|---|---|---|
+| `/` (homepage) | 69 | 96 | 96 | 100 |
+| `/blog` | 80 | 93 | 96 | 100 |
+| `/dsa` | 76 | 88 | 96 | 91 |
+| `/projects/log-analyser` | 72 | 94 | 96 | 100 |
+
+### Known issues flagged (as reported)
+- Homepage Performance (69) is the weakest of the four — GSAP animations,
+  GitHub dashboard, and terminal easter egg are candidates, not yet
+  root-caused. Worth a follow-up pass at per-audit detail (LCP breakdown,
+  render-blocking resources, unused JS) if performance work becomes a
+  priority.
+- `/dsa` SEO (91) is the only non-100 SEO score across the four pages —
+  worth checking that page for a missing meta description, canonical tag,
+  or similar.
+- The Session-1-referenced `lighthouse-reports/` audit from 2026-07-08
+  (86/96/96/100, homepage only) is now superseded and should not be cited
+  as current — it predates the blog system, GitHub dashboard, terminal
+  easter egg, and XSS fix.
+
+### Files
+- No raw report files were added to `lighthouse-reports/` this session
+  (none were shared with me). `PROJECT_CONTEXT.md` updated with the
+  table above in place of the "blocked" note from Session 1.
+
+### Next step
+- If the raw `.json`/`.html` Lighthouse output exists, commit it into
+  `lighthouse-reports/` (e.g. `home-2026-08-25.report.json`, etc.) so a
+  future session can verify fetchTime/version/environment the same way
+  Session 1 did for the pre-existing files, rather than relying on a
+  reported table.
+- Optional: re-audit against the live Vercel deployment once
+  `DATABASE_URL` and other prod env vars are confirmed set, to capture
+  real-world/CDN conditions and a populated `/blog`.
