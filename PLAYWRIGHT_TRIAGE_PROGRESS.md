@@ -349,3 +349,218 @@ action planned.
      `prisma generate`, should verification for this fix happen in an
      environment with broader network access, with this sandbox doing
      source-level diagnosis + diff only (as G1/G3 did)?
+
+## G2 Fix — Step 1 — 2026-08-25
+
+### What was done
+- Fresh clone of `SHIV1804/Portfolio`, checked out `dev` (`56152ca`).
+- Before anything else, per this session's instructions, ran
+  `git log --oneline -20` and searched all history for "command palette",
+  "G2", "onSelect", "navigation":
+  `git log --oneline --all | grep -iE "command palette|G2|onSelect|navigation"`
+  → `af30120`, `9c62ba6`, `55ba5bd`, `2eb0b4a`. This surfaced a real premise
+  conflict that needed reporting before proceeding (and was reported to the
+  user before any code was touched):
+  - `55ba5bd`/`9c62ba6` (2026-08-22): G2 was previously investigated and
+    marked **RESOLVED** — root cause traced to a `className`→
+    `contentClassName` cmdk prop bug (fixed in `552f96d`), with the
+    remaining URL-not-updating symptom attributed to dev-server hydration
+    timing, confirmed rare/absent on a production build (24/25 across 3
+    scenarios).
+  - `af30120` (2026-08-24): a prior session given this exact same briefing
+    (open onSelect bug, "value props already committed") found neither
+    claim held up — no `value` prop exists on any `Command.Item` in `dev`,
+    and that session had no working browser at all, so it logged the
+    conflict and stopped rather than guess.
+  - Confirmed directly: `git log --oneline -- widgets/command-palette/ui/CommandPalette.tsx`
+    → only `552f96d` and `f078bda`, no value-prop commit;
+    `grep -n "value=" widgets/command-palette/ui/CommandPalette.tsx` → 0 matches.
+- Unlike prior sessions, this sandbox has a real (if version-mismatched)
+  Chromium available (`/opt/pw-browsers`, revision 1194; project's
+  `@playwright/test@1.61.1` wants 1228, and `npx playwright install` can't
+  reach `cdn.playwright.dev`). Pointed `playwright.config.ts`'s
+  `use.launchOptions.executablePath` at the real binary as a **local,
+  uncommitted diagnostic** (reverted before every commit and again at the
+  end of this session) and actually reproduced, rather than stopping at
+  "cannot verify" like the prior two sessions.
+- `npm install` still fails its `postinstall` (`prisma generate`, same
+  `binaries.prisma.sh` / `host_not_allowed` block as the Lighthouse
+  session) — irrelevant here since `playwright.config.ts`'s `webServer` is
+  `npm run dev`, not a production build, and `next dev` runs fine without
+  a generated Prisma client as long as no Prisma-dependent route is hit by
+  the tests being audited (command-palette and architecture-diagram
+  don't touch it).
+- Started `next dev` in the background, ran the real repro command from
+  the brief.
+
+### Findings before touching code
+- **Reproduced for real** (first time this file has real Playwright output
+  for G2, not just historical claims):
+  `npx playwright test tests/command-palette --reporter=list` →
+  **2 of the 3** briefed tests fail deterministically (3/3 runs):
+  - `Enter selects a highlighted command` (expects `/#about`) — FAILS
+  - `navigation command navigates correctly` (expects `/#skills`) — FAILS
+  - `case study navigation command works` (expects `/projects/log-analyser`)
+    — **PASSES** deterministically (3/3), contradicting the brief's "3
+    failing tests, confirmed on two machines" claim. This is a second,
+    independent premise conflict beyond the value-prop one `af30120`
+    already found — flagging it rather than silently treating the brief
+    as fully accurate.
+  - `tests/architecture-diagram/architecture-diagram.spec.ts:323` — FAILS
+    5/5 as described. Not touched (per instructions).
+- **Inspected `onSelect`/navigation wiring** (Step 2 of the brief) before
+  changing anything: every `Command.Item` in `CommandPalette.tsx` calls
+  `runCommand(() => router.push(...))` identically. cmdk's `onSelect`
+  fires the same way for a click and for Enter-while-highlighted — it does
+  not distinguish input method. No guard, no early return, no
+  keyboard-specific branch anywhere. **The brief's premise (broken/guarded
+  keyboard wiring) does not match the code.**
+- Root-caused the actual failure via real network tracing
+  (`page.on('request'/'response')`) instead of guessing:
+  - Selecting "About" while already on `/` fires a genuine Next.js RSC
+    round-trip (`GET /?_rsc=...`) before the hash commits to the URL —
+    confirmed via trace, timed at **~170-260ms** across repeated runs. The
+    two failing tests assert `page.url()` (a synchronous, non-retrying
+    property read) immediately after the dialog closes, with zero wait —
+    they race ahead of that commit every time. The "case study" test
+    happens to include `await page.waitForLoadState('networkidle')`, which
+    is why it passes — not because path-nav is faster, but because it
+    waits and hash-nav doesn't get the same courtesy in the other two
+    tests.
+  - Selecting "About" from a *different* route (as the architecture-diagram
+    test does, starting from `/projects/log-analyser`) is much slower —
+    measured **~800ms** (cold-fetching the entire home route's heavier RSC
+    payload: hero GSAP animations, GitHub dashboard, all sections).
+    `router.prefetch()` for these targets on mount was tried and measured —
+    it did **not** reduce this in dev (still ~800ms, confirmed via repeated
+    trace) — reverted, not part of the final fix.
+  - `router.push()` returns `void` in this Next.js version (confirmed via
+    `node_modules/next/dist/shared/lib/app-router-context.shared-runtime.d.ts`)
+    — no completion promise, so there's no built-in way to know when a
+    push has actually landed.
+  - Confirmed the architecture-diagram failure's exact mechanism: issuing a
+    second real route-changing command (`Log Analyser`) while the first
+    (`About`) is still in flight causes **both** navigations to be
+    silently dropped — not just delayed. Verified by waiting 3s after the
+    full sequence and finding the page never left `/projects/log-analyser`
+    at all (`aria-expanded` still `'true'`, URL unchanged). Isolated: just
+    reopening the palette (Ctrl+K) and pressing Escape without selecting
+    anything does *not* interrupt the pending nav — it's specifically a
+    second `router.push()` call that causes the collision.
+
+### Decisions made (and why)
+- **Not** touching `onSelect`'s wiring pattern itself (adding guards,
+  keyboard-specific branches) — real evidence shows it was never broken
+  that way. Doing so anyway would mean "fixing" a bug that isn't there
+  while leaving the actual defect (RSC round-trip on same-page anchors,
+  and the drop-both-navigations collision) in place.
+- Fixed the actual defect in two parts:
+  1. `navigateToSection()`: for the 4 in-page anchors (About/Skills/
+     Experience/Projects), bypass the Next.js router entirely when already
+     on `/` — use the native History API (`pushState`) + `scrollIntoView`
+     directly. There's no server data to refetch for a same-page scroll,
+     so this is synchronous with no round-trip. This directly fixes the
+     two originally-failing tests.
+  2. `navigateToRoute()`: for real cross-page navigations (both case-study
+     links, and the 4 anchors when *not* already on `/`), keep
+     `router.push()` but serialize it through a promise queue
+     (`navQueueRef`) that waits for the previous push's target `pathname`
+     to actually land (polled via `usePathname()`, 3s safety-net timeout)
+     before firing the next one. This fixes the architecture-diagram
+     collision without ever blocking the Ctrl+K shortcut itself.
+- **First attempt at #2 was wrong and is documented as a dead end in the
+  code's own comments**: tried gating the Ctrl+K keydown handler itself
+  with a `useTransition()`-based `isPending` flag (and later a fixed-
+  duration `setTimeout` cooldown). Both made things *worse* — the
+  architecture-diagram test sends a single, non-retried `Control+k`
+  keypress with no wait; if that keypress is ignored because a guard is
+  still active, the palette never opens and the test hangs until timeout
+  (confirmed: `page.type` timed out waiting for a locator that never
+  appears, because nothing re-sends the keypress). Blocking the *UI* was
+  the wrong layer; serializing the *navigation side effect* while leaving
+  the UI free to respond immediately is what actually works.
+- Mid-implementation, an edit accidentally deleted the `const router =
+  useRouter()` and `const [theme, setTheme] = useState(...)` declarations,
+  causing a `ReferenceError: theme is not defined` (500) in the dev
+  server. Caught via `curl` health-check + dev server log, fixed by
+  restoring both declarations, verified via a clean `curl` 200 and a
+  rerun of the full suite before proceeding — flagging this so the
+  verification counts below are trusted only from that point forward.
+
+### Files created/modified
+- `widgets/command-palette/ui/CommandPalette.tsx` — real fix (diff
+  committed alongside this entry).
+- `playwright.config.ts` — temporarily edited (`launchOptions.executablePath`
+  pointing at the sandbox's real Chromium binary, to work around the
+  Playwright/browser revision mismatch) for every test run in this
+  session, **reverted before every commit** (confirmed via `git status`
+  showing it clean at each commit point). Not part of the shipped diff.
+- `next-env.d.ts` — auto-regenerated by `next dev` locally (path
+  `.next/dev/types/...` vs `.next/types/...`); reverted, not committed —
+  this is a dev-server artifact, not a real change.
+- `PLAYWRIGHT_TRIAGE_PROGRESS.md` — this entry.
+
+### Verification performed (real commands run, real results)
+- `npx playwright test tests/command-palette --reporter=list` — full
+  18-test suite (17 run + 1 skipped, WebKit-only Meta+K test), run **5
+  times** after the fix: **17 passed / 1 skipped, all 5 runs**, zero
+  flakes.
+- `npx playwright test tests/architecture-diagram/architecture-diagram.spec.ts:323`
+  isolated, run **5 times** after the fix: **1 passed, all 5 runs**
+  (previously failed 5/5 before the fix, confirmed both before and after
+  in this same session).
+- Combined run, both suites together in one command (post-fix): **18
+  passed / 1 skipped**, single run, consistent with the separate 5x runs.
+- `npm run lint`: **0 errors, 14 warnings** — identical warning set to the
+  pre-existing baseline recorded in this file's earlier entries; none in
+  `CommandPalette.tsx`.
+- `npx tsc --noEmit`: **8 errors**, all `Module '"@prisma/client"' has no
+  exported member 'PostStatus'` / implicit-any in `app/blog/**`,
+  `app/admin/posts/**`, `app/api/**`, `shared/lib/blog-db.ts` — the same
+  pre-existing Prisma-generation blocker documented in the Lighthouse
+  audit session (`binaries.prisma.sh` unreachable in this sandbox). Zero
+  errors in `CommandPalette.tsx` or `playwright.config.ts`.
+- `git status` / `git diff --stat` at commit time: only
+  `widgets/command-palette/ui/CommandPalette.tsx` changed —
+  `playwright.config.ts` and `next-env.d.ts` confirmed reverted to
+  `origin/dev`'s exact content before commit.
+
+### Known issues / blocked items
+- The 3s safety-net timeout in `navigateToRoute`'s poll loop is a
+  pragmatic bound, not a guarantee — if a route genuinely takes longer
+  than 3s to land (unlikely for this app, but possible under heavier load
+  or a slower environment), the queue will move on to the next command
+  before the previous one actually settled. Worth a follow-up if this app
+  ever adds a much heavier route.
+- The ~800ms cold-navigation cost from a case-study page back to home
+  (dev/Turbopack-specific per this session's own measurement, consistent
+  with the prior session's "confirmed absent on production build"
+  finding for a related symptom) has not been re-verified against a real
+  production build in this sandbox — same `binaries.prisma.sh` block that
+  stopped the Lighthouse session's `next build` stops one here too. Real
+  users on the live Vercel deployment almost certainly see this much
+  faster (minified bundles, CDN-served chunks), but that's inference, not
+  something this sandbox can measure directly.
+- This is the **third** premise conflict logged against this repeated G2
+  briefing (value-prop fix not actually present; G2 previously RESOLVED
+  via a different mechanism; now "3 tests fail" when only 2 do). Worth
+  the owner checking why this briefing keeps arriving with claims that
+  don't match the repo — possibly a stale template being reused, or a
+  different repo/branch being described.
+
+### Next step
+- None required for G2 itself — closed, see below. If the owner wants the
+  ~800ms cross-route cold-navigation cost investigated further (it's a UX
+  smoothness question, not a correctness bug — no test currently exercises
+  it as anything other than "eventually lands"), that would be a new,
+  separate item.
+
+**Status: RESOLVED.** Both originally-failing command-palette tests and
+the architecture-diagram downstream regression pass, verified 5/5 each
+(not once), against a real `next dev` server with a real Chromium browser
+(not a claim from git history — this session generated its own evidence).
+Root cause was not the briefed "onSelect wiring" — it was (1) an
+unnecessary RSC round-trip for same-page hash navigation, fixed by
+bypassing the router for those; and (2) a genuine navigation race for
+real cross-page pushes issued back-to-back, fixed by serializing them
+without blocking the UI. Diff below / in the paired commit.
