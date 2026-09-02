@@ -392,7 +392,12 @@ test.describe('Architecture Diagram Tests', () => {
     console.log(`[diag] +${Date.now() - t0}ms: networkidle fired, url=${page.url()}`);
 
     const firstNodeAfter = diagramNodes(page).first();
-    await expect(firstNodeAfter).toHaveAttribute('aria-expanded', 'false', { timeout: 25000 });
-    console.log(`[diag] +${Date.now() - t0}ms: aria-expanded reached "false", url=${page.url()}`);
+    try {
+      await expect(firstNodeAfter).toHaveAttribute('aria-expanded', 'false', { timeout: 25000 });
+      console.log(`[diag] +${Date.now() - t0}ms: aria-expanded reached "false", url=${page.url()}`);
+    } finally {
+      const navDebug = await page.evaluate(() => (window as unknown as { __navDebug?: unknown[] }).__navDebug ?? []);
+      console.log(`[diag] __navDebug: ${JSON.stringify(navDebug)}`);
+    }
   });
 });

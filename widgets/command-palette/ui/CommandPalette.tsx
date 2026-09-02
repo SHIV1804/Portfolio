@@ -94,13 +94,38 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, setOpen })
   // navigation side effect — so Ctrl+K / reopening always works instantly.
   const navigateToRoute = (path: string) => {
     const targetPathname = path.split("#")[0] || "/";
+    // TEMPORARY DIAGNOSTIC (G2 follow-up): record how each queued
+    // navigation actually resolved - by the pathname genuinely landing, or
+    // by the 3s safety-net deadline firing instead. Read back in tests via
+    // window.__navDebug. Remove once the follow-up race is understood.
+    const startedAt = Date.now();
+    const fromPathname = pathnameRef.current;
     navQueueRef.current = navQueueRef.current.then(
       () =>
         new Promise<void>((resolve) => {
           router.push(path);
           const deadline = Date.now() + 3000;
           const poll = () => {
-            if (pathnameRef.current === targetPathname || Date.now() > deadline) {
+            if (pathnameRef.current === targetPathname) {
+              (window as unknown as { __navDebug?: unknown[] }).__navDebug ??= [];
+              (window as unknown as { __navDebug: unknown[] }).__navDebug.push({
+                path,
+                fromPathname,
+                targetPathname,
+                resolvedVia: "pathname-match",
+                elapsedMs: Date.now() - startedAt,
+              });
+              resolve();
+            } else if (Date.now() > deadline) {
+              (window as unknown as { __navDebug?: unknown[] }).__navDebug ??= [];
+              (window as unknown as { __navDebug: unknown[] }).__navDebug.push({
+                path,
+                fromPathname,
+                targetPathname,
+                resolvedVia: "deadline-timeout",
+                elapsedMs: Date.now() - startedAt,
+                pathnameAtDeadline: pathnameRef.current,
+              });
               resolve();
             } else {
               setTimeout(poll, 20);
