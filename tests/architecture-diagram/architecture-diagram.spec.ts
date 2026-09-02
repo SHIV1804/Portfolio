@@ -344,9 +344,21 @@ test.describe('Architecture Diagram Tests', () => {
 
     await page.waitForLoadState('networkidle');
 
-    // Component state should be reset (nodes should be closed) - this is normal behavior
+    // Component state should be reset (nodes should be closed) - this is normal behavior.
+    //
+    // ArchitectureDiagram is keyed by pathname (widgets/case-study-layout/ui/
+    // ArchitectureDiagram.tsx) specifically to force a remount - and thus a
+    // fresh reset state - on every route change, working around Next's
+    // client Router Cache reusing the component instance across a soft
+    // (router.push) navigation. But `waitForLoadState('networkidle')` only
+    // waits for network requests to quiesce; it does not wait for React to
+    // actually commit that remount. Under load the two can be seconds
+    // apart, so a single non-retrying getAttribute() snapshot can catch the
+    // still-mounted previous instance mid-transition. Use an auto-retrying
+    // assertion instead so the check waits for the DOM to actually reflect
+    // the reset state (bounded by Playwright's default timeout) rather than
+    // racing the remount.
     const firstNodeAfter = diagramNodes(page).first();
-    const expandedAfter = await firstNodeAfter.getAttribute('aria-expanded');
-    expect(expandedAfter).toBe('false'); // Fresh page load resets state
+    await expect(firstNodeAfter).toHaveAttribute('aria-expanded', 'false'); // Fresh page load resets state
   });
 });
