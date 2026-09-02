@@ -361,4 +361,38 @@ test.describe('Architecture Diagram Tests', () => {
     const firstNodeAfter = diagramNodes(page).first();
     await expect(firstNodeAfter).toHaveAttribute('aria-expanded', 'false'); // Fresh page load resets state
   });
+
+  // TEMPORARY DIAGNOSTIC - not a real regression test, just timing
+  // instrumentation to find out whether the state-reset above eventually
+  // lands under contention (slow) or never does (genuinely stuck). Remove
+  // once G2's follow-up race is actually understood.
+  test('DIAGNOSTIC: navigation away from diagram and back maintains state', async ({
+    page,
+  }) => {
+    await page.goto('/projects/log-analyser');
+
+    const firstNode = diagramNodes(page).first();
+    await firstNode.click();
+
+    const expanded = await firstNode.getAttribute('aria-expanded');
+    expect(expanded).toBe('true');
+
+    const t0 = Date.now();
+    await page.press('body', 'Control+k');
+    await page.type('input[placeholder*="Type a command"]', 'About');
+    await page.press('body', 'Enter');
+    console.log(`[diag] +${Date.now() - t0}ms: pressed Enter on "About", url=${page.url()}`);
+
+    await page.press('body', 'Control+k');
+    await page.type('input[placeholder*="Type a command"]', 'Log Analyser');
+    await page.press('body', 'Enter');
+    console.log(`[diag] +${Date.now() - t0}ms: pressed Enter on "Log Analyser", url=${page.url()}`);
+
+    await page.waitForLoadState('networkidle');
+    console.log(`[diag] +${Date.now() - t0}ms: networkidle fired, url=${page.url()}`);
+
+    const firstNodeAfter = diagramNodes(page).first();
+    await expect(firstNodeAfter).toHaveAttribute('aria-expanded', 'false', { timeout: 25000 });
+    console.log(`[diag] +${Date.now() - t0}ms: aria-expanded reached "false", url=${page.url()}`);
+  });
 });
