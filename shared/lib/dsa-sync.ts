@@ -23,6 +23,14 @@ export interface DSATraceStep {
   variables: Record<string, unknown>;
   highlightIndices?: number[];
   explanation: string;
+  /**
+   * Hash-map contents at this step, for phases that build up a map (e.g. the
+   * optimized Two Sum approach). Optional and NOT currently present in the
+   * real GDB-generated trace.json for two-sum — the trace pipeline doesn't
+   * emit it yet. Rendered when present; omitted entirely otherwise, so no
+   * placeholder/fabricated map data is ever shown.
+   */
+  mapState?: Record<string, unknown>;
 }
 
 export interface DSATracePhase {

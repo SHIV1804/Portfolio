@@ -107,3 +107,60 @@ Next check to run: Check 5 (skip straight to push/verify since no code change is
 - **Metrics**: Confirmed via `curl` and visual inspection that the metrics section now shows `—` and the `(pending real benchmark)` caption.
 - **OG URL**: Confirmed via `curl` that `og:url` correctly points to `https://portfolio-theta-ruby-31nqvqjqmc.vercel.app/projects/log-analyser`.
 - **Status**: **COMPLETE**
+
+
+## Duplicate `<main>`/`<footer>` Regression — Found and Fixed — 2026-08-16 (dev branch, commit `b5a9d9b` base)
+
+### Report received
+"Multiple pages have TWO `<main>` elements and/or TWO `<footer>` elements... confirmed via real Playwright test failures ('strict mode violation: locator resolved to 2 elements') across accessibility, navigation, responsive, smoke, and scroll-experience specs." Explicit instruction: diagnose before fixing, do not guess-fix.
+
+### Diagnosis
+
+**Step 1 — searched every render site for `<main>` and `<Footer>`/`<footer>`, committed `HEAD` (`b5a9d9b`) on `dev`:**
+```
+git grep -n "<main" HEAD -- 'app/**/*.tsx'
+```
+Found **13 duplicate `<main>` occurrences across 9 page files**, each wrapping that page's own content in a *second* `<main>` in addition to the one `app/layout.tsx` already provides for every route:
+
+| File | Line(s) |
+|---|---|
+| `app/admin/posts/page.tsx` | 79, 88, 107 (three return branches: loading, access-denied, main content) |
+| `app/blog/[slug]/page.tsx` | 136 |
+| `app/blog/page.tsx` | 39 |
+| `app/blog/tags/[tag]/page.tsx` | 30 |
+| `app/blog/write/page.tsx` | 69, 84, 111 (three return branches: loading, success, main form) |
+| `app/dsa/[pattern]/[slug]/page.tsx` | 58 |
+| `app/dsa/page.tsx` | 14 |
+| `app/projects/case-study-two/page.tsx` | 20 |
+| `app/projects/log-analyser/page.tsx` | 22 |
+
+(`app/layout.tsx:37` is the one legitimate `<main>` — not counted above.)
+
+```
+git grep -n "<footer" HEAD -- 'app/**/*.tsx'
+```
+Found **1 duplicate `<footer>` occurrence**:
+
+| File | Line |
+|---|---|
+| `app/blog/[slug]/page.tsx` | 215 — a "Related Posts" section at the end of the article, semantically not a page footer, wrongly tagged `<footer>` |
+
+(`app/layout.tsx:40` → `<Footer />` → `widgets/footer/ui/Footer.tsx:28`'s single `<footer>` is the one legitimate footer — not counted above.)
+
+**Step 2 — checked for other duplication sources**, all clean: exactly one `layout.tsx` in the whole `app/` tree (no nested/parallel/intercepting routes, no `template.tsx`/`error.tsx`/`not-found.tsx`); no `createPortal`/raw DOM manipulation; no `dangerouslySetInnerHTML` injecting chrome tags; no ARIA `role="main"`/`role="contentinfo"` duplicates. The bug is fully and only the 14 literal tag occurrences listed above.
+
+**Step 3 — cross-referenced against the prior fix** (commit `9ac1236`, "fix: remove duplicate Header/Footer on case study pages"): that commit only ever touched `app/projects/case-study-two/page.tsx` and `app/projects/log-analyser/page.tsx`. The other 7 files above were never covered by that fix — meaning most of this is not a regression of the old fix, but the *same class* of bug independently present in pages the prior fix never reached (the DSA and blog/admin routes). Only `case-study-two`/`log-analyser` are an actual regression of `9ac1236`.
+
+### Fix applied
+In every file/line listed above: `<main ...>` → `<div ...>` (all classNames preserved exactly, no styling change), and the one `<footer>` in `app/blog/[slug]/page.tsx` → `<section>` (classNames preserved). `app/layout.tsx` was not touched — it remains the single source of the site's `<main>` and `<Footer />`.
+
+### Verification performed
+- Re-ran the same exhaustive `<main>`/`<footer>` search against the working tree after the fix: **exactly one `<main>` (`app/layout.tsx:37`) and one `<footer>` (`widgets/footer/ui/Footer.tsx:28`, rendered via `app/layout.tsx:40`) in the entire codebase.**
+- `npm run lint`: 0 errors (same 14 pre-existing warnings as every prior chunk this session, unchanged).
+- Isolated `tsc --noEmit` scoped to all 9 changed files + `app/layout.tsx`: the tag-name changes themselves introduce no new type errors. The check does surface pre-existing, unrelated errors (`PostStatus` not exported from `@prisma/client`, `session.user.isAdmin` not on the NextAuth session type) — these are the same pre-existing Prisma-client-generation sandbox limitation documented throughout `DSA_FLAGSHIP_PROGRESS.md` (this sandbox can't reach `binaries.prisma.sh` to generate the real Prisma client) and are unrelated to `<main>`/`<div>`/`<footer>`/`<section>` tag names — confirmed by inspection: none of the errors reference the touched lines or JSX tag types.
+
+### An honest note on how this was found
+My first pass at this diagnosis (grepping the working tree as I'd just cloned/pulled it) found **no** duplication and nearly led me to conclude, incorrectly, that there was no bug in the source — mirroring the "Check 3"/"Check 6" outcome earlier in this file. Before writing that up, `git status` showed these 9 files already modified in my working tree, which I had not consciously edited. Diffing each against committed `HEAD` (shown above) revealed the real, committed bug, with a fix already sitting uncommitted in my local working tree, in this same sandbox session (which has been reused across `Chunk 2-5` and earlier bugfix work in this conversation). I don't have a confirmed explanation for how that draft fix got there. Given that, I did not commit it blindly: I reviewed **every line of every diff** above against the real committed source before treating any of it as correct, and only committed after independently re-verifying the before/after state via `git grep` against `HEAD` and the working tree as shown above. Flagging this so it's not read as effortless — it very nearly produced a false "nothing's wrong" report.
+
+### Not verified: full Playwright suite
+Same sandbox limitation as `DSA_FLAGSHIP_PROGRESS.md` — no browser is installable here (`npx playwright install chromium` fails, `cdn.playwright.dev` not in the network allowlist), so **the actual failing tests were not re-run to confirm they now pass.** The fix is verified via exhaustive static search (before: 14 occurrences; after: exactly the 2 legitimate ones) and clean lint/type-check, not via a real test run. Whoever has browser access should run the previously-failing specs (`accessibility`, `navigation`, `responsive`, `smoke`, `scroll-experience`) to confirm.

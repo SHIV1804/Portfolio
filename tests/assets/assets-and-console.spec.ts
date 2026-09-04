@@ -165,7 +165,7 @@ test.describe('Broken Assets and Console Checks', () => {
     expect(linkCount).toBeGreaterThan(0);
   });
 
-  test('placeholder URLs are detected in footer', async ({ page }) => {
+  test('no placeholder URLs remain in footer', async ({ page }) => {
     const placeholderUrls: string[] = [];
 
     await page.goto('/');
@@ -192,8 +192,9 @@ test.describe('Broken Assets and Console Checks', () => {
       }
     }
 
-    // These are expected to be placeholders
-    expect(placeholderUrls.length).toBeGreaterThan(0);
+    // Footer content has been finalized — these template placeholders
+    // should never reappear (e.g. from a config reset or bad merge).
+    expect(placeholderUrls).toEqual([]);
   });
 
   test('placeholder URLs are detected in command palette', async ({

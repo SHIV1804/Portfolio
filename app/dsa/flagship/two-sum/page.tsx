@@ -3,6 +3,8 @@ import { Metadata } from 'next';
 import { getDSAProblemBySlug, fetchDSATrace } from '@/shared/lib/dsa-sync';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { ArrayBox } from './ArrayBox';
+import { ExecutionPanel } from './ExecutionPanel';
+import { DiscoveryTransition } from './DiscoveryTransition';
 
 export const metadata: Metadata = {
   title: 'Two Sum Interactive Walkthrough | DSA Flagship',
@@ -54,13 +56,34 @@ export default async function TwoSumFlagshipPage() {
         </div>
       </div>
 
-      <div className="text-center mt-16">
-        <button
-          disabled
-          className="px-8 py-4 bg-accent text-accent-foreground font-bold rounded-lg text-lg opacity-50 cursor-not-allowed"
-        >
-          Watch the Brute-Force Attempt &rarr;
-        </button>
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold text-foreground mb-6">Watch the Brute-Force Attempt</h2>
+        <ExecutionPanel
+          phase={trace.bruteForce}
+          nums={nums}
+          title="Brute-Force Walkthrough"
+          phaseKey="bruteForce"
+          predictionQuestions={trace.predictionQuestions}
+        />
+      </div>
+
+      <div className="mb-12">
+        <DiscoveryTransition
+          complexity={trace.bruteForce.complexity}
+          discoveryQuestions={trace.discoveryQuestions}
+          exampleSize={nums.length}
+        />
+      </div>
+
+      <div id="optimized-walkthrough" className="mb-12 scroll-mt-8">
+        <h2 className="text-2xl font-bold text-foreground mb-6">Watch the Optimized Approach</h2>
+        <ExecutionPanel
+          phase={trace.optimized}
+          nums={nums}
+          title="Optimized Walkthrough"
+          phaseKey="optimized"
+          predictionQuestions={trace.predictionQuestions}
+        />
       </div>
     </div>
   );

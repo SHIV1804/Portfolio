@@ -78,3 +78,201 @@
 - **Database-less Build (Final)**: Ran `npm run build` with `DATABASE_URL` explicitly unset. The build completed successfully (30/30 pages), with the console correctly logging `PrismaClientInitializationError` warnings instead of crashing.
 - **Linting (Final)**: Ran `npm run lint` which passed with 0 errors.
 - **Commit History**: Verified that subtasks 1a-1c are now fully committed to the main branch.
+
+## Chunk 2 — Brute-Force Execution Panel — 2026-08-16
+
+### What was built
+- `app/dsa/flagship/two-sum/ExecutionPanel.tsx` (new client component, `'use client'`): synced code panel, variable tracker, array highlighting (extends `ArrayBox`), explanation text, and play/pause/step-forward/step-back/reset controls, keyboard-operable (←/→/space/R), scoped to the panel via a focusable `role="group"` container.
+- `app/dsa/flagship/two-sum/page.tsx` updated to render `<ExecutionPanel phase={trace.bruteForce} nums={nums} title="Brute-Force Walkthrough" />` in place of the old disabled placeholder button. `page.tsx` remains an async Server Component (unchanged fetch logic); only the new panel is a Client Component — no server/client mixing.
+
+### Decisions made (and why)
+- Code line highlighting matches `step.line` (1-indexed) directly against the `code` array index (`line - 1`) — confirmed this alignment against the real trace.json (e.g. line 6 = `if (nums[i] + nums[j] == target)`, matching step 0's "Comparing nums[0] + nums[1]" explanation).
+- Autoplay's `setIsPlaying(false)` on reaching the last step is called inside the `setTimeout` callback (deferred), not synchronously in the effect body, to satisfy `react-hooks/set-state-in-effect` (this was the one lint error hit and fixed during this chunk).
+- Reduced-motion: the Play/Pause button is disabled entirely (not just silently inert) when `prefersReducedMotion` is true, and manual step-forward/back/reset remain fully functional — verified both behaviors directly (see below).
+- `ExecutionPanel` takes a generic `phase: DSATracePhase` prop rather than being hardcoded to `bruteForce`, so it already renders the `optimized` phase correctly too (verified) — sets up Chunk 4 to reuse it without new component logic, per that chunk's requirement.
+
+### Files created/modified
+- `app/dsa/flagship/two-sum/ExecutionPanel.tsx` (created)
+- `app/dsa/flagship/two-sum/page.tsx` (modified)
+
+### Verification performed (real commands run, real results)
+- `npm run lint`: 0 errors in touched files (1 pre-existing error was introduced then fixed during this chunk; remaining lint output is pre-existing warnings in unrelated files).
+- Isolated `tsc --noEmit` scoped to the touched files (via a temporary tsconfig, since project-wide `npm run build` fails on an unrelated pre-existing issue — see Known issues): 0 type errors.
+- Rendered `ExecutionPanel` with the real, GDB-verified `trace.json` (`bruteForce` and `optimized` phases both) via `react-dom/server` — confirmed correct output at step 1 for both phases.
+- Rendered and interacted with `ExecutionPanel` in jsdom via `react-dom/client` + `act`, using real trace data:
+  - Step-forward through all 4 brute-force steps: explanation text, and forward-button disabled state at the last step, updated correctly at each step.
+  - Step-back from the last step returned to step 3's explanation correctly.
+  - Reset returned to step 1 and correctly disabled the back button.
+  - Keyboard `ArrowRight` on the focused panel advanced from step 1 to step 2's explanation, confirming keyboard operability.
+  - Under simulated `prefers-reduced-motion: reduce`, the Play/Pause button was disabled while manual step-forward still worked.
+- These test scripts were temporary (written to a local `.smoketest/` dir, deleted after use) and are not part of the commit; `git status` shows only the two intended file changes.
+
+### Known issues / blocked items
+- **Could not run a clean `npm run build` or `npm run lint` against the full project, and could not push to `dev` or check a Vercel Preview URL**, because this session ran in a sandboxed environment without: (a) network access to `binaries.prisma.sh` (blocked by egress allowlist), which breaks `prisma generate` and causes an unrelated pre-existing type error in `app/admin/posts/page.tsx` (`PostStatus` not exported) during full builds — this is an environment limitation, not a defect in this chunk's code; (b) push credentials for the `SHIV1804/Portfolio` remote; (c) a browser to load the Preview URL. All verification above was done via isolated type-checking and direct component rendering/interaction with the real trace data instead. **This chunk still needs a human (or a session with deploy access) to push to `dev`, load the Preview URL, and do the manual walkthrough the original task specified before treating this checkpoint as fully closed.**
+
+### Next chunk to run
+- Chunk 3: "why is this slow" transition + discovery questions.
+
+## Chunk 3 — "Why Is This Slow" Transition + Discovery Questions — 2026-08-16
+
+### What was built
+- `app/dsa/flagship/two-sum/DiscoveryTransition.tsx` (new client component): displays `bruteForce.complexity` prominently with framing text extrapolating to a 10,000-element array, then renders `discoveryQuestions` one at a time via a "reveal next" button (starts as "Start thinking it through", becomes "Next question"), stacking each revealed question rather than replacing it. Once all questions are revealed, a disabled CTA ("Watch the Optimized Approach") appears in their place — functional wiring is explicitly deferred to Chunk 4, per the task.
+- `app/dsa/flagship/two-sum/page.tsx` updated to render `<DiscoveryTransition>` beneath the Chunk 2 execution panel, passing `trace.bruteForce.complexity`, `trace.discoveryQuestions`, and the example array's length.
+
+### Decisions made (and why)
+- Reused the existing accent/surface-raised card styling and the `bg-accent text-background` solid-button pattern already used elsewhere in the codebase (confirmed via grep across `app/`) rather than the `text-accent-foreground` class used in the original Chunk 1 placeholder button, which doesn't correspond to any defined design token in `app/globals.css`.
+- The reveal button's label changes on the first click ("Start thinking it through" → "Next question") to read naturally as a guided sequence rather than a generic "next" control from the start.
+
+### Files created/modified
+- `app/dsa/flagship/two-sum/DiscoveryTransition.tsx` (created)
+- `app/dsa/flagship/two-sum/page.tsx` (modified)
+
+### Verification performed (real commands run, real results)
+- `npm run lint`: 0 errors on touched files (14 pre-existing warnings elsewhere, unchanged).
+- Isolated `tsc --noEmit` scoped to touched files (temporary tsconfig, removed after use, project-wide build still blocked by the unrelated pre-existing Prisma issue noted in Chunk 2): 0 type errors.
+- Rendered and interacted with `DiscoveryTransition` in jsdom via `react-dom/client` + `act`, using the real `discoveryQuestions` array (4 questions) from `trace.json`:
+  - Confirmed the complexity ("O(n²)") renders and no questions or CTA are visible before any interaction.
+  - Clicked the reveal button 4 times: at each click confirmed the new question's exact text appeared AND all previously revealed questions remained visible (sequence stacks rather than replaces).
+  - After the 4th reveal, confirmed the reveal button disappeared, the CTA ("Watch the Optimized Approach") appeared, and the CTA is disabled.
+- Test scripts were temporary (local `.smoketest/` dir, deleted after use); `git status` shows only the two intended file changes.
+
+### Known issues / blocked items
+- Same sandbox limitations as Chunk 2: no browser/Vercel Preview access from this session, so the guided-reveal interaction and framing text were verified via jsdom rendering against real data rather than a live page load. **Needs a human check on the actual dev Preview URL before this checkpoint is fully closed.**
+
+### Next chunk to run
+- Chunk 4: optimized execution panel, reusing the `ExecutionPanel` component (already verified to handle the `optimized` phase shape during Chunk 2's testing).
+
+## Chunk 4 — Optimized Execution Panel — 2026-08-16
+
+### What was built
+- `app/dsa/flagship/two-sum/page.tsx` now renders a second `<ExecutionPanel>` instance for `trace.optimized`, right below the discovery transition, under an `id="optimized-walkthrough"` anchor — reusing the exact same component from Chunk 2, just different `phase` props. No new/duplicate execution-panel component was created.
+- Made the Chunk 3 CTA functional: it's now a real `<a href="#optimized-walkthrough">` link (was a disabled button) that scrolls to this new panel.
+- Extended `DSATraceStep` (`shared/lib/dsa-sync.ts`) with an optional `mapState?: Record<string, unknown>` field, and extended `ExecutionPanel`'s variable tracker to render a visually distinct "Map" section (amber-tinted, key:value chips) whenever a step has `mapState`.
+
+### Important finding — reported, not silently worked around
+The task assumed the optimized trace has `mapState` per step. **It does not, in the real GDB-verified `trace.json` for two-sum** (pulled directly from `SHIV1804/dsa-solutions`, `problems/hash-map/two-sum/trace.json`) — its `optimized.steps` only have `line`, `variables`, `highlightIndices`, `explanation`. I did not fabricate map contents to fill this gap. Instead:
+- The `mapState` field and its rendering are fully implemented and tested (see below) and will work correctly the moment the trace-generation pipeline starts emitting it.
+- For now, the optimized walkthrough renders exactly as Chunk 2 does for brute-force — code, variables (`i`, `nums_i`, `complement`, and `matchIndex` on the final step), array highlighting, explanation — with no Map section, since there's no real data for it.
+- **This needs a decision from you**: either (a) extend the GDB trace-generation driver for two-sum's optimized solution to also dump the `unordered_map`'s contents at each breakpoint (a Section B-style task against `dsa-solutions`), or (b) accept the optimized panel without a live map view for now. Not something I should decide unilaterally.
+
+### Files created/modified
+- `app/dsa/flagship/two-sum/page.tsx` (modified — added optimized panel)
+- `app/dsa/flagship/two-sum/ExecutionPanel.tsx` (modified — added conditional Map section)
+- `app/dsa/flagship/two-sum/DiscoveryTransition.tsx` (modified — CTA now a real anchor link, not disabled)
+- `shared/lib/dsa-sync.ts` (modified — added optional `mapState` to `DSATraceStep`)
+
+### Verification performed (real commands run, real results)
+- `npm run lint`: 0 errors (same 14 pre-existing warnings elsewhere, unchanged).
+- Isolated `tsc --noEmit` scoped to touched files (temp tsconfig, removed after): 0 type errors.
+- Rendered and interacted with `ExecutionPanel` fed the **real** `trace.optimized` data in jsdom: stepped through all 4 steps forward, confirmed each step's real explanation text appeared in order, confirmed the forward button correctly disables on the final step, and confirmed **no** Map section renders (since the real data has no `mapState` — proving the fallback doesn't fabricate anything).
+- Separately, fed `ExecutionPanel` **clearly-labeled synthetic** step data containing `mapState` (not claimed as real trace data) to prove the new rendering logic itself is correct: confirmed the map renders as `{ }` when empty, then correctly shows `3: 0` after one insert, then both `3: 0` and `2: 1` after a second — i.e. it builds up entry by entry as expected, exactly like the task's example (`{} -> {3:0} -> {3:0,2:1} -> match`) would look once real `mapState` data exists.
+- Confirmed via component reuse (no new panel component, single `ExecutionPanel` handles both phases via props only).
+- Test scripts were temporary (local `.smoketest/`, deleted after use); `git status` shows only the four intended file changes.
+
+### Known issues / blocked items
+- Same sandbox limitations as Chunks 2–3: no browser/Vercel Preview access, so this was verified via jsdom rendering/interaction against real (and, for the mapState-specific logic, synthetic) data rather than a live page load.
+- **mapState is not present in current real data — see "Important finding" above. This blocks step 3 of the original Chunk 4 task ("confirm mapState displays and updates correctly... should show building up: {} -> {3:0} -> {3:0,2:1} -> match") from being verifiable against real production data until the trace pipeline is updated.** The panel and code are ready for it.
+
+### Next chunk to run
+- Chunk 5: prediction questions + final polish + Playwright tests (also where the "confirm no Map section on real data" state should be re-checked if the GDB pipeline gets updated to emit mapState before Chunk 5 runs).
+
+## Chunk 5 — Prediction Questions + Final Polish + Tests — 2026-08-16
+
+### What was built
+- `ExecutionPanel.tsx` now accepts `phaseKey` ('bruteForce' | 'optimized') and `predictionQuestions` props. At any step matching a `predictionQuestions` entry's `stepIndex` + `phase`, the panel gates: it shows only the question card (options as buttons) and hides the array/code/variables/explanation panels, with a "Answer the question above to reveal this step" placeholder. Step-forward and Play are disabled while gated. Picking an option immediately reveals the real step content plus a "Correct!" / "Not quite — the correct answer is highlighted above" indicator, and locks the options (correct one highlighted green, any wrong pick highlighted red). Autoplay auto-pauses on arriving at a gated step rather than skipping past it. Revisiting an already-answered step (via step-back) shows it un-gated with its prior answer state, not re-gated.
+- `page.tsx` passes `phaseKey` + `trace.predictionQuestions` to both the brute-force and optimized panel instances.
+- New `tests/dsa-flagship/two-sum-execution-panel.spec.ts`: page load, step-forward button, keyboard stepping, `prefers-reduced-motion` (autoplay disabled, manual stepping still works), and a prediction-question render + answer test — following the existing repo's Playwright conventions (`page.emulateMedia`, `getByRole`, patterns matched against `tests/architecture-diagram` and `tests/reduced-motion`).
+
+### Files created/modified
+- `app/dsa/flagship/two-sum/ExecutionPanel.tsx` (modified — prediction gating)
+- `app/dsa/flagship/two-sum/page.tsx` (modified — new props wired through)
+- `tests/dsa-flagship/two-sum-execution-panel.spec.ts` (created)
+
+### Verification performed (real commands run, real results)
+- `npm run lint`: 0 errors (same 14 pre-existing warnings, unchanged; one new `react-hooks/set-state-in-effect` error was introduced and fixed during this chunk — the gated-autoplay-pause branch now defers via `setTimeout(..., 0)` like the existing end-of-playback branch).
+- Isolated `tsc --noEmit` on the touched app files and separately on the new spec file: 0 type errors in both.
+- Interactive jsdom test against the **real** `predictionQuestions` + `bruteForce` trace data: confirmed step 1's real question text renders, confirmed the real explanation is hidden until answered, confirmed the forward button is disabled while gated; answered incorrectly and confirmed the explanation then reveals, the "Not quite" message shows, forward re-enables, and options lock; advanced to step 2 (also gated) and confirmed it gates independently; answered correctly and confirmed "Correct!"; stepped back to step 1 and confirmed it stays un-gated with its prior (incorrect) answer still shown — i.e. answered state persists across navigation rather than re-blocking.
+
+### Known issues / blocked items — full Playwright suite could NOT be run
+- **`npx playwright install chromium` fails in this sandbox**: `cdn.playwright.dev` is not in the network egress allowlist (confirmed directly — `403 Host not in allowlist`). Without browser binaries, no Playwright test — new or pre-existing — can actually execute here, so **I could not run the new tests, and could not run the full existing suite to check for regressions, as the task required.** The new spec file is written to compile, lint clean, and match the accessible-name/testid contract the components actually render (verified via the jsdom tests above standing in as a proxy), but it has not been executed against a real browser.
+- Same pre-existing, unrelated `npm run build` blocker as prior chunks (Prisma engine download blocked).
+- I also attempted to spin up a real `next dev` server (with the actual `DSA_GITHUB_REPO`/`GITHUB_TOKEN` set locally, gitignored, never committed) to get genuine end-to-end verification instead of jsdom proxies — the server started and reported "Ready", but background processes don't survive between tool calls in this sandbox, so it was unreachable by the time I could curl it. Reverted to the jsdom approach used in Chunks 2–4.
+- **This chunk, and really the whole flagship feature, needs a human (or an agent session with real deploy/browser access) to: run `npx playwright test` for real, run the full pre-existing suite for regressions, and do the final manual walkthrough on the dev Preview URL before merging dev → main.** None of that happened in this session.
+
+### Status
+Chunks 2–5 are implemented, individually lint/type-check clean, and functionally verified via targeted jsdom render/interaction tests against real trace data (not fabricated) — but **not one of the four chunks has been seen by a human on an actual running page**, and Chunk 5's Playwright tests have never been executed. Treat the checkpoints as code-complete, not verification-complete.
+
+## Chunk 6 — Fix 3 Failing Prediction-Gate Tests — 2026-08-20
+
+### What was built
+- Updated the 3 failing tests in `tests/dsa-flagship/two-sum-execution-panel.spec.ts` so each answers the prediction-question gate at every gated step (stepIndex 0, 1, 2 — only the last step, 3, is ungated per the real `trace.json`) before advancing past it, using the existing `[data-testid="prediction-question"]` locator and its option buttons, matching the working pattern already in the file's 5th test ("a prediction question renders and can be answered"). No app code (`ExecutionPanel.tsx`, `page.tsx`) was touched — this is a test-file-only fix, per the confirmed diagnosis that the gating itself is intentional.
+- Added a small shared `answerCurrentQuestion(panel)` helper at the top of the spec file instead of duplicating the click-first-option-and-assert-gate-lifted pattern three times.
+
+### Decisions made (and why)
+- Confirmed from `ExecutionPanel.tsx` (not re-derived, but re-read to justify the fix): `isAnswered` is `currentQuestion ? stepIndex in answers : true` (line 50), and `answerQuestion(optionIndex)` does `setAnswers(prev => ({ ...prev, [stepIndex]: optionIndex }))` (lines 82-87) — i.e. the gate lifts as soon as `stepIndex` is a key in `answers`, regardless of which option index was clicked. So clicking the *first* option (as the existing 5th test already does) is sufficient to lift the gate at every step; there was no need to pick the "correct" option.
+- `stepBack()` (line 60-62) has no `isGated` check at all — only `stepForward()` (line 55-58) and the keyboard `ArrowRight` path route through it. So the keyboard test's `ArrowLeft` back to step 1 needed no additional answer, matching the task's instructions.
+
+### Files created/modified
+- `tests/dsa-flagship/two-sum-execution-panel.spec.ts` (modified — 3 tests updated, 1 helper added)
+- `DSA_FLAGSHIP_PROGRESS.md` (this entry)
+
+### Verification performed (real commands run, real results) — and what could NOT be verified
+- `pnpm run lint`: 0 errors (same 14 pre-existing warnings in unrelated files, unchanged).
+- `pnpm run build`: **still fails**, for the same pre-existing, unrelated reason Chunks 2-5 already documented: `prisma generate` cannot run because `binaries.prisma.sh` returns `403 Forbidden` / `Host not in allowlist` in this sandbox's network egress policy, so `@prisma/client`'s generated `.prisma/client` module doesn't exist, and `next build` fails resolving it from `app/admin/posts/page.tsx` — nothing to do with this test-file change.
+- **Playwright execution: NOT achieved, despite this session's task description asserting real Playwright access.** `npx playwright install chromium` failed with the identical error prior sessions already logged: `403 Host not in allowlist: cdn.playwright.dev`. No browser binary could be downloaded, so neither the 3 fixed tests nor the full suite could actually be executed in this sandbox. This is an unresolved, environment-level limitation, not something the test-file diff can work around.
+- Also confirmed (as prior chunks did) that `DSA_GITHUB_REPO`/`GITHUB_TOKEN` are not set in this sandbox, so even with a browser, `fetchDSATrace` would return `null` and the page would render "Problem Not Found" rather than the real panel — a second, independent reason a live run isn't currently possible here.
+- The fix's correctness instead rests on static reasoning against the real `ExecutionPanel.tsx` gating logic (see above) plus the existing, already-passing 5th test's proven click-first-option pattern, reused verbatim.
+
+### Known issues / blocked items
+- Same as every prior chunk: no Playwright browser binaries, no live trace data, no working `prisma generate` in this sandbox. **A session with real browser + `DSA_GITHUB_REPO`/`GITHUB_TOKEN` + prisma-engine network access still needs to run `npx playwright test tests/dsa-flagship/two-sum-execution-panel.spec.ts` and the full suite for real before this fix can be treated as verification-complete.**
+
+### Next chunk to run
+- Get a sandbox/session with `cdn.playwright.dev` and `binaries.prisma.sh` allowlisted (or run locally) to execute the Playwright suite for real and close out Chunks 2-6's verification gap.
+
+## Chunk 7 — Fix Keyboard Test's Focus-Loss Regression — 2026-08-20
+
+### What was built
+- Follow-up fix to Chunk 6's `answerCurrentQuestion` helper in
+  `tests/dsa-flagship/two-sum-execution-panel.spec.ts` — not a new feature.
+  A real Playwright run (owner's local machine) on Chunk 6's commit showed
+  2 of the 3 previously-gated tests now passing ("via the step-forward
+  button" and "prefers-reduced-motion..."), but "steps through the
+  brute-force panel via keyboard" still failed:
+  `expect(locator).toBeVisible() failed ... after page.keyboard.press('ArrowRight')`.
+- Root cause: `answerCurrentQuestion` clicks the first prediction-question
+  option, which puts DOM focus on that button. React then re-renders the
+  clicked option `disabled={hasAnswered}`, and browsers auto-blur an
+  element the instant it becomes disabled — focus silently falls back to
+  `<body>`. The subsequent `page.keyboard.press('ArrowRight')` therefore
+  fires on `<body>`, never reaching `ExecutionPanel.tsx`'s `containerRef`
+  keydown listener (which only handles events bubbling from inside the
+  panel container), so nothing advances and the test times out.
+- Fix: added a single `await panel.focus();` line inside
+  `answerCurrentQuestion` itself (after the existing `not.toBeVisible()`
+  assertion), so every call site — button-click tests included — re-focuses
+  the panel after answering. Harmless for the button-click tests (they
+  don't depend on focus location) and fixes the keyboard test's dropped
+  focus.
+
+### Files created/modified
+- `tests/dsa-flagship/two-sum-execution-panel.spec.ts` (modified — 6-line
+  addition inside `answerCurrentQuestion`, nothing else touched)
+- `DSA_FLAGSHIP_PROGRESS.md` (this entry)
+
+### Verification performed
+- `pnpm run lint`: 0 errors (same 14 pre-existing warnings, unchanged).
+- **No Playwright run performed in this session** — this sandbox still has
+  no browser binaries (`cdn.playwright.dev` not in the egress allowlist,
+  confirmed in the prior chunk). The owner will run the real Playwright
+  suite locally after this lands, per their explicit instruction for this
+  chunk; no "passed" result is claimed or simulated here.
+
+### Known issues / blocked items
+- Same as every prior chunk: this sandbox cannot execute Playwright or a
+  full `next build` (Prisma engine host blocked). Needs a session/machine
+  with real browser + network access to close out verification.
+
+### Next chunk to run
+- Owner to run the real Playwright suite locally against this commit and
+  report back; no further test-file changes anticipated unless that run
+  surfaces something new.

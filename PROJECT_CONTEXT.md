@@ -32,7 +32,7 @@ Follows **Feature-Sliced Design (FSD)**:
 ## Known Issues Log
 1. **Unverified Claims**: `app/projects/log-analyser/page.tsx` contains unverified technical claims.
 2. **Placeholder Content**: "About" section and "Project Omega" are placeholders.
-3. **Lighthouse**: Scores were previously self-estimated; real measurement needed.
+3. **Lighthouse**: Real audit completed 2026-08-25 (local production build; reported by repo owner, not independently verified from raw report files — see `LIGHTHOUSE_AUDIT_PROGRESS.md`). Homepage 69/96/96/100, Blog 80/93/96/100 (DB unset, fallback content), DSA 76/88/96/91, Log Analyser 72/94/96/100 (Performance/Accessibility/Best Practices/SEO). Homepage performance and DSA SEO flagged for follow-up. This local-build run does not reflect the live Vercel edge deployment.
 4. **Resend**: API keys not yet configured.
 
 ## Recent Changes

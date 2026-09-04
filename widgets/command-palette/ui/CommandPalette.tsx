@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Command } from "cmdk";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { track } from "@vercel/analytics";
 import {
   User,
@@ -27,6 +27,46 @@ interface CommandPaletteProps {
 export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, setOpen }) => {
   const router = useRouter();
   const [theme, setTheme] = useState<"light" | "dark">("dark");
+  // G2 root cause (real network trace, not the "onSelect wiring" theory this
+  // fix was originally briefed against): Command.Item's onSelect fires
+  // identically for click and keyboard (Enter) — cmdk doesn't distinguish
+  // them, so there was never a keyboard-specific bug. Two distinct real
+  // defects found instead:
+  //
+  // 1. router.push("/#about") etc. triggers a real Next.js App Router RSC
+  //    round-trip (confirmed: a GET /?_rsc=... request) even when the
+  //    destination is just an anchor on the current page — ~170-260ms when
+  //    already on "/". Fixed in navigateToSection() below by bypassing the
+  //    router entirely for same-page anchors (History API + scrollIntoView,
+  //    synchronous, no round-trip). This is what the "Enter selects a
+  //    highlighted command" / "navigation command navigates correctly"
+  //    tests exercise, and what this session was actually briefed against.
+  //
+  // 2. Separately (the architecture-diagram regression): selecting "About"
+  //    from a different route (e.g. a case-study page) cold-fetches the
+  //    entire home route's RSC payload — measured ~800ms in this dev
+  //    environment (Turbopack, unminified; router.prefetch() ahead of time
+  //    did not reduce this in dev — tried and reverted). router.push()
+  //    returns void with no completion signal, so if a second
+  //    navigation-triggering command fires before that ~800ms lands, Next's
+  //    client router drops BOTH navigations silently (confirmed: final
+  //    state stays on the original page indefinitely, not just delayed).
+  //    Blocking the Ctrl+K shortcut while a nav is pending was tried first
+  //    and made this worse — architecture-diagram's regression test sends a
+  //    single, non-retried Control+k keypress with no wait, so an ignored
+  //    keypress just hangs the test forever rather than fixing anything.
+  //    The actual fix (below, navQueueRef) instead lets the palette open
+  //    and close freely, but serializes the underlying router.push calls:
+  //    a second navigation command waits for the previous one's pathname to
+  //    actually land (polled via usePathname(), 3s safety-net timeout)
+  //    before firing, so two rapid commands settle in order instead of
+  //    colliding.
+  const pathname = usePathname();
+  const pathnameRef = React.useRef(pathname);
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
+  const navQueueRef = React.useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -47,6 +87,45 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, setOpen })
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, [open, setOpen]);
+
+  // Serializes real route changes: waits for any previously-queued
+  // navigation's target pathname to actually land before firing the next
+  // router.push. Never blocks the palette UI itself — only the underlying
+  // navigation side effect — so Ctrl+K / reopening always works instantly.
+  const navigateToRoute = (path: string) => {
+    const targetPathname = path.split("#")[0] || "/";
+    navQueueRef.current = navQueueRef.current.then(
+      () =>
+        new Promise<void>((resolve) => {
+          router.push(path);
+          const deadline = Date.now() + 3000;
+          const poll = () => {
+            if (pathnameRef.current === targetPathname) {
+              resolve();
+            } else if (Date.now() > deadline) {
+              resolve();
+            } else {
+              setTimeout(poll, 20);
+            }
+          };
+          poll();
+        }),
+    );
+  };
+
+  // In-page section anchors (About/Skills/Experience/Projects) bypass the
+  // router entirely when already on "/" — there's no server data to refetch
+  // for a same-page scroll, so this is synchronous with no round-trip. A
+  // cross-page target (case studies, or landing on "/" from elsewhere)
+  // still needs a real route change, queued via navigateToRoute above.
+  const navigateToSection = (hash: string) => {
+    if (window.location.pathname === "/") {
+      window.history.pushState(null, "", `/${hash}`);
+      document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigateToRoute(`/${hash}`);
+    }
+  };
 
   const runCommand = (command: () => void) => {
     setOpen(false);
@@ -69,7 +148,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, setOpen })
       open={open}
       onOpenChange={setOpen}
       label="Command Palette"
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] p-4 bg-background/40 backdrop-blur-sm"
+      contentClassName="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] p-4 bg-background/40 backdrop-blur-sm"
     >
       <div className="w-full max-w-2xl bg-surface border border-border rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
         <div className="flex items-center px-4 border-b border-border">
@@ -87,28 +166,28 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, setOpen })
 
           <Command.Group heading="Navigation" className="px-2 py-1.5 text-xs font-mono text-accent uppercase tracking-widest">
             <Command.Item
-              onSelect={() => runCommand(() => router.push("/#about"))}
+              onSelect={() => runCommand(() => navigateToSection("#about"))}
               className="flex items-center gap-3 px-2 py-2 rounded-md text-sm text-foreground-muted aria-selected:bg-surface-raised aria-selected:text-foreground cursor-pointer"
             >
               <User className="w-4 h-4" />
               About
             </Command.Item>
             <Command.Item
-              onSelect={() => runCommand(() => router.push("/#skills"))}
+              onSelect={() => runCommand(() => navigateToSection("#skills"))}
               className="flex items-center gap-3 px-2 py-2 rounded-md text-sm text-foreground-muted aria-selected:bg-surface-raised aria-selected:text-foreground cursor-pointer"
             >
               <Code className="w-4 h-4" />
               Skills
             </Command.Item>
             <Command.Item
-              onSelect={() => runCommand(() => router.push("/#experience"))}
+              onSelect={() => runCommand(() => navigateToSection("#experience"))}
               className="flex items-center gap-3 px-2 py-2 rounded-md text-sm text-foreground-muted aria-selected:bg-surface-raised aria-selected:text-foreground cursor-pointer"
             >
               <Briefcase className="w-4 h-4" />
               Experience
             </Command.Item>
             <Command.Item
-              onSelect={() => runCommand(() => router.push("/#projects"))}
+              onSelect={() => runCommand(() => navigateToSection("#projects"))}
               className="flex items-center gap-3 px-2 py-2 rounded-md text-sm text-foreground-muted aria-selected:bg-surface-raised aria-selected:text-foreground cursor-pointer"
             >
               <Layers className="w-4 h-4" />
@@ -118,14 +197,14 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, setOpen })
 
           <Command.Group heading="Case Studies" className="px-2 py-1.5 text-xs font-mono text-accent uppercase tracking-widest mt-2">
             <Command.Item
-              onSelect={() => runCommand(() => router.push("/projects/log-analyser"))}
+              onSelect={() => runCommand(() => navigateToRoute("/projects/log-analyser"))}
               className="flex items-center gap-3 px-2 py-2 rounded-md text-sm text-foreground-muted aria-selected:bg-surface-raised aria-selected:text-foreground cursor-pointer"
             >
               <FileText className="w-4 h-4" />
               Log Analyser Case Study
             </Command.Item>
             <Command.Item
-              onSelect={() => runCommand(() => router.push("/projects/case-study-two"))}
+              onSelect={() => runCommand(() => navigateToRoute("/projects/case-study-two"))}
               className="flex items-center gap-3 px-2 py-2 rounded-md text-sm text-foreground-muted aria-selected:bg-surface-raised aria-selected:text-foreground cursor-pointer"
             >
               <FileText className="w-4 h-4" />

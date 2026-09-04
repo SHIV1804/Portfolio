@@ -105,21 +105,26 @@ test.describe('Theme Toggle Tests', () => {
   test('theme toggle is keyboard accessible', async ({ page }) => {
     await page.goto('/');
 
-    // Tab to the theme toggle button
-    let focusedElement = await page.evaluate(() => document.activeElement?.tagName);
+    // Tab to the theme toggle button, reading focus state directly via
+    // document.activeElement instead of an auto-waiting locator — a
+    // locator like `button:focus` retries for the full default timeout
+    // whenever focus isn't currently on a button, which stalls the loop.
+    let focusInfo = await page.evaluate(() => {
+      const el = document.activeElement;
+      return { tag: el?.tagName, ariaLabel: el?.getAttribute('aria-label') };
+    });
 
     // Press Tab multiple times until we reach the theme button or timeout
     let attempts = 0;
     while (
-      focusedElement !== 'BUTTON' &&
-      attempts < 20 &&
-      (await page
-        .locator('button:focus')
-        .getAttribute('aria-label'))
-        ?.includes('Switch to') === false
+      !(focusInfo.tag === 'BUTTON' && focusInfo.ariaLabel?.includes('Switch to')) &&
+      attempts < 20
     ) {
       await page.press('body', 'Tab');
-      focusedElement = await page.evaluate(() => document.activeElement?.tagName);
+      focusInfo = await page.evaluate(() => {
+        const el = document.activeElement;
+        return { tag: el?.tagName, ariaLabel: el?.getAttribute('aria-label') };
+      });
       attempts++;
     }
 
@@ -149,17 +154,36 @@ test.describe('Theme Toggle Tests', () => {
   test('body class reflects theme state', async ({ page }) => {
     await page.goto('/');
 
-    // Get body class
-    const bodyClass = await page.locator('body').getAttribute('class');
+    // Theme state lives on <html> (theme-provider.tsx toggles the `dark`
+    // class on document.documentElement), not on <body> — body's class
+    // attribute is static layout styling unrelated to theme and should
+    // stay constant across a theme toggle.
+    const bodyClassBefore = await page.locator('body').getAttribute('class');
+    const initialDark = await page.locator('html').evaluate((el) =>
+      el.classList.contains('dark'),
+    );
 
-    // Body should have text color classes that reflect theme
-    expect(bodyClass).toBeFalsy(); // Body class is applied to html, not body in this app
+    await page.click('[aria-label*="Switch to"]');
+
+    const bodyClassAfter = await page.locator('body').getAttribute('class');
+    const afterDark = await page.locator('html').evaluate((el) =>
+      el.classList.contains('dark'),
+    );
+
+    // The theme toggle should flip the `dark` class on <html>...
+    expect(afterDark).toBe(!initialDark);
+    // ...and leave <body>'s class attribute completely unaffected.
+    expect(bodyClassAfter).toBe(bodyClassBefore);
   });
 
   test('localStorage is updated when theme changes', async ({ page }) => {
     await page.goto('/');
 
-    // Get initial stored value
+    // Before any interaction, nothing has written to localStorage yet —
+    // themeInitScript only reads localStorage/system preference to set
+    // the initial class, it doesn't persist a default. So the stored
+    // value can legitimately be null here; that's not what this test
+    // is checking.
     const initialStored = await page.evaluate(() =>
       localStorage.getItem('portfolio-theme'),
     );
@@ -172,11 +196,8 @@ test.describe('Theme Toggle Tests', () => {
       localStorage.getItem('portfolio-theme'),
     );
 
-    // Values should be different
-    expect(initialStored).not.toBe(newStored);
-
-    // Both should be valid theme values
-    expect(['light', 'dark']).toContain(initialStored);
+    // The toggle should have written a real value, different from before
+    expect(newStored).not.toBe(initialStored);
     expect(['light', 'dark']).toContain(newStored);
   });
 
