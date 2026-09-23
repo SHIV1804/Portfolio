@@ -6,7 +6,7 @@ interface StatsRowProps {
 
 export function StatsRow({ totalRepos, totalStars, totalContributions }: StatsRowProps) {
   const stats = [
-    { label: 'Public Repositories', value: totalRepos },
+    { label: 'Original Public Repositories (No Forks)', value: totalRepos },
     { label: 'Total Stars Earned', value: totalStars },
     { label: 'Yearly Contributions', value: totalContributions },
   ];

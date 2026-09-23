@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { Play, Pause, SkipBack, SkipForward, RefreshCw } from 'lucide-react';
 
 import { DSATracePhase, DSATraceStep } from '@/shared/lib/dsa-sync';
@@ -38,6 +39,7 @@ export const BinarySearchVisualizer: React.FC<BinarySearchVisualizerProps> = ({
   const [legacyHigh, setLegacyHigh] = useState(array.length - 1);
   const [legacyMid, setLegacyMid] = useState(-1);
   const [legacyFound, setLegacyFound] = useState(false);
+  const transition = { duration: prefersReducedMotion ? 0 : 0.35, ease: 'easeOut' as const };
 
   const currentStep: DSATraceStep | undefined = trace?.steps[currentStepIndex];
   
@@ -136,26 +138,28 @@ export const BinarySearchVisualizer: React.FC<BinarySearchVisualizerProps> = ({
 
           return (
             <div key={i} className="relative flex flex-col items-center">
-              {isMid && (
-                <div className="absolute -top-8 text-[10px] font-bold text-accent animate-bounce">
-                  MID
-                </div>
-              )}
-              <div 
-                className={`w-10 h-10 flex items-center justify-center rounded border transition-all duration-300
+              <motion.div
+                className={`w-10 h-10 flex items-center justify-center rounded border
                   ${isMatch ? 'bg-green-500/20 border-green-500 text-green-500 scale-110 shadow-[0_0_15px_rgba(34,197,94,0.3)]' : 
                     isMid ? 'bg-accent/20 border-accent text-accent' : 
                     (isLow || isHigh) ? 'bg-amber-400/20 border-amber-400/40 text-amber-400/60' :
-                    isExcluded ? 'opacity-20 grayscale scale-90' :
+                    isExcluded ? 'grayscale' :
                     'bg-white/5 border-white/10 text-white/40'}
                 `}
+                animate={{ opacity: isExcluded ? 0.2 : 1, scale: isMatch ? 1.1 : isExcluded ? 0.9 : 1 }}
+                transition={transition}
               >
                 {num}
-              </div>
+              </motion.div>
               <div className="mt-2 text-[8px] text-foreground-faint">{i}</div>
             </div>
           );
         })}
+        <motion.div className="pointer-events-none absolute -top-8 left-0 h-5 w-full" aria-hidden="true">
+          <motion.span className="absolute -translate-x-1/2 text-[10px] font-bold text-amber-400" animate={{ x: low * 48 + 20 }} transition={transition}>LOW</motion.span>
+          <motion.span className="absolute -translate-x-1/2 text-[10px] font-bold text-accent" animate={{ x: mid < 0 ? 0 : mid * 48 + 20, opacity: mid < 0 ? 0 : 1 }} transition={transition}>MID</motion.span>
+          <motion.span className="absolute -translate-x-1/2 text-[10px] font-bold text-amber-400" animate={{ x: high * 48 + 20 }} transition={transition}>HIGH</motion.span>
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 text-xs border-t border-white/5 pt-4">
@@ -184,6 +188,16 @@ export const BinarySearchVisualizer: React.FC<BinarySearchVisualizerProps> = ({
           </div>
         </div>
       </div>
+      {isFound && (
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={transition}
+          className="mt-4 p-2 bg-green-500/10 border border-green-500/20 rounded text-center text-green-500 text-xs"
+        >
+          FOUND: Target {finalTarget} is at index {mid}
+        </motion.div>
+      )}
       {currentStep?.explanation && (
         <div className="mt-4 p-2 bg-blue-500/10 border border-blue-500/20 rounded text-center text-blue-500 text-xs">
           {currentStep.explanation}
