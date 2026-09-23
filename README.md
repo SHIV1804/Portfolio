@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Portfolio
 
-## Getting Started
+Personal portfolio website for a systems-minded software engineer — built with Next.js, featuring a full blog system (static MDX + moderated community posts), a live GitHub activity dashboard, and an interactive DSA (Data Structures & Algorithms) walkthrough synced from a companion repository.
 
-First, run the development server:
+**For AI agents / contributors:** read [`AGENTS.md`](./AGENTS.md) first, then [`ARCHITECTURE.md`](./ARCHITECTURE.md) and [`CONVENTIONS.md`](./CONVENTIONS.md). Current status is in [`TASKS.md`](./TASKS.md).
 
+## Stack
+Next.js 16.2.10 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · Prisma 6 + PostgreSQL (Neon) · NextAuth (GitHub OAuth) · GSAP · Framer Motion · MDX (`next-mdx-remote`) · Playwright
+
+## Repository structure
+Follows Feature-Sliced Design (FSD):
+
+| Path | Purpose |
+|---|---|
+| `app/` | Route composition, pages, API routes (App Router) |
+| `widgets/` | Complex, composed UI sections (Header, Hero, GitHub dashboard, DSA visualizers, command palette, terminal) |
+| `features/` | User interactions (contact form, theme toggle) |
+| `entities/` | Small domain-specific UI/data (project cards, skill badges) |
+| `shared/` | Config, cross-cutting libs, base UI (`shared/ui`), Prisma client, auth |
+| `content/blog/` | First-party MDX blog posts |
+| `prisma/` | Schema + migrations (Postgres) |
+| `dsa-solutions/` | A committed snapshot supporting one DSA page — the live data source is the separate `SHIV1804/dsa-solutions` GitHub repo, fetched at request time |
+| `tests/` | Playwright E2E specs |
+| `docs/` | Content-integrity rules and historical session logs |
+
+Full breakdown: [`ARCHITECTURE.md`](./ARCHITECTURE.md).
+
+## Local setup
 ```bash
+npm ci
+cp .env.example .env   # then fill in real values — see BUILD.md for the full variable list
+npx prisma generate    # requires network access to binaries.prisma.sh
+npx prisma migrate dev # first run only, against a real Postgres DATABASE_URL
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
+Open http://localhost:3000.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Common commands
+```bash
+npm run dev        # start dev server
+npm run build       # production build
+npm run lint         # ESLint
+npm run test:e2e   # Playwright E2E suite (starts its own dev server)
+```
+Full details, including environment variables and a known sandbox limitation with `prisma generate`, are in [`BUILD.md`](./BUILD.md).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Status
+Actively developed on the `dev` branch (ahead of `main`). See [`TASKS.md`](./TASKS.md) for what's in progress, known placeholder content, and open issues; [`DECISIONS.md`](./DECISIONS.md) for why things are built the way they are.

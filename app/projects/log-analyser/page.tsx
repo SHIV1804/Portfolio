@@ -26,7 +26,7 @@ export default function LogAnalyserPage() {
           // account (github.com/SHIV1804) that no log-parsing/C++ tooling
           // repo or matching code exists anywhere — "not yet implemented" is
           // an accurate status claim, not a hedge. See
-          // CONTENT_VERIFICATION_PROGRESS.md, Step 2, finding #3.
+          // docs/history/CONTENT_VERIFICATION_PROGRESS.md, Step 2, finding #3.
           subtitle="A planned utility for high-performance log parsing — architecture design in progress, not yet implemented."
           problem={
             <div className="space-y-4">
@@ -91,7 +91,7 @@ export default function LogAnalyserPage() {
                   re-confirmed here that they haven't regressed. No benchmark
                   exists because no implementation exists (see subtitle's
                   VERIFIED note above). See
-                  CONTENT_VERIFICATION_PROGRESS.md, Step 2, findings #17–18. */}
+                  docs/history/CONTENT_VERIFICATION_PROGRESS.md, Step 2, findings #17–18. */}
               <div className="p-4 border border-border rounded bg-surface-raised">
                 <div className="text-accent font-mono text-2xl mb-1">—</div>
                 <div className="text-sm text-foreground-faint uppercase tracking-wider">Average Parse Time (100k lines)</div>
@@ -110,7 +110,7 @@ export default function LogAnalyserPage() {
                   implies a prior completed build, which contradicts this
                   project's actual status (planned/concept, not yet built —
                   confirmed via GitHub API, no implementation exists). See
-                  CONTENT_VERIFICATION_PROGRESS.md, Step 2, finding #19. */}
+                  docs/history/CONTENT_VERIFICATION_PROGRESS.md, Step 2, finding #19. */}
               <p>
                 If I were to take this design further, I would explore using a SIMD-accelerated regex engine to further optimize the parsing pass. Additionally, I would consider a plugin-based architecture for log formatters to make it easier for other engineers to contribute patterns for new systems.
               </p>
