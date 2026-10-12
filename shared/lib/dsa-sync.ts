@@ -48,10 +48,11 @@ export interface DSAPredictionQuestion {
 }
 
 export interface DSATrace {
-  bruteForce: DSATracePhase;
+  /** Some problems start with only an optimized trace and add brute force later. */
+  bruteForce?: DSATracePhase;
   optimized: DSATracePhase;
-  discoveryQuestions: string[];
-  predictionQuestions: DSAPredictionQuestion[];
+  discoveryQuestions?: string[];
+  predictionQuestions?: DSAPredictionQuestion[];
 }
 
 interface GitHubContent {

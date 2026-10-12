@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import rehypePrettyCode from 'rehype-pretty-code';
-import { getDSAProblemBySlug, fetchDSAProblems } from '@/shared/lib/dsa-sync';
+import { getDSAProblemBySlug, fetchDSAProblems, fetchDSATrace } from '@/shared/lib/dsa-sync';
 import { mdxComponents } from '../../../blog/MdxComponents';
 import { Badge } from '@/shared/ui/Badge';
 import { PatternVisualizer } from '@/widgets/dsa/ui/PatternVisualizer';
@@ -39,6 +39,8 @@ export default async function DSAProblemPage({ params }: PageProps) {
     notFound();
   }
 
+  const trace = await fetchDSATrace(pattern, slug);
+
   // Map file extensions to Shiki-supported language tags
   const extensionMap: Record<string, string> = {
     'cpp': 'cpp',
@@ -66,9 +68,9 @@ export default async function DSAProblemPage({ params }: PageProps) {
               ← Back to DSA Solutions
             </Link>
 
-            {slug === 'two-sum' && (
+            {trace && (
               <Link
-                href="/dsa/flagship/two-sum"
+                href={`/dsa/flagship/${pattern}/${slug}`}
                 className="text-xs font-mono px-3 py-1.5 border border-accent/30 rounded bg-accent/5 text-accent hover:bg-accent/10 transition-all flex items-center gap-2"
               >
                 <span className="relative flex h-2 w-2">

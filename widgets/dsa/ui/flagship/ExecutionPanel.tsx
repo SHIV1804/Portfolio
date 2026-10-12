@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Play, Pause, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
 import { useReducedMotion } from '@/shared/lib/useReducedMotion';
-import { ArrayBox } from './ArrayBox';
+import { ArrayBox } from '@/widgets/dsa/ui/flagship/ArrayBox';
 import type { DSATracePhase, DSAPredictionQuestion } from '@/shared/lib/dsa-sync';
 
 interface ExecutionPanelProps {

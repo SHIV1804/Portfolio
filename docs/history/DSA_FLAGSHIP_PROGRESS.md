@@ -276,3 +276,25 @@ Chunks 2–5 are implemented, individually lint/type-check clean, and functional
 - Owner to run the real Playwright suite locally against this commit and
   report back; no further test-file changes anticipated unless that run
   surfaces something new.
+
+## Chunk 8 — Generic Trace-Driven Flagship Route — 2026-10-12
+
+### What was built
+- Added `app/dsa/flagship/[pattern]/[slug]/page.tsx`, which fetches the problem and its `trace.json` using the route parameters and renders the shared flagship experience for any trace-backed DSA problem.
+- Reused the existing `ArrayBox`, `ExecutionPanel`, and `DiscoveryTransition` components unchanged in behavior, moving them to `widgets/dsa/ui/flagship/` so the route remains a composition layer.
+- Made `bruteForce` and prediction questions optional in the trace contract. A trace with only an optimized phase now renders a clear fallback and skips the brute-force section instead of crashing.
+- Replaced `/dsa/flagship/two-sum` with a redirect to `/dsa/flagship/hash-map/two-sum`.
+- Updated regular DSA problem pages to show the flagship link whenever that problem has a real `trace.json`, rather than checking for the Two Sum slug only.
+
+### Verification performed
+- `npm run lint`: passed with 0 errors and existing unrelated warnings.
+- `npm run build`: passed; Next.js compiled, type-checked, generated all pages, and listed the new dynamic flagship route.
+- Dev Preview with authenticated access to `SHIV1804/dsa-solutions`:
+  - Two Sum rendered the generic route with its real brute-force and optimized trace panels, prediction gating, discovery flow, and optimized walkthrough.
+  - Two Sum II rendered the generic route with its real brute-force and optimized trace panels and controls.
+  - The legacy Two Sum URL redirected to `/dsa/flagship/hash-map/two-sum`.
+  - The regular Two Sum II page displayed a link to its dynamic flagship route.
+- Confirmed the reusable components contain no Two Sum-specific branching or hardcoded problem identity; problem-specific execution text comes from the fetched trace data.
+
+### Known data note
+- The current Two Sum source `trace.json` still contains an older `[3, 2, 4]` / `6` narrative while its live `meta.md` example is `[2, 7, 11, 15]` / `9`. The route remains data-driven and does not fabricate or silently rewrite that source trace; the trace should be regenerated or corrected in `dsa-solutions` separately.
