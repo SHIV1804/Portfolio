@@ -59,7 +59,7 @@ export const HeroSection: React.FC = () => {
     {
       id: 4,
       title: "Building the Future",
-      content: "[PLACEHOLDER: bio content pending owner review]"
+      content: "[PLACEHOLDER: what I want recruiters to remember — owner to provide]"
     },
   ];
 

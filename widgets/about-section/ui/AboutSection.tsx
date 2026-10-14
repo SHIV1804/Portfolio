@@ -15,7 +15,7 @@ export const AboutSection: React.FC = () => {
             I care about building things that actually work end-to-end, not just things that look finished. This site itself is an example: it syncs solved problems from GitHub through a signature-verified webhook, handles real user authentication and a moderated content-submission queue backed by a real database, and includes interactive algorithm visualizers built from hand-verified execution traces.
           </p>
           <p>
-            [PLACEHOLDER: bio content pending owner review]
+            [PLACEHOLDER: current role and work, and how I got into systems programming — owner to provide]
           </p>
         </div>
       </div>
