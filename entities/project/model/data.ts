@@ -20,11 +20,4 @@ export const projects: Project[] = [
     tags: ["C++", "Systems", "Concept"],
     href: "/projects/log-analyser",
   },
-  {
-    slug: "case-study-two",
-    title: "Second project",
-    description: "[PLACEHOLDER — project not yet selected]",
-    href: "/projects/case-study-two",
-    isPlaceholder: true,
-  },
 ];

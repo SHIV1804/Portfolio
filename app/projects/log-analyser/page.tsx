@@ -11,7 +11,6 @@ export const metadata: Metadata = {
     title: "Log Analyser Case Study | Shivam Portfolio",
     description: "Planned architecture for a C++ tool to parse and visualize complex system logs — design in progress, not yet built.",
     url: `${siteConfig.url}/projects/log-analyser`,
-    images: [{ url: "/og-log-analyser.png" }], // [PLACEHOLDER: OG image]
     type: "article",
   },
 };
@@ -52,7 +51,7 @@ export default function LogAnalyserPage() {
                 The planned utility would be built using modern C++, focusing on memory-mapped I/O for fast file access and a multi-pass parsing strategy. The design explores a first pass to index the file and identify transaction boundaries, while a second pass would build a directed acyclic graph (DAG) representing the event flow.
               </p>
               <div className="bg-surface border border-border p-4 rounded font-mono text-sm overflow-x-auto">
-                [PLACEHOLDER: Architecture Diagram Description - A flow diagram showing File I/O → Indexing Engine → Transaction Reconstructor → Visualization Layer]
+                Architecture diagram not available: this project is planned and not yet built.
               </div>
               <div className="mt-6">
                 <p className="mb-4">Key architectural components under consideration include:</p>
@@ -79,7 +78,7 @@ export default function LogAnalyserPage() {
                 </p>
               </div>
               <div className="bg-surface border border-border p-4 rounded font-mono text-sm overflow-x-auto">
-                <pre>{`// [PLACEHOLDER: code snippet showing mmap implementation or core parsing logic]`}</pre>
+                <pre>Code sample not available: this project is planned and not yet built.</pre>
               </div>
             </div>
           }

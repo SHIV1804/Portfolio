@@ -201,14 +201,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ open, setOpen })
               className="flex items-center gap-3 px-2 py-2 rounded-md text-sm text-foreground-muted aria-selected:bg-surface-raised aria-selected:text-foreground cursor-pointer"
             >
               <FileText className="w-4 h-4" />
-              Log Analyser Case Study
-            </Command.Item>
-            <Command.Item
-              onSelect={() => runCommand(() => navigateToRoute("/projects/case-study-two"))}
-              className="flex items-center gap-3 px-2 py-2 rounded-md text-sm text-foreground-muted aria-selected:bg-surface-raised aria-selected:text-foreground cursor-pointer"
-            >
-              <FileText className="w-4 h-4" />
-              Project Omega (Coming Soon)
+              Planned Log Analyser (not yet built)
             </Command.Item>
           </Command.Group>
 
