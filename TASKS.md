@@ -8,7 +8,6 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 - **About/Hero bio content is a placeholder.** `widgets/about-section/ui/AboutSection.tsx` and the 4th story beat in `widgets/hero-section/ui/HeroSection.tsx` both contain the literal text `[PLACEHOLDER: bio content pending owner review]`, pending real content from the site owner.
 
 ## Known Issues / Bugs (verified by reading the current source)
-- **`.env.example` is missing three variables actually read by the code**: `DSA_GITHUB_REPO`, `DSA_WEBHOOK_SECRET`, `NEXT_PUBLIC_SITE_URL`. See `BUILD.md`.
 - **`/resume.pdf` is referenced but not present.** `widgets/command-palette/ui/CommandPalette.tsx` and `widgets/terminal-easter-egg/lib/commands.ts` both `window.open('/resume.pdf')`; `public/` contains only the default Next.js starter SVGs (`file.svg`, `globe.svg`, `next.svg`, `vercel.svg`, `window.svg`) — no `resume.pdf`.
 - **OG images referenced but not present.** `app/page.tsx`, `app/projects/log-analyser/page.tsx`, `app/projects/case-study-two/page.tsx` all reference `/og-*.png` paths marked `// [PLACEHOLDER: OG image]`; none exist in `public/`. (`app/blog/[slug]/opengraph-image.tsx` generates blog OG images dynamically via `next/og` — that one is real and not affected.)
 - **Two lockfiles committed**: `package-lock.json` and `pnpm-lock.yaml` + `pnpm-workspace.yaml` are all present. `npm ci` (used to verify this doc) works fine, but which package manager is authoritative isn't documented anywhere.
@@ -19,6 +18,7 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 - **A real Lighthouse audit from *this* sandbox** is similarly blocked by the same network restriction — the only numbers in `docs/history/LIGHTHOUSE_AUDIT_PROGRESS.md` Session 2 (2026-08-25) were run and reported by the repo owner on their own machine, not independently verified from raw report files.
 
 ## Completed (verified against code, not just prior logs)
+- `.env.example` now lists every discovered environment variable with an empty value and a purpose comment, including the DSA repository, webhook secret, and public site URL variables.
 - Launch blockers fixed on `fix/launch-blockers`: GitHub private-email fallback now sends the interpolated access token and only accepts a primary, verified email; post slug collisions now interpolate the base slug and counter.
 - Blog system: MDX (`content/blog/*.mdx`) + moderated community posts (Prisma `Post` model, `PENDING`/`APPROVED`/`REJECTED`), search (`BlogSearch`), tags, RSS, dynamic OG images for MDX posts.
 - Stored-XSS fix for community posts: `shared/lib/safe-markdown.ts` sanitization pipeline, used consistently everywhere DB-backed post content is rendered (`app/blog/page.tsx` excerpt generation via `.slice()` + `app/blog/[slug]/page.tsx` full render).
