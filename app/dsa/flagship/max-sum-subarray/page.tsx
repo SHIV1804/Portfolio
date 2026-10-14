@@ -215,8 +215,8 @@ const SlidingWindowVisualizer: React.FC<VisualizerProps> = ({ nums, trace }) => 
 };
 
 async function MaxSumSubarrayPageContent() {
-  const problem = await getDSAProblemBySlug('sliding-window', 'max-sum-subarray');
-  const trace = await fetchDSATrace('sliding-window', 'max-sum-subarray');
+  const problem = await getDSAProblemBySlug('sliding-window', 'maximum-sum-subarray-of-size-k');
+  const trace = await fetchDSATrace('sliding-window', 'maximum-sum-subarray-of-size-k');
 
   if (!problem || !trace) {
     return (
