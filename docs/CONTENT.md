@@ -10,9 +10,9 @@ No fabrication. Never invent personal facts, metrics, dates, or technical claims
 |---|---|
 | `widgets/hero-section/ui/HeroSection.tsx` (4th story beat) | `[PLACEHOLDER: bio content pending owner review]` |
 | `widgets/about-section/ui/AboutSection.tsx` | `[PLACEHOLDER: bio content pending owner review]` |
-| `entities/project/model/data.ts` (`case-study-two`) | `[PLACEHOLDER — project not yet selected]`, `isPlaceholder: true` |
-| `app/projects/log-analyser/page.tsx` | Three markers: architecture-diagram description, a code snippet, and an OG image |
-| `app/page.tsx`, `app/projects/log-analyser/page.tsx`, `app/projects/case-study-two/page.tsx` | `// [PLACEHOLDER: OG image]` — none of the referenced `/og-*.png` files exist in `public/` |
+| `app/projects/case-study-two/page.tsx` | Direct-only route retained for the unselected project; it is not in project data, public navigation, command palette, terminal listings, or sitemap. |
+| `app/projects/log-analyser/page.tsx` | Planned/not-yet-built wording is explicit; no implementation details or placeholder markers are presented as completed work. |
+| `app/page.tsx`, `app/projects/case-study-two/page.tsx` | `// [PLACEHOLDER: OG image]` — none of the referenced `/og-*.png` files exist in `public/` |
 
 ## Current `VERIFIED:` markers (verified by reading the code)
 | Location | What was verified |
