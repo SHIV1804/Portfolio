@@ -17,19 +17,27 @@ export const HeroSection: React.FC = () => {
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mediaQuery.addEventListener("change", handler);
 
+    let isCancelled = false;
+    let matchMediaInstance: gsap.MatchMedia | null = null;
+
     if (!mediaQuery.matches) {
       // Lazy load GSAP
       const loadAnimations = async () => {
         const { initHeroAnimations } = await import("../lib/scrollAnimations");
+        if (isCancelled) return;
         if (containerRef.current && parallaxRef.current) {
           const validBeats = beatsRef.current.filter((b): b is HTMLDivElement => b !== null);
-          initHeroAnimations(containerRef.current, validBeats, parallaxRef.current);
+          matchMediaInstance = initHeroAnimations(containerRef.current, validBeats, parallaxRef.current);
         }
       };
       loadAnimations();
     }
 
-    return () => mediaQuery.removeEventListener("change", handler);
+    return () => {
+      isCancelled = true;
+      mediaQuery.removeEventListener("change", handler);
+      matchMediaInstance?.revert();
+    };
   }, []);
 
   const storyBeats = [

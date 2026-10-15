@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { Play, Pause, SkipBack, SkipForward, RefreshCw } from 'lucide-react';
+import { useReducedMotion } from '@/shared/lib/useReducedMotion';
 
 interface SlidingWindowVisualizerProps {
   exampleInput: {
@@ -11,14 +13,18 @@ interface SlidingWindowVisualizerProps {
   };
 }
 
+const CELL_STEP = 48;
+
 export const SlidingWindowVisualizer: React.FC<SlidingWindowVisualizerProps> = ({ exampleInput }) => {
   const { array, k = 3 } = exampleInput;
+  const prefersReducedMotion = useReducedMotion();
   const [left, setLeft] = useState(0);
   const [right, setRight] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSum, setCurrentSum] = useState(0);
   const [maxSum, setMaxSum] = useState(0);
   const [history, setHistory] = useState<{ left: number; right: number; sum: number; maxSum: number }[]>([]);
+  const transition = { duration: prefersReducedMotion ? 0 : 0.35, ease: 'easeOut' as const };
 
   const reset = useCallback(() => {
     setLeft(0);
@@ -74,65 +80,41 @@ export const SlidingWindowVisualizer: React.FC<SlidingWindowVisualizerProps> = (
   return (
     <div className="w-full bg-background/50 rounded-xl border border-white/10 p-6 font-mono">
       <div className="flex justify-between items-center mb-8">
-        <div className="text-xs uppercase tracking-widest text-foreground-faint">
-          Sliding Window Visualizer
-        </div>
+        <div className="text-xs uppercase tracking-widest text-foreground-faint">Sliding Window Visualizer</div>
         <div className="flex gap-2">
-          <button onClick={prevStep} disabled={history.length === 0} className="p-2 hover:bg-white/5 rounded-lg disabled:opacity-30">
-            <SkipBack size={16} />
-          </button>
-          <button onClick={() => setIsPlaying(!isPlaying)} className="p-2 hover:bg-white/5 rounded-lg text-accent">
-            {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-          </button>
-          <button onClick={nextStep} disabled={right >= array.length} className="p-2 hover:bg-white/5 rounded-lg disabled:opacity-30">
-            <SkipForward size={16} />
-          </button>
-          <button onClick={reset} className="p-2 hover:bg-white/5 rounded-lg">
-            <RefreshCw size={16} />
-          </button>
+          <button onClick={prevStep} disabled={history.length === 0} className="p-2 hover:bg-white/5 rounded-lg disabled:opacity-30"><SkipBack size={16} /></button>
+          <button onClick={() => setIsPlaying(!isPlaying)} className="p-2 hover:bg-white/5 rounded-lg text-accent">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</button>
+          <button onClick={nextStep} disabled={right >= array.length} className="p-2 hover:bg-white/5 rounded-lg disabled:opacity-30"><SkipForward size={16} /></button>
+          <button onClick={reset} className="p-2 hover:bg-white/5 rounded-lg"><RefreshCw size={16} /></button>
         </div>
       </div>
 
-      <div className="flex justify-center gap-2 mb-8 h-16 items-end">
+      <div className="relative flex justify-center gap-2 mb-8 h-16 items-end">
         {array.map((num, i) => {
           const isInWindow = i >= left && i < right;
-
           return (
-            <div key={i} className="relative flex flex-col items-center">
-              <div 
-                className={`w-10 h-10 flex items-center justify-center rounded border transition-all duration-300
-                  ${isInWindow ? 'bg-accent/20 border-accent text-accent scale-105 shadow-[0_0_10px_rgba(251,191,36,0.2)]' : 
-                    'bg-white/5 border-white/10 text-white/40'}
-                `}
-              >
-                {num}
-              </div>
+            <motion.div key={i} className="relative flex flex-col items-center" animate={{ opacity: isInWindow ? 1 : 0.72 }} transition={transition}>
+              <motion.div
+                className={`w-10 h-10 flex items-center justify-center rounded border ${isInWindow ? 'bg-accent/20 border-accent text-accent shadow-[0_0_10px_rgba(251,191,36,0.2)]' : 'bg-white/5 border-white/10 text-white/40'}`}
+                animate={{ scale: isInWindow ? 1.05 : 1 }}
+                transition={transition}
+              >{num}</motion.div>
               <div className="mt-2 text-[8px] text-foreground-faint">{i}</div>
-            </div>
+            </motion.div>
           );
         })}
+        <motion.div className="pointer-events-none absolute bottom-0 h-11 border-l-2 border-accent" aria-hidden="true" animate={{ x: left * CELL_STEP + 20 }} transition={transition} />
+        <motion.div className="pointer-events-none absolute bottom-0 h-11 border-r-2 border-accent" aria-hidden="true" animate={{ x: Math.max(0, right - 1) * CELL_STEP + 20 }} transition={transition} />
       </div>
 
       <div className="grid grid-cols-2 gap-4 text-xs border-t border-white/5 pt-4">
         <div className="space-y-1">
-          <div className="flex justify-between">
-            <span className="text-foreground-faint">Window Range:</span>
-            <span className="text-accent">[{left}, {Math.max(0, right - 1)}]</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-foreground-faint">Window Size:</span>
-            <span className="text-white">{Math.max(0, right - left)} / {k}</span>
-          </div>
+          <div className="flex justify-between"><span className="text-foreground-faint">Window Range:</span><span className="text-accent">[{left}, {Math.max(0, right - 1)}]</span></div>
+          <div className="flex justify-between"><span className="text-foreground-faint">Window Size:</span><span className="text-white">{Math.max(0, right - left)} / {k}</span></div>
         </div>
         <div className="space-y-1">
-          <div className="flex justify-between">
-            <span className="text-foreground-faint">Current Sum:</span>
-            <span className="text-white font-bold">{currentSum}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-foreground-faint">Max Sum Seen:</span>
-            <span className="text-accent font-bold">{maxSum}</span>
-          </div>
+          <div className="flex justify-between"><span className="text-foreground-faint">Current Sum:</span><span className="text-white font-bold">{currentSum}</span></div>
+          <div className="flex justify-between"><span className="text-foreground-faint">Max Sum Seen:</span><span className="text-accent font-bold">{maxSum}</span></div>
         </div>
       </div>
     </div>

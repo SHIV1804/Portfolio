@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function CaseStudyTwoPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-grow">
+      <div className="flex-grow">
         <CaseStudyLayout
           title="Project Omega"
           subtitle="[TBD — project not yet selected]"
@@ -28,7 +28,7 @@ export default function CaseStudyTwoPage() {
           metrics={<p>[TBD — project not yet selected]</p>}
           differently={<p>[TBD — project not yet selected]</p>}
         />
-      </main>
+      </div>
     </div>
   );
 }

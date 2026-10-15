@@ -66,12 +66,12 @@ export default function WritePostPage() {
 
   if (status === 'loading') {
     return (
-      <main className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto">
+      <div className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-accent" />
           <p className="text-foreground-muted font-mono">Loading session...</p>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -81,7 +81,7 @@ export default function WritePostPage() {
 
   if (isSuccess) {
     return (
-      <main className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto">
+      <div className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto">
         <div className="bg-surface border border-border p-12 rounded-lg text-center">
           <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-6" />
           <h1 className="text-3xl font-bold mb-4">Submission Received</h1>
@@ -103,12 +103,12 @@ export default function WritePostPage() {
             </button>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto">
+    <div className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto">
       <div className="mb-8">
         <Link
           href="/blog"
@@ -191,6 +191,6 @@ export default function WritePostPage() {
           </Link>
         </div>
       </form>
-    </main>
+    </div>
   );
 }

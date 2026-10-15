@@ -181,3 +181,50 @@
 
 ### Next chunk to run
 - Chunk 5: Search and Filtering improvements (client-side).
+
+## Chunk 5 — UI/UX Polish & Accessibility Fix — 2026-08-10
+### What was built
+- **Accessibility Fix**: Removed duplicate `<main>` landmarks from `/dsa` and `/dsa/[pattern]/[slug]` pages. These pages now correctly inherit the primary `<main>` wrapper from the root layout, resolving Playwright test failures.
+### Decisions made (and why)
+- **Landmark Consistency**: Ensured that the site follows WAI-ARIA best practices by having only one primary `<main>` element per page.
+### Files created/modified
+- `app/dsa/page.tsx`
+- `app/dsa/[pattern]/[slug]/page.tsx`
+### Verification performed
+- `npm run build`: Passed.
+- `npm run lint`: Passed.
+- **DOM Inspection**: Verified `document.querySelectorAll('main').length === 1` on DSA routes.
+### Next chunk to run
+- Chunk 6: Advanced visualizer features or performance optimizations.
+
+
+## Chunk 7 — Visualizer Motion Polish — 2026-09-04
+
+### What was built
+- Added Framer Motion transitions to `TwoPointersVisualizer`: left/right marker labels slide between cells with a 350 ms ease-out transition, comparison/match styling fades, and the match result enters smoothly.
+- Added Framer Motion transitions to `SlidingWindowVisualizer`: both window boundaries slide as the range advances, while cells entering or leaving the window fade and scale into place.
+- Added Framer Motion transitions to `BinarySearchVisualizer`: low/mid/high marker labels move on shared animated tracks, excluded cells fade and shrink as the range narrows, and the FOUND result fades/slides in.
+- All transition durations use the shared `useReducedMotion` hook and become `0` when `prefers-reduced-motion: reduce` is active. Binary Search autoplay retains its existing zero-delay reduced-motion behavior.
+
+### Verification performed
+- Started the local dev Preview with `DSA_GITHUB_REPO=SHIV1804/dsa-solutions` and authenticated GitHub access.
+- Rendered real problem pages successfully:
+  - Two Sum II — Input Array Is Sorted: `[2, 7, 11, 15]`, target `9`.
+  - Maximum Sum Subarray of Size K: `[2, 1, 5, 1, 3, 2]`, `k = 3`.
+  - Binary Search: `[-1, 0, 3, 5, 9, 12]`, target `9`.
+- Confirmed the preview DOM exposes the moving pointer/window labels and Binary Search `LOW`, `MID`, and `HIGH` marker track.
+- `pnpm run lint`: passed with 0 errors and the repository's existing 14 warnings in unrelated files.
+
+## Chunk 8 — Motion Verification Revalidation — 2026-10-12
+
+### Verification performed
+- Confirmed the existing Framer Motion implementation on `dev` is active in all three visualizers:
+  - **Two Pointers**: `LEFT`/`RIGHT` markers move between cells with a 350 ms ease-out transition; active/match cell emphasis and the match result fade/scale smoothly.
+  - **Sliding Window**: both window boundary markers move with the range; cells entering/leaving the window fade and scale.
+  - **Binary Search**: `LOW`/`MID`/`HIGH` markers move with the search range; excluded cells fade/shrink; the `FOUND` result fades/slides into view.
+- Verified the real Preview routes served successfully with authenticated GitHub data from `SHIV1804/dsa-solutions`:
+  - `/dsa/two-pointers/two-sum-ii-input-array-is-sorted` — Two Sum II data and pointer labels rendered.
+  - `/dsa/sliding-window/maximum-sum-subarray-of-size-k` — Maximum Sum Subarray data and window range rendered.
+  - `/dsa/binary-search/binary-search` — Binary Search data and `LOW`/`MID`/`HIGH` labels rendered.
+- Verified reduced-motion handling remains wired through `useReducedMotion`: all visual transitions use duration `0` when `prefers-reduced-motion: reduce` is active, and Binary Search autoplay retains its zero-delay reduced-motion path.
+- `pnpm run lint`: passed with 0 errors and the repository's existing 14 warnings.

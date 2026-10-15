@@ -76,16 +76,16 @@ export default function AdminPostsPage() {
 
   if (status === 'loading' || (status === 'authenticated' && session?.user?.isAdmin && isLoading)) {
     return (
-      <main className="min-h-screen pt-32 pb-20 px-6 max-w-6xl mx-auto text-center">
+      <div className="min-h-screen pt-32 pb-20 px-6 max-w-6xl mx-auto text-center">
         <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-accent" />
         <p className="text-foreground-muted font-mono">Loading dashboard...</p>
-      </main>
+      </div>
     );
   }
 
   if (status === 'authenticated' && !session?.user?.isAdmin) {
     return (
-      <main className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto">
+      <div className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto">
         <div className="bg-red-500/10 border border-red-500/50 p-12 rounded-lg text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
           <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
@@ -99,12 +99,12 @@ export default function AdminPostsPage() {
             Back to Blog
           </Link>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen pt-32 pb-20 px-6 max-w-6xl mx-auto">
+    <div className="min-h-screen pt-32 pb-20 px-6 max-w-6xl mx-auto">
       <div className="mb-8">
         <Link
           href="/blog"
@@ -185,6 +185,6 @@ export default function AdminPostsPage() {
           ))}
         </div>
       )}
-    </main>
+    </div>
   );
 }

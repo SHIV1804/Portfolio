@@ -8,7 +8,7 @@ test.describe('Command Palette Tests', () => {
     await page.press('body', 'Control+k');
 
     // Command palette should be visible
-    const dialog = page.locator('[label="Command Palette"]');
+    const dialog = page.locator('[aria-label="Command Palette"]');
     await expect(dialog).toBeVisible();
   });
 
@@ -23,7 +23,7 @@ test.describe('Command Palette Tests', () => {
     // Press Meta+K (simulates Cmd+K on Mac)
     await page.press('body', 'Meta+k');
 
-    const dialog = page.locator('[label="Command Palette"]');
+    const dialog = page.locator('[aria-label="Command Palette"]');
     await expect(dialog).toBeVisible();
   });
 
@@ -65,7 +65,7 @@ test.describe('Command Palette Tests', () => {
 
     // Open palette
     await page.press('body', 'Control+k');
-    const dialog = page.locator('[label="Command Palette"]');
+    const dialog = page.locator('[aria-label="Command Palette"]');
     await expect(dialog).toBeVisible();
 
     // Press Escape
@@ -92,7 +92,7 @@ test.describe('Command Palette Tests', () => {
     await page.press('body', 'Enter');
 
     // Palette should close
-    const dialog = page.locator('[label="Command Palette"]');
+    const dialog = page.locator('[aria-label="Command Palette"]');
     await expect(dialog).not.toBeVisible();
 
     // Should have navigated to #about
@@ -196,7 +196,7 @@ test.describe('Command Palette Tests', () => {
     // Just verify command palette closed
     await page.press('body', 'Enter');
 
-    const dialog = page.locator('[label="Command Palette"]');
+    const dialog = page.locator('[aria-label="Command Palette"]');
     await expect(dialog).not.toBeVisible();
   });
 
@@ -220,7 +220,7 @@ test.describe('Command Palette Tests', () => {
     for (let i = 0; i < 2; i++) {
       await page.press('body', 'Control+k');
 
-      const dialog = page.locator('[label="Command Palette"]');
+      const dialog = page.locator('[aria-label="Command Palette"]');
       await expect(dialog).toBeVisible();
 
       // Close it
@@ -235,7 +235,7 @@ test.describe('Command Palette Tests', () => {
     await page.goto('/');
 
     // Palette should not be open initially
-    const dialog = page.locator('[label="Command Palette"]');
+    const dialog = page.locator('[aria-label="Command Palette"]');
     await expect(dialog).not.toBeVisible();
   });
 
@@ -248,7 +248,7 @@ test.describe('Command Palette Tests', () => {
     await page.click('[aria-label="Open command palette"]');
 
     // Palette should be visible
-    const dialog = page.locator('[label="Command Palette"]');
+    const dialog = page.locator('[aria-label="Command Palette"]');
     await expect(dialog).toBeVisible();
   });
 
