@@ -44,7 +44,7 @@ export const HeroSection: React.FC = () => {
     {
       id: 1,
       title: "Precision at the Edge",
-      content: "A software engineer building real systems from the ground up — from solving 120+ algorithmic problems on LeetCode to shipping full-stack features with real infrastructure behind them."
+      content: "A software engineer building real systems from the ground up — from regular problem-solving on LeetCode to shipping full-stack features with real infrastructure behind them."
     },
     {
       id: 2,
@@ -59,7 +59,7 @@ export const HeroSection: React.FC = () => {
     {
       id: 4,
       title: "Building the Future",
-      content: "[PLACEHOLDER: bio content pending owner review]"
+      content: "My goal is to build reliable, efficient software and take ownership of challenging technical problems, growing through continuous learning and hands-on experience."
     },
   ];
 

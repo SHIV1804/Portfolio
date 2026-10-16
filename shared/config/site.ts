@@ -1,8 +1,8 @@
 export const siteConfig = {
   name: "Shivam",
-  role: "Software Engineer",
+  role: "Associate Software Developer",
   description:
-    "Systems-minded software engineer building production payment terminal software.",
+    "Associate Software Developer | C++ | Problem Solving | Software Development",
   url: "https://portfolio-theta-ruby-31nqvqjqmc.vercel.app",
   links: {
     email: "mailto:shivamchourasiya766@gmail.com",
