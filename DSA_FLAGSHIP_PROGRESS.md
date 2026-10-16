@@ -78,3 +78,21 @@
 - **Database-less Build (Final)**: Ran `npm run build` with `DATABASE_URL` explicitly unset. The build completed successfully (30/30 pages), with the console correctly logging `PrismaClientInitializationError` warnings instead of crashing.
 - **Linting (Final)**: Ran `npm run lint` which passed with 0 errors.
 - **Commit History**: Verified that subtasks 1a-1c are now fully committed to the main branch.
+
+## DSA Chunk D — Binary Search Visualizer — 2026-10-17
+
+### What was built
+- Added a trace-driven Binary Search walkthrough for `[-1, 0, 3, 5, 9, 12]` targeting `9` in the authoritative `dsa-solutions` repository.
+- Updated the portfolio DSA problem route to fetch `trace.json` from GitHub and pass the optimized trace into `PatternVisualizer`.
+- Refined `BinarySearchVisualizer` to show the active search range, midpoint, comparison, excluded values, and found state with play/pause, step, previous, and reset controls.
+
+### Verification performed
+- Confirmed the trace follows the actual Binary Search execution: midpoint `3`, narrowed range `[3, 5]`, midpoint `9`, then a match at index `4`.
+- Confirmed reduced-motion handling remains delegated to the shared `useReducedMotion` hook.
+- Confirmed the portfolio branch and DSA source branch are both kept separate and pushed without force-pushing.
+
+### Files created/modified
+- `dsa-solutions/problems/binary-search/binary-search/trace.json`
+- `app/dsa/[pattern]/[slug]/page.tsx`
+- `widgets/dsa/ui/PatternVisualizer.tsx`
+- `widgets/dsa/ui/visualizers/BinarySearchVisualizer.tsx`

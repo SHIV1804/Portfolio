@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import rehypePrettyCode from 'rehype-pretty-code';
-import { getDSAProblemBySlug, fetchDSAProblems } from '@/shared/lib/dsa-sync';
+import { getDSAProblemBySlug, fetchDSAProblems, fetchDSATrace } from '@/shared/lib/dsa-sync';
 import { mdxComponents } from '../../../blog/MdxComponents';
 import { Badge } from '@/shared/ui/Badge';
 import { PatternVisualizer } from '@/widgets/dsa/ui/PatternVisualizer';
@@ -38,6 +38,7 @@ export default async function DSAProblemPage({ params }: PageProps) {
   if (!problem) {
     notFound();
   }
+  const trace = await fetchDSATrace(pattern, slug);
 
   // Map file extensions to Shiki-supported language tags
   const extensionMap: Record<string, string> = {
@@ -123,7 +124,7 @@ export default async function DSAProblemPage({ params }: PageProps) {
         {/* Visualizer Slot */}
         <section className="mb-16">
           <h2 className="text-sm font-mono text-foreground-faint uppercase tracking-widest mb-4">Visualizer</h2>
-          <PatternVisualizer pattern={problem.pattern} exampleInput={problem.exampleInput} />
+          <PatternVisualizer pattern={problem.pattern} exampleInput={problem.exampleInput} trace={trace} />
         </section>
 
         {/* Write-up Content */}
