@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { DSATracePhase } from '@/shared/lib/dsa-sync';
+import { DSATrace } from '@/shared/lib/dsa-sync';
 import { TwoPointersVisualizer } from './visualizers/TwoPointersVisualizer';
 import { SlidingWindowVisualizer } from './visualizers/SlidingWindowVisualizer';
 import { BinarySearchVisualizer } from './visualizers/BinarySearchVisualizer';
@@ -9,9 +9,10 @@ import { BinarySearchVisualizer } from './visualizers/BinarySearchVisualizer';
 interface PatternVisualizerProps {
   pattern: string;
   exampleInput: Record<string, unknown>;
+  trace?: DSATrace | null;
 }
 
-export const PatternVisualizer: React.FC<PatternVisualizerProps> = ({ pattern, exampleInput }) => {
+export const PatternVisualizer: React.FC<PatternVisualizerProps> = ({ pattern, exampleInput, trace }) => {
   if (!exampleInput || !Array.isArray(exampleInput.array)) {
     return (
       <div className="w-full aspect-video bg-background/50 rounded-xl border border-dashed border-white/10 flex items-center justify-center text-foreground-faint text-xs font-mono">
@@ -30,12 +31,10 @@ export const PatternVisualizer: React.FC<PatternVisualizerProps> = ({ pattern, e
     case 'sliding-window':
       return <SlidingWindowVisualizer exampleInput={{ array, k, target }} />;
     case 'binary-search':
-      // Check if this is a flagship trace-driven visualizer
-      if (exampleInput.trace && typeof exampleInput.trace === 'object') {
-        const trace = (exampleInput.trace as { bruteForce: DSATracePhase }).bruteForce; // Default to bruteForce for visualizer
+      if (trace?.optimized) {
         return (
           <BinarySearchVisualizer 
-            trace={trace} 
+            trace={trace.optimized}
             initialArray={array} 
             target={target} 
           />

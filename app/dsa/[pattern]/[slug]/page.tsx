@@ -38,7 +38,6 @@ export default async function DSAProblemPage({ params }: PageProps) {
   if (!problem) {
     notFound();
   }
-
   const trace = await fetchDSATrace(pattern, slug);
 
   // Map file extensions to Shiki-supported language tags
@@ -125,7 +124,7 @@ export default async function DSAProblemPage({ params }: PageProps) {
         {/* Visualizer Slot */}
         <section className="mb-16">
           <h2 className="text-sm font-mono text-foreground-faint uppercase tracking-widest mb-4">Visualizer</h2>
-          <PatternVisualizer pattern={problem.pattern} exampleInput={problem.exampleInput} />
+          <PatternVisualizer pattern={problem.pattern} exampleInput={problem.exampleInput} trace={trace} />
         </section>
 
         {/* Write-up Content */}
