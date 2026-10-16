@@ -298,3 +298,20 @@ Chunks 2–5 are implemented, individually lint/type-check clean, and functional
 
 ### Known data note
 - The current Two Sum source `trace.json` still contains an older `[3, 2, 4]` / `6` narrative while its live `meta.md` example is `[2, 7, 11, 15]` / `9`. The route remains data-driven and does not fabricate or silently rewrite that source trace; the trace should be regenerated or corrected in `dsa-solutions` separately.
+## DSA Chunk D — Binary Search Visualizer — 2026-10-17
+
+### What was built
+- Added a trace-driven Binary Search walkthrough for `[-1, 0, 3, 5, 9, 12]` targeting `9` in the authoritative `dsa-solutions` repository.
+- Updated the portfolio DSA problem route to fetch `trace.json` from GitHub and pass the optimized trace into `PatternVisualizer`.
+- Refined `BinarySearchVisualizer` to show the active search range, midpoint, comparison, excluded values, and found state with play/pause, step, previous, and reset controls.
+
+### Verification performed
+- Confirmed the trace follows the actual Binary Search execution: midpoint `3`, narrowed range `[3, 5]`, midpoint `9`, then a match at index `4`.
+- Confirmed reduced-motion handling remains delegated to the shared `useReducedMotion` hook.
+- Confirmed the portfolio branch and DSA source branch are both kept separate and pushed without force-pushing.
+
+### Files created/modified
+- `dsa-solutions/problems/binary-search/binary-search/trace.json`
+- `app/dsa/[pattern]/[slug]/page.tsx`
+- `widgets/dsa/ui/PatternVisualizer.tsx`
+- `widgets/dsa/ui/visualizers/BinarySearchVisualizer.tsx`
