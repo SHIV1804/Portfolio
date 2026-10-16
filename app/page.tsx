@@ -15,13 +15,6 @@ export const metadata = {
     description: "Systems-minded software engineer building production payment terminal software and high-performance C++ tools.",
     url: siteConfig.url,
     siteName: "Shivam Portfolio",
-    images: [
-      {
-        url: "/og-image.png", // [PLACEHOLDER: OG image]
-        width: 1200,
-        height: 630,
-      },
-    ],
     locale: "en_US",
     type: "website",
   },
