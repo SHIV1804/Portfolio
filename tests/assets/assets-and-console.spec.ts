@@ -280,22 +280,10 @@ test.describe('Broken Assets and Console Checks', () => {
     expect(realErrors).toEqual([]);
   });
 
-  test('verify specific known placeholder content exists', async ({
-    page,
-  }) => {
-    const placeholderContent: string[] = [];
-
+  test('log-analyser page has no placeholder markers', async ({ page }) => {
     await page.goto('/projects/log-analyser');
-
-    // Check for expected placeholder markers
     const content = await page.content();
-
-    if (content.includes('[PLACEHOLDER')) {
-      placeholderContent.push('Found [PLACEHOLDER] markers on page');
-    }
-
-    // This is expected - the page intentionally has placeholders
-    expect(placeholderContent.length).toBeGreaterThan(0);
+    expect(content).not.toContain('[PLACEHOLDER');
   });
 
   test('verify resume link exists but may be placeholder', async ({
