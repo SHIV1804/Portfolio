@@ -102,7 +102,7 @@ test.describe('Navigation Tests', () => {
     expect(page.url()).toBe('http://localhost:3000/');
   });
 
-  test('GitHub link opens with correct URL', async ({ page, context }) => {
+  test('GitHub link opens with correct URL', async ({ page }) => {
     await page.goto('/');
 
     // Get the GitHub URL from the page

@@ -184,9 +184,6 @@ test.describe('Architecture Diagram Tests', () => {
     // Focus the node
     await firstNode.focus();
 
-    // Initially not expanded (or in default state)
-    const initialExpanded = await firstNode.getAttribute('aria-expanded');
-
     // Press Space to activate
     await diagramNodes(page).first().press('Space');
 
@@ -206,18 +203,9 @@ test.describe('Architecture Diagram Tests', () => {
     const firstNode = diagramNodes(page).first();
     await firstNode.click();
 
-    // Details should become visible (possibly without animation)
-    const detailsId = await firstNode.getAttribute('aria-controls');
-    if (detailsId) {
-      const details = page.locator(`#${detailsId}`);
-      // Should still be accessible
-      const isVisible = await details.isVisible();
-      // May or may not be visible depending on max-height:0 state
-      // What matters is it's not trapped
-    }
   });
 
-  test('mobile layout remains usable', async ({ page, context }) => {
+  test('mobile layout remains usable', async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
 

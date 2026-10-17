@@ -200,8 +200,6 @@ test.describe('Scroll Experience and Hero Section', () => {
       window.scrollBy(0, 1000);
     });
 
-    const scrollBefore = await page.evaluate(() => window.scrollY);
-
     // Navigate to another page
     await page.goto('/projects/log-analyser');
 
