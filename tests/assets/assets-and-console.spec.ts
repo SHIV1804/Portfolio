@@ -280,22 +280,10 @@ test.describe('Broken Assets and Console Checks', () => {
     expect(realErrors).toEqual([]);
   });
 
-  test('verify specific known placeholder content exists', async ({
-    page,
-  }) => {
-    const placeholderContent: string[] = [];
-
+  test('log-analyser page has no placeholder markers', async ({ page }) => {
     await page.goto('/projects/log-analyser');
-
-    // Check for expected placeholder markers
     const content = await page.content();
-
-    if (content.includes('[PLACEHOLDER')) {
-      placeholderContent.push('Found [PLACEHOLDER] markers on page');
-    }
-
-    // This is expected - the page intentionally has placeholders
-    expect(placeholderContent.length).toBeGreaterThan(0);
+    expect(content).not.toContain('[PLACEHOLDER');
   });
 
   test('verify resume link exists but may be placeholder', async ({
@@ -324,12 +312,20 @@ test.describe('Broken Assets and Console Checks', () => {
       }
     });
 
-    // Navigate through multiple routes
+    // Navigate through multiple routes, letting each page finish its startup
+    // requests (e.g. /api/auth/session) before leaving it. Navigating away
+    // mid-fetch makes the browser cancel the request, which NextAuth logs as
+    // CLIENT_FETCH_ERROR "Failed to fetch".
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await page.goto('/projects/log-analyser');
+    await page.waitForLoadState('networkidle');
     await page.goBack();
+    await page.waitForLoadState('networkidle');
     await page.goto('/projects/case-study-two');
+    await page.waitForLoadState('networkidle');
     await page.goBack();
+    await page.waitForLoadState('networkidle');
 
     // Filter out known false positives
     const realErrors = navigationErrors.filter(

@@ -92,8 +92,6 @@ test.describe('Contact Form Tests', () => {
       await submitButton.click();
       await page.waitForTimeout(500);
 
-      // Error message should appear
-      const emailError = page.locator('text=/email|Email/i');
       // May or may not be visible depending on form library behavior
     }
   });
@@ -236,8 +234,6 @@ test.describe('Contact Form Tests', () => {
       if (await submitButton.isVisible()) {
         await submitButton.click();
 
-        // Look for loading indicator
-        const loadingIndicator = page.locator('text=/sending|loading/i');
         // May briefly show loading state
       }
     }
@@ -276,8 +272,6 @@ test.describe('Contact Form Tests', () => {
         await submitButton.click();
         await page.waitForTimeout(1000);
 
-        // Error message or state should be visible
-        const errorArea = page.locator('text=/error|failed/i');
         // May or may not be explicitly visible depending on error handling
       }
     }
@@ -332,7 +326,6 @@ test.describe('Contact Form Tests', () => {
 
       // If honeypot exists, it should be hidden
       if (count > 0) {
-        const isVisible = await honeypot.first().isVisible();
         // Honeypot should typically be hidden with display:none or similar
       }
     }

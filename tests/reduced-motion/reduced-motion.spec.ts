@@ -40,9 +40,7 @@ test.describe('Reduced Motion (prefers-reduced-motion: reduce)', () => {
 
     if (await aboutLink.isVisible()) {
       await aboutLink.click();
-      await page.waitForTimeout(300);
-
-      expect(page.url()).toContain('/#about');
+      await expect(page).toHaveURL(/\/#about$/);
     }
   });
 

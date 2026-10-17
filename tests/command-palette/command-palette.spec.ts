@@ -96,7 +96,7 @@ test.describe('Command Palette Tests', () => {
     await expect(dialog).not.toBeVisible();
 
     // Should have navigated to #about
-    expect(page.url()).toContain('/#about');
+    await expect(page).toHaveURL(/\/#about$/);
   });
 
   test('command palette filters commands by search text', async ({ page }) => {
@@ -124,7 +124,7 @@ test.describe('Command Palette Tests', () => {
     await page.press('body', 'Enter');
 
     // Should navigate to skills section
-    expect(page.url()).toContain('/#skills');
+    await expect(page).toHaveURL(/\/#skills$/);
   });
 
   test('case study navigation command works', async ({ page }) => {
@@ -143,8 +143,7 @@ test.describe('Command Palette Tests', () => {
     await page.press('body', 'Enter');
 
     // Should navigate to the case study
-    await page.waitForLoadState('networkidle');
-    expect(page.url()).toContain('/projects/log-analyser');
+    await expect(page).toHaveURL(/\/projects\/log-analyser/);
   });
 
   test('toggle theme command works from palette', async ({ page }) => {
@@ -179,7 +178,7 @@ test.describe('Command Palette Tests', () => {
     await page.goto('/');
 
     // Track any popup dialogs
-    const newPagePromise = new Promise((resolve) =>
+    new Promise((resolve) =>
       context.once('page', resolve),
     );
 
