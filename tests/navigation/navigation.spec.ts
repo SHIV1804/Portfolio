@@ -12,10 +12,7 @@ test.describe('Navigation Tests', () => {
 
     // Click on About link
     await page.click('a[href="/#about"]');
-    await page.waitForTimeout(500);
-
-    // Verify URL changed
-    expect(page.url()).toContain('/#about');
+    await expect(page).toHaveURL(/\/#about$/);
   });
 
   test('section navigation with hash links scroll to sections', async ({
@@ -25,9 +22,7 @@ test.describe('Navigation Tests', () => {
 
     // Test clicking Skills link
     await page.click('a[href="/#skills"]');
-    await page.waitForTimeout(500);
-
-    expect(page.url()).toContain('/#skills');
+    await expect(page).toHaveURL(/\/#skills$/);
   });
 
   test('project card navigation links work', async ({ page }) => {
