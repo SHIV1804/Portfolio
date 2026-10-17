@@ -312,12 +312,20 @@ test.describe('Broken Assets and Console Checks', () => {
       }
     });
 
-    // Navigate through multiple routes
+    // Navigate through multiple routes, letting each page finish its startup
+    // requests (e.g. /api/auth/session) before leaving it. Navigating away
+    // mid-fetch makes the browser cancel the request, which NextAuth logs as
+    // CLIENT_FETCH_ERROR "Failed to fetch".
     await page.goto('/');
+    await page.waitForLoadState('networkidle');
     await page.goto('/projects/log-analyser');
+    await page.waitForLoadState('networkidle');
     await page.goBack();
+    await page.waitForLoadState('networkidle');
     await page.goto('/projects/case-study-two');
+    await page.waitForLoadState('networkidle');
     await page.goBack();
+    await page.waitForLoadState('networkidle');
 
     // Filter out known false positives
     const realErrors = navigationErrors.filter(
