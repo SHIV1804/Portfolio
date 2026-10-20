@@ -9,10 +9,10 @@ import { siteConfig } from "@/shared/config/site";
 
 export const metadata = {
   title: "Shivam | Systems Engineer Portfolio",
-  description: "Systems-minded software engineer building production payment terminal software and high-performance C++ tools.",
+  description: siteConfig.description,
   openGraph: {
     title: "Shivam | Systems Engineer Portfolio",
-    description: "Systems-minded software engineer building production payment terminal software and high-performance C++ tools.",
+    description: siteConfig.description,
     url: siteConfig.url,
     siteName: "Shivam Portfolio",
     images: [

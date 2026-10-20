@@ -8,25 +8,16 @@ interface SkillGroup {
 
 export const skillGroups: SkillGroup[] = [
   {
-    title: "Languages",
-    skills: ["TypeScript", "JavaScript", "C", "C++", "Python"],
+    title: "Programming languages",
+    skills: ["C++", "Java", "C"],
   },
   {
-    title: "Domain Expertise",
-    skills: [
-      "Payment Terminal Software (Verifone)",
-    ],
+    title: "Software development",
+    skills: ["Problem Solving", "Debugging", "Code Analysis", "Software Testing"],
   },
   {
-    title: "Tools & Practices",
-    skills: [
-      "Git",
-      "Docker",
-      "CI/CD",
-      "Unit Testing",
-      "System Architecture",
-      "Agile Methodology",
-    ],
+    title: "Continuous learning",
+    skills: ["Data Structures & Algorithms", "Software Engineering"],
   },
 ];
 
