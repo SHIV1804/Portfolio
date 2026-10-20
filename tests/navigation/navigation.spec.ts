@@ -95,9 +95,7 @@ test.describe('Navigation Tests', () => {
     // Click the logo
     const logo = page.locator('a[href="/"]').first();
     await logo.click();
-    await page.waitForLoadState('networkidle');
-
-    expect(page.url()).toBe('http://localhost:3000/');
+    await expect(page).toHaveURL(/^http:\/\/localhost:3000\/$/);
   });
 
   test('GitHub link opens with correct URL', async ({ page }) => {

@@ -87,10 +87,9 @@ test.describe('Scroll Experience and Hero Section', () => {
 
     if (await projectLink.isVisible()) {
       await projectLink.click();
-      await page.waitForLoadState('networkidle');
 
       // Should successfully navigate
-      expect(page.url()).toContain('/projects/log-analyser');
+      await expect(page).toHaveURL(/\/projects\/log-analyser/);
     }
   });
 
