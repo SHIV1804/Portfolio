@@ -312,20 +312,33 @@ test.describe('Broken Assets and Console Checks', () => {
       }
     });
 
-    // Navigate through multiple routes, letting each page finish its startup
-    // requests (e.g. /api/auth/session) before leaving it. Navigating away
-    // mid-fetch makes the browser cancel the request, which NextAuth logs as
-    // CLIENT_FETCH_ERROR "Failed to fetch".
+    // Navigate through multiple routes, leaving each page only after its own
+    // startup /api/auth/session request has completed. Leaving mid-fetch makes the
+    // browser cancel the request, which NextAuth logs as CLIENT_FETCH_ERROR
+    // "Failed to fetch". Playwright disables the back/forward cache, so goBack()
+    // loads a new document that fetches the session again.
+    const sessionResponse = () =>
+      page.waitForResponse((res) => res.url().includes('/api/auth/session'));
+
+    let session = sessionResponse();
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await session;
+
+    session = sessionResponse();
     await page.goto('/projects/log-analyser');
-    await page.waitForLoadState('networkidle');
+    await session;
+
+    session = sessionResponse();
     await page.goBack();
-    await page.waitForLoadState('networkidle');
+    await session;
+
+    session = sessionResponse();
     await page.goto('/projects/case-study-two');
-    await page.waitForLoadState('networkidle');
+    await session;
+
+    session = sessionResponse();
     await page.goBack();
-    await page.waitForLoadState('networkidle');
+    await session;
 
     // Filter out known false positives
     const realErrors = navigationErrors.filter(
