@@ -104,10 +104,9 @@ test.describe('Scroll Experience and Hero Section', () => {
 
     if (await aboutLink.isVisible()) {
       await aboutLink.click();
-      await page.waitForTimeout(500);
 
       // Should navigate to about section
-      expect(page.url()).toContain('/#about');
+      await expect(page).toHaveURL(/\/#about$/);
     }
   });
 
