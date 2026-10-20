@@ -35,9 +35,7 @@ test.describe('Navigation Tests', () => {
     const projectLink = page.locator('a[href="/projects/log-analyser"]').first();
     if (await projectLink.isVisible()) {
       await projectLink.click();
-      await page.waitForLoadState('networkidle');
-
-      expect(page.url()).toContain('/projects/log-analyser');
+      await expect(page).toHaveURL(/\/projects\/log-analyser/);
       await expect(page.locator('main')).toBeVisible();
     }
   });
