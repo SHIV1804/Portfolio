@@ -320,17 +320,21 @@ test.describe('Architecture Diagram Tests', () => {
     const expanded = await firstNode.getAttribute('aria-expanded');
     expect(expanded).toBe('true');
 
-    // Navigate away and back (using command palette)
+    // Navigate away (command palette -> About) and confirm the route change
+    // actually committed before navigating back; otherwise the "back" navigation
+    // can land while still on this route and no remount ever happens.
     await page.press('body', 'Control+k');
     await page.type('input[placeholder*="Type a command"]', 'About');
     await page.press('body', 'Enter');
+    await expect(page).toHaveURL(/\/#about$/);
+    await expect(diagramNodes(page)).toHaveCount(0);
 
     // Navigate back to log-analyser
     await page.press('body', 'Control+k');
     await page.type('input[placeholder*="Type a command"]', 'Log Analyser');
     await page.press('body', 'Enter');
-
-    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/\/projects\/log-analyser/);
+    await expect(diagramNodes(page).first()).toBeVisible();
 
     // Component state should be reset (nodes should be closed) - this is normal behavior.
     //
