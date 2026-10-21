@@ -184,9 +184,6 @@ test.describe('Architecture Diagram Tests', () => {
     // Focus the node
     await firstNode.focus();
 
-    // Initially not expanded (or in default state)
-    const initialExpanded = await firstNode.getAttribute('aria-expanded');
-
     // Press Space to activate
     await diagramNodes(page).first().press('Space');
 
@@ -206,18 +203,9 @@ test.describe('Architecture Diagram Tests', () => {
     const firstNode = diagramNodes(page).first();
     await firstNode.click();
 
-    // Details should become visible (possibly without animation)
-    const detailsId = await firstNode.getAttribute('aria-controls');
-    if (detailsId) {
-      const details = page.locator(`#${detailsId}`);
-      // Should still be accessible
-      const isVisible = await details.isVisible();
-      // May or may not be visible depending on max-height:0 state
-      // What matters is it's not trapped
-    }
   });
 
-  test('mobile layout remains usable', async ({ page, context }) => {
+  test('mobile layout remains usable', async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
 
@@ -332,17 +320,21 @@ test.describe('Architecture Diagram Tests', () => {
     const expanded = await firstNode.getAttribute('aria-expanded');
     expect(expanded).toBe('true');
 
-    // Navigate away and back (using command palette)
+    // Navigate away (command palette -> About) and confirm the route change
+    // actually committed before navigating back; otherwise the "back" navigation
+    // can land while still on this route and no remount ever happens.
     await page.press('body', 'Control+k');
     await page.type('input[placeholder*="Type a command"]', 'About');
     await page.press('body', 'Enter');
+    await expect(page).toHaveURL(/\/#about$/);
+    await expect(diagramNodes(page)).toHaveCount(0);
 
     // Navigate back to log-analyser
     await page.press('body', 'Control+k');
     await page.type('input[placeholder*="Type a command"]', 'Log Analyser');
     await page.press('body', 'Enter');
-
-    await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/\/projects\/log-analyser/);
+    await expect(diagramNodes(page).first()).toBeVisible();
 
     // Component state should be reset (nodes should be closed) - this is normal behavior.
     //
@@ -362,42 +354,4 @@ test.describe('Architecture Diagram Tests', () => {
     await expect(firstNodeAfter).toHaveAttribute('aria-expanded', 'false'); // Fresh page load resets state
   });
 
-  // TEMPORARY DIAGNOSTIC - not a real regression test, just timing
-  // instrumentation to find out whether the state-reset above eventually
-  // lands under contention (slow) or never does (genuinely stuck). Remove
-  // once G2's follow-up race is actually understood.
-  test('DIAGNOSTIC: navigation away from diagram and back maintains state', async ({
-    page,
-  }) => {
-    await page.goto('/projects/log-analyser');
-
-    const firstNode = diagramNodes(page).first();
-    await firstNode.click();
-
-    const expanded = await firstNode.getAttribute('aria-expanded');
-    expect(expanded).toBe('true');
-
-    const t0 = Date.now();
-    await page.press('body', 'Control+k');
-    await page.type('input[placeholder*="Type a command"]', 'About');
-    await page.press('body', 'Enter');
-    console.log(`[diag] +${Date.now() - t0}ms: pressed Enter on "About", url=${page.url()}`);
-
-    await page.press('body', 'Control+k');
-    await page.type('input[placeholder*="Type a command"]', 'Log Analyser');
-    await page.press('body', 'Enter');
-    console.log(`[diag] +${Date.now() - t0}ms: pressed Enter on "Log Analyser", url=${page.url()}`);
-
-    await page.waitForLoadState('networkidle');
-    console.log(`[diag] +${Date.now() - t0}ms: networkidle fired, url=${page.url()}`);
-
-    const firstNodeAfter = diagramNodes(page).first();
-    try {
-      await expect(firstNodeAfter).toHaveAttribute('aria-expanded', 'false', { timeout: 25000 });
-      console.log(`[diag] +${Date.now() - t0}ms: aria-expanded reached "false", url=${page.url()}`);
-    } finally {
-      const navDebug = await page.evaluate(() => (window as unknown as { __navDebug?: unknown[] }).__navDebug ?? []);
-      console.log(`[diag] __navDebug: ${JSON.stringify(navDebug)}`);
-    }
-  });
 });

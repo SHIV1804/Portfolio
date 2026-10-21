@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause, SkipBack, SkipForward, RefreshCw } from 'lucide-react';
 
@@ -25,7 +25,10 @@ export const BinarySearchVisualizer: React.FC<BinarySearchVisualizerProps> = ({
   exampleInput,
 }) => {
   // Handle legacy mode if trace is not provided
-  const array = initialArray || exampleInput?.array || [];
+  const array = useMemo(
+    () => initialArray || exampleInput?.array || [],
+    [initialArray, exampleInput?.array],
+  );
   const finalTarget = target ?? exampleInput?.target ?? 0;
 
   // If in legacy mode (no trace), we'll use a simplified internal state machine
