@@ -17,7 +17,7 @@ export const metadata = {
     siteName: "Shivam Portfolio",
     images: [
       {
-        url: "/og-image.png", // [PLACEHOLDER: OG image]
+        url: "/og-image.png",
         width: 1200,
         height: 630,
       },
