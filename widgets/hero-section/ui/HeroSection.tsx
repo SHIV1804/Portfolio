@@ -17,26 +17,34 @@ export const HeroSection: React.FC = () => {
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mediaQuery.addEventListener("change", handler);
 
+    let isCancelled = false;
+    let matchMediaInstance: gsap.MatchMedia | null = null;
+
     if (!mediaQuery.matches) {
       // Lazy load GSAP
       const loadAnimations = async () => {
         const { initHeroAnimations } = await import("../lib/scrollAnimations");
+        if (isCancelled) return;
         if (containerRef.current && parallaxRef.current) {
           const validBeats = beatsRef.current.filter((b): b is HTMLDivElement => b !== null);
-          initHeroAnimations(containerRef.current, validBeats, parallaxRef.current);
+          matchMediaInstance = initHeroAnimations(containerRef.current, validBeats, parallaxRef.current);
         }
       };
       loadAnimations();
     }
 
-    return () => mediaQuery.removeEventListener("change", handler);
+    return () => {
+      isCancelled = true;
+      mediaQuery.removeEventListener("change", handler);
+      matchMediaInstance?.revert();
+    };
   }, []);
 
   const storyBeats = [
     {
       id: 1,
       title: "Precision at the Edge",
-      content: "A software engineer building real systems from the ground up — from solving 120+ algorithmic problems on LeetCode to shipping full-stack features with real infrastructure behind them."
+      content: "A software engineer building real systems from the ground up — from regular problem-solving on LeetCode to shipping full-stack features with real infrastructure behind them."
     },
     {
       id: 2,
@@ -51,7 +59,7 @@ export const HeroSection: React.FC = () => {
     {
       id: 4,
       title: "Building the Future",
-      content: "[PLACEHOLDER: bio content pending owner review]"
+      content: "My goal is to build reliable, efficient software and take ownership of challenging technical problems, growing through continuous learning and hands-on experience."
     },
   ];
 

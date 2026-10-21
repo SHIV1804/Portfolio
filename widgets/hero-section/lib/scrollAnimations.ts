@@ -5,7 +5,7 @@ export const initHeroAnimations = (
   container: HTMLElement,
   beats: HTMLElement[],
   parallaxLayer: HTMLElement
-) => {
+): gsap.MatchMedia => {
   gsap.registerPlugin(ScrollTrigger);
 
   const mm = gsap.matchMedia();
@@ -80,4 +80,6 @@ export const initHeroAnimations = (
       );
     });
   });
+
+  return mm;
 };

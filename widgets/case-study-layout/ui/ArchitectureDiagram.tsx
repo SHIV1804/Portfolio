@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import { ChevronRight, ChevronDown } from "lucide-react";
 
 interface DiagramNode {
@@ -32,7 +33,21 @@ const nodes: DiagramNode[] = [
   },
 ];
 
+// Next's client-side Router Cache can keep this component instance alive
+// across a soft (router.push) navigation away and back — e.g. via the
+// command palette — instead of unmounting/remounting it like a hard
+// reload would. That left an expanded node's open/closed state stuck
+// across navigation, which is inconsistent (and not something anything
+// here intentionally preserves). Keying the stateful inner component by
+// pathname forces a fresh remount (and thus fresh state) whenever the
+// route changes, so revisiting this page always starts collapsed —
+// matching a hard reload — without reaching for an effect.
 export const ArchitectureDiagram: React.FC = () => {
+  const pathname = usePathname();
+  return <ArchitectureDiagramInner key={pathname} />;
+};
+
+const ArchitectureDiagramInner: React.FC = () => {
   const [activeNodeId, setActiveNodeId] = useState<string | null>(null);
 
   const toggleNode = (id: string) => {

@@ -9,13 +9,19 @@ export const AboutSection: React.FC = () => {
         </h2>
         <div className="space-y-6 text-lg leading-relaxed text-foreground-muted">
           <p>
-            I&apos;m a software engineer focused on full-stack web development and algorithmic problem-solving. My background is in computer science fundamentals — data structures, database systems, and object-oriented design — and I&apos;ve solved over 120 problems on LeetCode across Java, C++, and C, with particular depth in arrays, hash tables, and two-pointer techniques.
+            I am an Associate Software Developer with a strong interest in C++, problem-solving, and software engineering.
+          </p>
+          <p>
+            My professional experience has helped me strengthen my C++ skills, understand existing codebases, and work on software development and testing across different projects. I enjoy analyzing technical issues, debugging problems, and finding practical solutions.
           </p>
           <p>
             I care about building things that actually work end-to-end, not just things that look finished. This site itself is an example: it syncs solved problems from GitHub through a signature-verified webhook, handles real user authentication and a moderated content-submission queue backed by a real database, and includes interactive algorithm visualizers built from hand-verified execution traces.
           </p>
           <p>
-            [PLACEHOLDER: bio content pending owner review]
+            I am continuously working to improve my programming fundamentals, data structures and algorithms, and overall software engineering skills. I am also interested in Java and C, alongside C++.
+          </p>
+          <p>
+            My goal is to build reliable, efficient software, take ownership of challenging technical problems, and grow as a software engineer through continuous learning and hands-on experience.
           </p>
         </div>
       </div>

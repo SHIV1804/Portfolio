@@ -29,16 +29,17 @@ test.describe('Scroll Experience and Hero Section', () => {
   }) => {
     await page.goto('/');
 
-    // Scroll to bottom of page
-    await page.evaluate(() => {
-      window.scrollTo(0, document.body.scrollHeight);
-    });
+    const footer = page.locator('footer');
+
+    // Keep scrolling to the bottom until the footer is actually in view. The hero
+    // pin spacer is added asynchronously after load, which grows the document, so
+    // a single scrollTo can land short of the real bottom.
+    await expect(async () => {
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      await expect(footer).toBeInViewport({ timeout: 1000 });
+    }).toPass({ timeout: 15000 });
 
     const bottomScroll = await page.evaluate(() => window.scrollY);
-
-    // Footer should be visible
-    const footer = page.locator('footer');
-    await expect(footer).toBeInViewport();
 
     // Should be able to click on footer elements
     const footerLinks = page.locator('footer a').first();
@@ -86,10 +87,9 @@ test.describe('Scroll Experience and Hero Section', () => {
 
     if (await projectLink.isVisible()) {
       await projectLink.click();
-      await page.waitForLoadState('networkidle');
 
       // Should successfully navigate
-      expect(page.url()).toContain('/projects/log-analyser');
+      await expect(page).toHaveURL(/\/projects\/log-analyser/);
     }
   });
 
@@ -103,10 +103,9 @@ test.describe('Scroll Experience and Hero Section', () => {
 
     if (await aboutLink.isVisible()) {
       await aboutLink.click();
-      await page.waitForTimeout(500);
 
       // Should navigate to about section
-      expect(page.url()).toContain('/#about');
+      await expect(page).toHaveURL(/\/#about$/);
     }
   });
 
@@ -199,8 +198,6 @@ test.describe('Scroll Experience and Hero Section', () => {
     await page.evaluate(() => {
       window.scrollBy(0, 1000);
     });
-
-    const scrollBefore = await page.evaluate(() => window.scrollY);
 
     // Navigate to another page
     await page.goto('/projects/log-analyser');

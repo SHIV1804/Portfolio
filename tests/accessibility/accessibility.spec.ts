@@ -303,8 +303,6 @@ test.describe('Accessibility Tests', () => {
         await submitButton.click();
         await page.waitForTimeout(500);
 
-        // Look for error messages
-        const errorMessages = page.locator('text=/error|required/i');
         // Errors might be shown or might not, depending on form behavior
       }
     }

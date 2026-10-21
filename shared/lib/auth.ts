@@ -24,7 +24,7 @@ export const authOptions: NextAuthOptions = {
         // Fallback for private emails
         if (!profile.email && tokens.access_token) {
           const res = await fetch("https://api.github.com/user/emails", {
-            headers: { Authorization: `token \${tokens.access_token}` },
+            headers: { Authorization: `token ${tokens.access_token}` },
           });
           if (res.ok) {
             const emails = (await res.json()) as Array<{
@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = {
               verified: boolean;
               visibility: string | null;
             }>;
-            profile.email = (emails.find((e) => e.primary) ?? emails[0])?.email;
+            profile.email = emails.find((e) => e.primary && e.verified)?.email;
           }
         }
 

@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       
       if (!existsInMdx && !existsInDb) break;
       
-      slug = `\${baseSlug}-\${slugCounter}`;
+      slug = `${baseSlug}-${slugCounter}`;
       slugCounter++;
     }
 

@@ -56,7 +56,7 @@ export default async function DSAProblemPage({ params }: PageProps) {
   const solutionMdx = `\`\`\`${lang}\n${problem.solution}\n\`\`\``;
 
   return (
-    <main className="min-h-screen pt-32 pb-20 px-6">
+    <div className="min-h-screen pt-32 pb-20 px-6">
       <div className="max-w-4xl mx-auto">
         <header className="mb-12">
           <div className="flex justify-between items-start mb-8">
@@ -67,9 +67,9 @@ export default async function DSAProblemPage({ params }: PageProps) {
               ← Back to DSA Solutions
             </Link>
 
-            {slug === 'two-sum' && (
+            {trace && (
               <Link
-                href="/dsa/flagship/two-sum"
+                href={`/dsa/flagship/${pattern}/${slug}`}
                 className="text-xs font-mono px-3 py-1.5 border border-accent/30 rounded bg-accent/5 text-accent hover:bg-accent/10 transition-all flex items-center gap-2"
               >
                 <span className="relative flex h-2 w-2">
@@ -160,6 +160,6 @@ export default async function DSAProblemPage({ params }: PageProps) {
           </div>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

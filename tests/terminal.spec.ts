@@ -30,7 +30,7 @@ test.describe('Terminal Easter Egg', () => {
     await page.keyboard.press('/');
     await page.keyboard.type('whoami');
     await page.keyboard.press('Enter');
-    await expect(page.getByText('Shivam - Software Engineer')).toBeVisible();
+    await expect(page.getByText('Shivam - Associate Software Developer')).toBeVisible();
   });
 
   test('should handle command history with arrow keys', async ({ page }) => {
@@ -41,7 +41,7 @@ test.describe('Terminal Easter Egg', () => {
     
     await page.keyboard.type('whoami');
     await page.keyboard.press('Enter');
-    await expect(page.getByText('Shivam - Software Engineer')).toBeVisible();
+    await expect(page.getByText('Shivam - Associate Software Developer')).toBeVisible();
     
     // Press Up twice to get 'help'
     await page.keyboard.press('ArrowUp');
@@ -57,7 +57,7 @@ test.describe('Terminal Easter Egg', () => {
     await page.keyboard.type('who');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
-    await expect(page.getByText('Shivam - Software Engineer')).toBeVisible();
+    await expect(page.getByText('Shivam - Associate Software Developer')).toBeVisible();
   });
 
   test('should change theme via command', async ({ page }) => {

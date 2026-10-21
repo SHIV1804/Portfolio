@@ -133,7 +133,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   const relatedPosts = await getRelatedPosts(post);
 
   return (
-    <main className="min-h-screen pt-32 pb-20 px-6">
+    <div className="min-h-screen pt-32 pb-20 px-6">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-16">
         <article className="max-w-3xl">
           <header className="mb-12">
@@ -212,14 +212,14 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
 
           {relatedPosts.length > 0 && (
-            <footer className="mt-20 pt-12 border-t border-border">
+            <section className="mt-20 pt-12 border-t border-border">
               <h2 className="text-xl font-bold mb-8">Related Posts</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {relatedPosts.map((post) => (
                   <PostCard key={post.slug} post={post} />
                 ))}
               </div>
-            </footer>
+            </section>
           )}
         </article>
 
@@ -229,6 +229,6 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
         </aside>
       </div>
-    </main>
+    </div>
   );
 }

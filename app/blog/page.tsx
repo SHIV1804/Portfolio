@@ -36,7 +36,7 @@ export default async function BlogPage() {
   });
 
   return (
-    <main className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto">
+    <div className="min-h-screen pt-32 pb-20 px-6 max-w-4xl mx-auto">
       <header className="mb-12">
         <div className="flex items-center justify-between gap-4 mb-4">
           <h1 className="text-4xl font-bold">Blog</h1>
@@ -48,6 +48,6 @@ export default async function BlogPage() {
       </header>
 
       <BlogSearch initialPosts={allPosts} />
-    </main>
+    </div>
   );
 }

@@ -165,7 +165,7 @@ test.describe('Broken Assets and Console Checks', () => {
     expect(linkCount).toBeGreaterThan(0);
   });
 
-  test('placeholder URLs are detected in footer', async ({ page }) => {
+  test('no placeholder URLs remain in footer', async ({ page }) => {
     const placeholderUrls: string[] = [];
 
     await page.goto('/');
@@ -192,8 +192,9 @@ test.describe('Broken Assets and Console Checks', () => {
       }
     }
 
-    // These are expected to be placeholders
-    expect(placeholderUrls.length).toBeGreaterThan(0);
+    // Footer content has been finalized — these template placeholders
+    // should never reappear (e.g. from a config reset or bad merge).
+    expect(placeholderUrls).toEqual([]);
   });
 
   test('placeholder URLs are detected in command palette', async ({
@@ -279,22 +280,10 @@ test.describe('Broken Assets and Console Checks', () => {
     expect(realErrors).toEqual([]);
   });
 
-  test('verify specific known placeholder content exists', async ({
-    page,
-  }) => {
-    const placeholderContent: string[] = [];
-
+  test('log-analyser page has no placeholder markers', async ({ page }) => {
     await page.goto('/projects/log-analyser');
-
-    // Check for expected placeholder markers
     const content = await page.content();
-
-    if (content.includes('[PLACEHOLDER')) {
-      placeholderContent.push('Found [PLACEHOLDER] markers on page');
-    }
-
-    // This is expected - the page intentionally has placeholders
-    expect(placeholderContent.length).toBeGreaterThan(0);
+    expect(content).not.toContain('[PLACEHOLDER');
   });
 
   test('verify resume link exists but may be placeholder', async ({
@@ -323,12 +312,33 @@ test.describe('Broken Assets and Console Checks', () => {
       }
     });
 
-    // Navigate through multiple routes
+    // Navigate through multiple routes, leaving each page only after its own
+    // startup /api/auth/session request has completed. Leaving mid-fetch makes the
+    // browser cancel the request, which NextAuth logs as CLIENT_FETCH_ERROR
+    // "Failed to fetch". Playwright disables the back/forward cache, so goBack()
+    // loads a new document that fetches the session again.
+    const sessionResponse = () =>
+      page.waitForResponse((res) => res.url().includes('/api/auth/session'));
+
+    let session = sessionResponse();
     await page.goto('/');
+    await session;
+
+    session = sessionResponse();
     await page.goto('/projects/log-analyser');
+    await session;
+
+    session = sessionResponse();
     await page.goBack();
+    await session;
+
+    session = sessionResponse();
     await page.goto('/projects/case-study-two');
+    await session;
+
+    session = sessionResponse();
     await page.goBack();
+    await session;
 
     // Filter out known false positives
     const realErrors = navigationErrors.filter(

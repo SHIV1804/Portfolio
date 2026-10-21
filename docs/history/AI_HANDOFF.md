@@ -46,3 +46,10 @@ The project now includes a production-grade blog, a live GitHub dashboard, and a
 59	## Continuation Prompt
 60	"Read PROJECT_CONTEXT.md and AI_HANDOFF.md. The security audit and content cleanup are complete. GitHub is now the accurate source of truth. The next priority is to finalize the DSA flagship experience or proceed with the real Lighthouse audit as previously planned."
 61	
+
+## Work Completed This Session (2026-08-10)
+- **Fix Duplicate Landmarks**: Resolved "strict mode violation" in Playwright tests by removing duplicate `<main>` and `<footer>` tags across multiple routes.
+    - **Diagnosis**: Found that `app/layout.tsx` already provided a global `<main>` wrapper, but individual pages in `app/admin`, `app/blog`, `app/dsa`, and `app/projects` were rendering their own nested `<main>` tags.
+    - **Fix**: Replaced nested `<main>` tags with `<div>` and changed the "Related Posts" `<footer>` in `app/blog/[slug]/page.tsx` to a `<section>`.
+    - **Verification**: Confirmed single `<main>` and `<footer>` elements on `/blog`, `/blog/[slug]`, `/dsa`, and `/projects/log-analyser` via generated HTML inspection.
+- **Build/Lint**: `npm run build` and `npm run lint` both passed successfully.
