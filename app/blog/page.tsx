@@ -28,6 +28,7 @@ export default async function BlogPage() {
     readingTime: calculateReadingTime(post.content),
     source: 'database',
     authorName: post.author.name || 'Anonymous',
+    databaseId: post.id,
   }));
 
   // 3. Merge and sort
