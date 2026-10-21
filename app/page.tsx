@@ -15,6 +15,13 @@ export const metadata = {
     description: siteConfig.description,
     url: siteConfig.url,
     siteName: "Shivam Portfolio",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
     locale: "en_US",
     type: "website",
   },
