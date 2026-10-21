@@ -4,8 +4,14 @@ export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // The suite runs against `next dev` (on-demand compilation plus live GitHub
+  // fetches), which is slow and variable under parallel load. Fewer workers,
+  // roomier budgets and one local retry keep results stable. A test that only
+  // passes on retry is reported as "flaky", not hidden.
+  timeout: 60_000,
+  expect: { timeout: 15_000 },
+  retries: process.env.CI ? 2 : 1,
+  workers: process.env.CI ? 1 : 2,
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:3000',
@@ -21,5 +27,6 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
+    timeout: 180_000,
   },
 });

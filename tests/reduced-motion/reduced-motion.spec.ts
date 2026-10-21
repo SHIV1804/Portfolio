@@ -40,9 +40,7 @@ test.describe('Reduced Motion (prefers-reduced-motion: reduce)', () => {
 
     if (await aboutLink.isVisible()) {
       await aboutLink.click();
-      await page.waitForTimeout(300);
-
-      expect(page.url()).toContain('/#about');
+      await expect(page).toHaveURL(/\/#about$/);
     }
   });
 
@@ -74,11 +72,10 @@ test.describe('Reduced Motion (prefers-reduced-motion: reduce)', () => {
     const h1s = page.locator('h1');
     const h2s = page.locator('h2');
 
-    const h1Count = await h1s.count();
+    await expect(h1s).not.toHaveCount(0);
     const h2Count = await h2s.count();
 
     // Should have reasonable heading structure
-    expect(h1Count).toBeGreaterThan(0);
     // H2 or deeper headings are optional but if present should follow H1
     if (h2Count > 0) {
       // Just verify they're on the page
