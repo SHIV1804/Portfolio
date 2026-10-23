@@ -1,0 +1,50 @@
+name: Migrate production database
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref that contains the migrations to apply
+        required: true
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx prisma generate
+      - name: Create Neon backup branch
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          name="pre-migrate-${GITHUB_RUN_ID}"
+          code=$(curl -sS -o /dev/null -w '%{http_code}' -X POST \
+            "https://console.neon.tech/api/v2/projects/${NEON_PROJECT_ID}/branches" \
+            -H "Authorization: Bearer ${NEON_API_KEY}" \
+            -H 'Content-Type: application/json' \
+            -d "{\"branch\":{\"name\":\"${name}\"}}")
+          if [ "$code" -ge 300 ]; then echo "Neon backup failed (HTTP $code); aborting"; exit 1; fi
+          echo "Backup branch created: ${name}"
+      - name: Show pending migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+        run: npx prisma migrate status || true
+      - name: Apply migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
+        run: npx prisma migrate deploy
