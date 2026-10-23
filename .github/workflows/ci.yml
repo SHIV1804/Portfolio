@@ -36,8 +36,8 @@ jobs:
       DSA_WEBHOOK_SECRET: ci-dsa-webhook-secret
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
       NODE_ENV: test
-      DSA_GITHUB_REPO: ${{ vars.DSA_GITHUB_REPO }}
-      GITHUB_TOKEN: ${{ secrets.E2E_GITHUB_TOKEN }}
+      DSA_GITHUB_REPO: SHIV1804/dsa-solutions
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     services:
       postgres:
         image: postgres:16
