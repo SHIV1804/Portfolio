@@ -15,6 +15,7 @@ export interface BlogPost {
   readingTime: string;
   source?: 'mdx' | 'database';
   authorName?: string;
+  databaseId?: string;
 }
 
 export function calculateReadingTime(content: string): string {

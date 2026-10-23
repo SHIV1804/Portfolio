@@ -5,7 +5,7 @@ import { MDXRemote } from 'next-mdx-remote/rsc';
 import rehypePrettyCode from 'rehype-pretty-code';
 import { getPostBySlug, getAllPosts, BlogPost, calculateReadingTime } from '@/shared/lib/blog';
 import { renderSafeMarkdown } from '@/shared/lib/safe-markdown';
-import { TableOfContents, PostCard } from '@/widgets/blog';
+import { TableOfContents, PostCard, PostModerationActions } from '@/widgets/blog';
 import { mdxComponents } from '../MdxComponents';
 import { getApprovedCommunityPostBySlug, getApprovedCommunityPosts } from '@/shared/lib/blog-db';
 import { Badge } from '@/shared/ui/Badge';
@@ -42,6 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         readingTime: calculateReadingTime(dbPost.content),
         source: 'database',
         authorName: dbPost.author.name || 'Anonymous',
+        databaseId: dbPost.id,
       };
     }
   }
@@ -85,6 +86,7 @@ async function getRelatedPosts(currentPost: BlogPost) {
     readingTime: calculateReadingTime(post.content),
     source: 'database',
     authorName: post.author.name || 'Anonymous',
+    databaseId: post.id,
   }));
 
   const allPosts = [...mdxPosts, ...dbPosts];
@@ -122,6 +124,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         readingTime: calculateReadingTime(dbPost.content),
         source: 'database',
         authorName: dbPost.author.name || 'Anonymous',
+        databaseId: dbPost.id,
       };
     }
   }
@@ -210,6 +213,10 @@ export default async function BlogPostPage({ params }: PageProps) {
               />
             )}
           </div>
+
+          {post.source === 'database' && post.databaseId && (
+            <PostModerationActions postId={post.databaseId} />
+          )}
 
           {relatedPosts.length > 0 && (
             <section className="mt-20 pt-12 border-t border-border">

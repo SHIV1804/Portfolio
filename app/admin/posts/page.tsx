@@ -18,10 +18,23 @@ interface Post {
   };
 }
 
+interface DeletionRequest {
+  id: string;
+  title: string;
+  slug: string;
+  deletionReason: string | null;
+  deletionRequestedAt: string;
+  author: {
+    name: string | null;
+    email: string | null;
+  };
+}
+
 export default function AdminPostsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [deletionRequests, setDeletionRequests] = useState<DeletionRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -33,6 +46,7 @@ export default function AdminPostsPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to fetch posts');
       setPosts(data.posts);
+      setDeletionRequests(data.deletionRequests || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch posts');
     } finally {
@@ -69,6 +83,28 @@ export default function AdminPostsPage() {
       setPosts(prev => prev.filter(post => post.id !== id));
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Action failed');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDeletionDecision = async (id: string, decision: 'approve' | 'deny') => {
+    if (decision === 'approve' && !window.confirm('Permanently delete this post?')) {
+      return;
+    }
+
+    try {
+      setActionLoading(`deletion-${id}`);
+      const response = await fetch(`/api/admin/posts/${id}/deletion`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Deletion decision failed');
+      await fetchPosts();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Deletion decision failed');
     } finally {
       setActionLoading(null);
     }
@@ -185,6 +221,59 @@ export default function AdminPostsPage() {
           ))}
         </div>
       )}
+
+      <section className="mt-16" aria-labelledby="deletion-requests-heading">
+        <div className="flex items-center justify-between gap-4 mb-6">
+          <h2 id="deletion-requests-heading" className="text-2xl font-bold">Deletion requests</h2>
+          <span className="text-sm font-mono text-foreground-muted">
+            {deletionRequests.length} Requested
+          </span>
+        </div>
+        {deletionRequests.length === 0 ? (
+          <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
+            <p className="text-foreground-muted italic">No deletion requests to review.</p>
+          </div>
+        ) : (
+          <div className="grid gap-6">
+            {deletionRequests.map((request) => (
+              <article key={request.id} className="bg-surface border border-border rounded-lg overflow-hidden">
+                <div className="p-6 space-y-4">
+                  <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-foreground-muted">
+                    <span>{request.author.name || request.author.email || 'Anonymous'}</span>
+                    <span>{new Date(request.deletionRequestedAt).toLocaleDateString()}</span>
+                  </div>
+                  <h3 className="text-xl font-bold">
+                    <Link href={`/blog/${request.slug}`} className="hover:text-accent transition-colors">
+                      {request.title}
+                    </Link>
+                  </h3>
+                  <p className="text-sm text-foreground-muted whitespace-pre-wrap">
+                    {request.deletionReason || 'No reason provided.'}
+                  </p>
+                </div>
+                <div className="border-t border-border bg-background/50 p-4 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleDeletionDecision(request.id, 'deny')}
+                    disabled={!!actionLoading}
+                    className="px-4 py-1.5 rounded-md border border-border hover:border-accent transition-colors text-sm font-medium disabled:opacity-50"
+                  >
+                    Deny
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeletionDecision(request.id, 'approve')}
+                    disabled={!!actionLoading}
+                    className="px-4 py-1.5 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors text-sm font-medium disabled:opacity-50"
+                  >
+                    {actionLoading === `deletion-${request.id}` ? 'Deleting…' : 'Approve deletion'}
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
