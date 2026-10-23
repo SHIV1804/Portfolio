@@ -23,13 +23,11 @@ jobs:
       DATABASE_URL: postgresql://ci:ci@localhost:5432/portfolio_ci
       RESEND_API_KEY: ci-placeholder
       CONTACT_EMAIL: ci@example.com
-      GITHUB_TOKEN: ''
       GITHUB_ID: ci-github-id
       GITHUB_SECRET: ci-github-secret
       NEXTAUTH_SECRET: ci-nextauth-secret
       NEXTAUTH_URL: http://localhost:3000
       ADMIN_EMAIL: admin@example.com
-      DSA_GITHUB_REPO: ''
       DSA_WEBHOOK_SECRET: ci-dsa-webhook-secret
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
       NODE_ENV: test
@@ -75,6 +73,9 @@ jobs:
 
       - name: Run end-to-end tests
         run: npm run test:e2e
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DSA_GITHUB_REPO: SHIV1804/dsa-solutions
 
       - name: Upload Playwright report on failure
         if: failure()
