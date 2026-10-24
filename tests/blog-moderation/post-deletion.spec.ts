@@ -111,7 +111,26 @@ test.describe('Community post deletion flow', () => {
     await authorContext.close();
   });
 
-  test('admin approval hard-deletes the post from public surfaces', async ({ browser }) => {
+  test('authenticated non-admin cannot use admin deletion endpoints', async ({ browser }) => {
+    const otherContext = await browser.newContext();
+    const otherApi = await withSession(otherContext, fixture.otherUser.id);
+
+    const decision = await otherApi.post(`/api/admin/posts/${fixture.approved.id}/deletion`, {
+      data: { decision: 'approve' },
+    });
+    expect(decision.status()).toBe(401);
+
+    const hardDelete = await otherApi.delete(`/api/admin/posts/${fixture.approved.id}`);
+    expect(hardDelete.status()).toBe(401);
+
+    await expect(
+      prisma.post.findUnique({ where: { id: fixture.approved.id }, select: { id: true } }),
+    ).resolves.toEqual({ id: fixture.approved.id });
+
+    await otherContext.close();
+  });
+
+  test('admin approval hard-deletes the approved post', async ({ browser }) => {
     const authorContext = await browser.newContext();
     const authorApi = await withSession(authorContext, fixture.author.id);
     await expect(
@@ -120,6 +139,9 @@ test.describe('Community post deletion flow', () => {
 
     const adminContext = await browser.newContext();
     const adminApi = await withSession(adminContext, fixture.admin.id);
+    const beforeApproval = await adminContext.request.get(`/blog/${fixture.approved.slug}`);
+    expect(beforeApproval.status()).toBe(200);
+
     const approve = await adminApi.post(`/api/admin/posts/${fixture.approved.id}/deletion`, {
       data: { decision: 'approve' },
     });
@@ -130,22 +152,29 @@ test.describe('Community post deletion flow', () => {
       prisma.post.findUnique({ where: { id: fixture.approved.id }, select: { id: true } }),
     ).resolves.toBeNull();
 
-    const blog = await adminApi.get('/blog');
-    expect(blog.status()).toBe(200);
-    expect(await blog.text()).not.toContain(fixture.approved.slug);
+    // /blog is cached, while sitemap.xml and rss.xml read only local MDX posts.
+    const postPage = await adminContext.request.get(`/blog/${fixture.approved.slug}`);
+    expect(postPage.status()).toBe(404);
+
+    await adminContext.close();
+    await authorContext.close();
+  });
+
+  test('admin directly hard-deletes an approved post', async ({ browser }) => {
+    const adminContext = await browser.newContext();
+    const adminApi = await withSession(adminContext, fixture.admin.id);
+
+    const hardDelete = await adminApi.delete(`/api/admin/posts/${fixture.approved.id}`);
+    expect(hardDelete.status()).toBe(200);
+    await expect(hardDelete.json()).resolves.toEqual({ deleted: true });
+
+    await expect(
+      prisma.post.findUnique({ where: { id: fixture.approved.id }, select: { id: true } }),
+    ).resolves.toBeNull();
 
     const postPage = await adminContext.request.get(`/blog/${fixture.approved.slug}`);
     expect(postPage.status()).toBe(404);
 
-    const sitemap = await adminApi.get('/sitemap.xml');
-    expect(sitemap.status()).toBe(200);
-    expect(await sitemap.text()).not.toContain(fixture.approved.slug);
-
-    const rss = await adminApi.get('/rss.xml');
-    expect(rss.status()).toBe(200);
-    expect(await rss.text()).not.toContain(fixture.approved.slug);
-
     await adminContext.close();
-    await authorContext.close();
   });
 });
