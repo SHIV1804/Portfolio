@@ -2,11 +2,6 @@ name: Migrate production database
 
 on:
   workflow_dispatch:
-    inputs:
-      ref:
-        description: Git ref that contains the migrations to apply
-        required: true
-        default: main
 
 permissions:
   contents: read
@@ -17,9 +12,13 @@ jobs:
     environment: production
     timeout-minutes: 15
     steps:
+      - name: Require main ref
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "This workflow must be run from refs/heads/main; refusing to continue (received $GITHUB_REF)."
+            exit 1
+          fi
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -43,7 +42,20 @@ jobs:
       - name: Show pending migrations
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
-        run: npx prisma migrate status || true
+        run: |
+          set +e
+          status_output=$(npx prisma migrate status 2>&1)
+          status_code=$?
+          set -e
+          printf '%s\n' "$status_output"
+          if [ "$status_code" -ne 0 ]; then
+            if printf '%s\n' "$status_output" | grep -Eqi 'pending migrations|not yet been applied|database schema is not up to date'; then
+              echo "Pending migrations detected; continuing to prisma migrate deploy."
+            else
+              echo "prisma migrate status failed; aborting."
+              exit "$status_code"
+            fi
+          fi
       - name: Apply migrations
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_DIRECT }}
