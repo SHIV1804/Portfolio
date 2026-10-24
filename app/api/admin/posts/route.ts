@@ -29,7 +29,30 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ posts });
+    const deletionRequests = await prisma.post.findMany({
+      where: {
+        status: PostStatus.APPROVED,
+        deletionRequestedAt: { not: null },
+      },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        deletionReason: true,
+        deletionRequestedAt: true,
+        author: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        deletionRequestedAt: "asc",
+      },
+    });
+
+    return NextResponse.json({ posts, deletionRequests });
   } catch (error) {
     console.error("Admin posts fetch error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
