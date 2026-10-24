@@ -22,7 +22,11 @@
 
 **Confirmed:** `.github/workflows/ci.yml` defines `verify` for pull requests and pushes to the configured branches. It provisions PostgreSQL 16, installs dependencies, generates Prisma Client, runs migrations, TypeScript checking, lint, build, Chromium installation, and the Playwright suite. CI variable names are `CI`, `DATABASE_URL`, `RESEND_API_KEY`, `CONTACT_EMAIL`, `GITHUB_ID`, `GITHUB_SECRET`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `ADMIN_EMAIL`, `DSA_WEBHOOK_SECRET`, `NEXT_PUBLIC_SITE_URL`, `NODE_ENV`, `DSA_GITHUB_REPO`, and `GITHUB_TOKEN`.
 
-**Confirmed:** `.github/workflows/migrate-production.yml` is manual-only, has a job-level `main` ref condition plus a second main-ref safeguard, references the `production` environment, creates a unique Neon backup branch before `prisma migrate deploy`, and aborts on Neon HTTP errors. It uses `NEON_API_KEY`, `NEON_PROJECT_ID`, and `DATABASE_URL_DIRECT` by name only. It must never be run from a PR branch. Whether the `production` environment currently enforces human approval is **unverified**.
+**Confirmed:** `.github/workflows/migrate-production.yml` is manual-only, has a job-level `main` ref condition plus a second main-ref safeguard, references the `production` environment, creates a unique Neon backup branch before `prisma migrate deploy`, and aborts on Neon HTTP errors. It uses `NEON_API_KEY`, `NEON_PROJECT_ID`, and `DATABASE_URL_DIRECT` by name only. It must never be run from a PR branch. **Owner-confirmed:** the `production` environment requires reviewers and permits deployment only from `main`.
+
+## Definition of done
+
+Every new feature or behavior change ships with tests in the same PR: Playwright E2E/API specs belong under `tests/`; logged-in author/admin flows reuse `tests/helpers/deletion-fixtures.ts` and `tests/helpers/auth-session.ts`; and database tests run only against the disposable local/CI database. Tests cover the happy path, authorization (logged-out, non-owner, and non-admin), and error/edge states. Bug fixes include a regression test. The PR description lists the tests added and the CI result. If the current infrastructure cannot test a feature, document that in the PR and open a follow-up task; do not silently skip coverage.
 
 ## Branch rules and open items
 
