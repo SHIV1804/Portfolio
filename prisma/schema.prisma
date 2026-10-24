@@ -63,6 +63,8 @@ model Post {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   publishedAt DateTime?
+  deletionRequestedAt DateTime?
+  deletionReason      String?
   author      User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
 
