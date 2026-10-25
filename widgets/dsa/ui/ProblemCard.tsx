@@ -20,7 +20,7 @@ export const ProblemCard: React.FC<ProblemCardProps> = ({ problem }) => {
 
   return (
     <div className="group relative p-6 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all duration-300">
-      <div className="relative z-10">
+      <div>
         <div className="flex justify-between items-start mb-4">
           <div>
             <h3 className="text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
