@@ -27,7 +27,7 @@ export const ProblemCard: React.FC<ProblemCardProps> = ({ problem }) => {
               <Link
                 href={detailUrl}
                 aria-label={`View solution for ${problem.title}`}
-                className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-400 after:absolute after:inset-0 after:z-0 after:content-['']"
+                className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-400 after:absolute after:inset-0 after:z-20 after:content-['']"
               >
                 {problem.title}
               </Link>
@@ -57,7 +57,7 @@ export const ProblemCard: React.FC<ProblemCardProps> = ({ problem }) => {
             href={problem.leetcodeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-white/40 hover:text-white transition-colors relative z-20"
+            className="text-xs text-white/40 hover:text-white transition-colors relative z-30"
             onClick={(e) => e.stopPropagation()}
           >
             LeetCode #{problem.leetcodeNumber}
