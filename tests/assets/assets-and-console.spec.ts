@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { observeSessionTraffic } from '../helpers/session-observer';
 
 test.describe('Broken Assets and Console Checks', () => {
   test('no 404 errors for local assets on homepage', async ({
@@ -304,50 +305,59 @@ test.describe('Broken Assets and Console Checks', () => {
   });
 
   test('navigation does not create console errors', async ({ page }) => {
-    const navigationErrors: string[] = [];
-
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        navigationErrors.push(msg.text());
-      }
-    });
+    const sessionTraffic = observeSessionTraffic(page);
 
     // Navigate through multiple routes, leaving each page only after its own
     // startup /api/auth/session request has completed. Leaving mid-fetch makes the
     // browser cancel the request, which NextAuth logs as CLIENT_FETCH_ERROR
     // "Failed to fetch". Playwright disables the back/forward cache, so goBack()
     // loads a new document that fetches the session again.
-    const sessionResponse = () =>
-      page.waitForResponse((res) => res.url().includes('/api/auth/session'));
-
-    let session = sessionResponse();
+    let session = sessionTraffic.waitForSessionResponse();
     await page.goto('/');
     await session;
 
-    session = sessionResponse();
+    session = sessionTraffic.waitForSessionResponse();
     await page.goto('/projects/log-analyser');
     await session;
 
-    session = sessionResponse();
+    session = sessionTraffic.waitForSessionResponse();
     await page.goBack();
     await session;
 
-    session = sessionResponse();
+    session = sessionTraffic.waitForSessionResponse();
     await page.goto('/projects/case-study-two');
     await session;
 
-    session = sessionResponse();
+    session = sessionTraffic.waitForSessionResponse();
     await page.goBack();
     await session;
 
-    // Filter out known false positives
-    const realErrors = navigationErrors.filter(
-      (err) =>
-        !err.includes('ResizeObserver') &&
-        !err.includes('Non-Error promise rejection'),
-    );
+    expect(sessionTraffic.unmatchedSessionErrors()).toEqual([]);
+    expect(sessionTraffic.invalidSessionFailures()).toEqual([]);
+    expect(sessionTraffic.invalidSessionResponses()).toEqual([]);
+  });
 
-    expect(realErrors).toEqual([]);
+  test('session observer reports real session failures', async ({ page }) => {
+    const serverErrorTraffic = observeSessionTraffic(page);
+    await page.route('**/api/auth/session', (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'test failure' }),
+      }),
+    );
+    await page.goto('/');
+    await expect
+      .poll(() => serverErrorTraffic.hasError())
+      .toBe(true);
+
+    await page.unroute('**/api/auth/session');
+    const failedRequestTraffic = observeSessionTraffic(page);
+    await page.route('**/api/auth/session', (route) => route.abort('failed'));
+    await page.reload();
+    await expect
+      .poll(() => failedRequestTraffic.hasError())
+      .toBe(true);
   });
 
   test('report summary of all warnings collected during usage', async ({
