@@ -76,14 +76,24 @@ test.describe('Terminal Easter Egg', () => {
 
   test('should persist history across reloads', async ({ page }) => {
     await page.keyboard.press('/');
+    const terminal = page.getByRole('dialog');
+    const input = terminal.locator('input');
+    await expect(terminal).toBeVisible();
+    await expect(input).toBeVisible();
+    await expect(input).toBeFocused();
     await page.keyboard.type('skills');
     await page.keyboard.press('Enter');
     await expect(page.getByText('Technical Skills:')).toBeVisible();
-    
     await page.reload();
     await page.waitForSelector('button[aria-label*="mode"]');
-    
+    await page.waitForFunction(() => {
+      const saved = localStorage.getItem('terminal-history');
+      return saved !== null && JSON.parse(saved).includes('skills');
+    });
     await page.keyboard.press('/');
+    await expect(terminal).toBeVisible();
+    await expect(input).toBeVisible();
+    await expect(input).toBeFocused();
     await page.keyboard.press('ArrowUp');
     await page.keyboard.press('Enter');
     const outputs = page.getByText('Technical Skills:');
