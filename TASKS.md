@@ -33,3 +33,10 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 ## Documentation gaps this pass could not close
 - Whether `main` or `dev` should be treated as the deploy branch is not stated anywhere in the repo (no CI config, no `vercel.json`).
 - No record of which package manager (npm vs pnpm) is intended, despite both lockfiles being committed.
+
+
+## Stage 3 — Framer Motion 14
+- **In progress on `chore/upgrade-framer-motion-14`:** `framer-motion` is being upgraded from `^12.42.2` to `^14.7.1` in a dedicated PR. Usage is limited to the two-pointer, sliding-window, and binary-search visualizers plus the flagship `ArrayBox` component; no application code changes are planned.
+- **Compatibility review:** the official Motion upgrade guide lists no breaking JavaScript API changes for Motion 13 or 14, and the repository does not use the separate Motion One APIs covered by the older migration sections.
+- **Audit baseline:** full `npm audit` on the dependency-upgrades base is 38 total (15 high, 2 critical); this upgrade is not expected to change the production-only audit because Framer Motion is a runtime dependency.
+- **Item 2 status:** `@types/node` remains blocked pending authenticated evidence of the Vercel project Node setting. CI is confirmed to use Node 22; Node 26 must not be assumed.
