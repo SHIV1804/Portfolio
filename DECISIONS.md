@@ -57,3 +57,8 @@ Technical decisions with evidence in code, config, or this project's own history
 **Decision:** The session-observer tests share one console-noise ignore list.
 **Reason:** The existing navigation and general console tests intentionally tolerate `ResizeObserver`, `Non-Error promise rejection`, and `Uncaught (in promise)` noise; keeping the list in the helper prevents the tests from silently diverging.
 **Impact:** New console-error assertions should use `isIgnorableConsoleError()` rather than adding test-local exceptions.
+
+---
+**Decision:** Keep `@playwright/test` at `1.61.1` during Stage 2 safe-range updates.
+**Reason:** The required tolerated-abort regression test passed on 1.61.1 but failed consistently on 1.64.1 in CI and locally: the delayed navigation produced no `requestfailed` event or NextAuth `CLIENT_FETCH_ERROR`; the 1.64.1 capture instead showed 200 session responses and `requestfinished` events. This changes the behavior the test is designed to verify, so the package is reverted rather than weakening the assertion.
+**Impact:** Playwright 1.64.1 requires a separately designed test/observer investigation before adoption; the remaining approved safe-range updates proceed independently.
