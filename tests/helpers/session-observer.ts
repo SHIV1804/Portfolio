@@ -44,7 +44,6 @@ export function isIgnorableConsoleError(message: string): boolean {
 function isAbortedSessionConsoleError(message: string): boolean {
   return (
     message.includes(CLIENT_FETCH_ERROR) &&
-    message.includes('Failed to fetch') &&
     message.includes('url: /api/auth/session') &&
     message.includes('message: Failed to fetch')
   );

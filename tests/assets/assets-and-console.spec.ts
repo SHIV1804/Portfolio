@@ -105,7 +105,9 @@ test.describe('Broken Assets and Console Checks', () => {
     }
 
     // Filter out known false positives
-    const realErrors = allErrors.filter((err) => !isIgnorableConsoleError(err.error));
+    const realErrors = allErrors.filter(
+      (err) => !isIgnorableConsoleError(err.error),
+    );
 
     expect(realErrors).toEqual([]);
   });
@@ -131,7 +133,10 @@ test.describe('Broken Assets and Console Checks', () => {
     }
   });
 
-  test('all internal navigation links are accessible', async ({ page, context }) => {
+  test('all internal navigation links are accessible', async ({
+    page,
+    context,
+  }) => {
     const brokenLinks: string[] = [];
 
     context.on('response', (response) => {
@@ -196,9 +201,7 @@ test.describe('Broken Assets and Console Checks', () => {
     expect(placeholderUrls).toEqual([]);
   });
 
-  test('placeholder URLs are detected in command palette', async ({
-    page,
-  }) => {
+  test('placeholder URLs are detected in command palette', async ({ page }) => {
     await page.goto('/');
 
     const placeholders: string[] = [];
@@ -216,7 +219,10 @@ test.describe('Broken Assets and Console Checks', () => {
     expect(placeholders.length).toBeGreaterThan(0);
   });
 
-  test('no uncaught exceptions in network requests', async ({ page, context }) => {
+  test('no uncaught exceptions in network requests', async ({
+    page,
+    context,
+  }) => {
     const networkErrors: string[] = [];
 
     context.on('response', (response) => {
@@ -285,9 +291,7 @@ test.describe('Broken Assets and Console Checks', () => {
     expect(content).not.toContain('[PLACEHOLDER');
   });
 
-  test('verify resume link exists but may be placeholder', async ({
-    page,
-  }) => {
+  test('verify resume link exists but may be placeholder', async ({ page }) => {
     await page.goto('/');
 
     // Open command palette
@@ -331,11 +335,18 @@ test.describe('Broken Assets and Console Checks', () => {
     await session;
 
     expect(sessionTraffic.unmatchedSessionErrors()).toEqual([]);
+    expect(
+      sessionTraffic.requestFailures.filter(
+        (failure) => failure.errorText === 'net::ERR_ABORTED',
+      ),
+    ).toEqual([]);
     expect(sessionTraffic.invalidSessionFailures()).toEqual([]);
     expect(sessionTraffic.invalidSessionResponses()).toEqual([]);
   });
 
-  test('session observer reports HTTP 500 session failures', async ({ page }) => {
+  test('session observer reports HTTP 500 session failures', async ({
+    page,
+  }) => {
     const serverErrorTraffic = observeSessionTraffic(page);
     await page.route('**/api/auth/session', (route) =>
       route.fulfill({
@@ -345,18 +356,16 @@ test.describe('Broken Assets and Console Checks', () => {
       }),
     );
     await page.goto('/');
-    await expect
-      .poll(() => serverErrorTraffic.hasError())
-      .toBe(true);
+    await expect.poll(() => serverErrorTraffic.hasError()).toBe(true);
   });
 
-  test('session observer reports aborted session failures', async ({ page }) => {
+  test('session observer reports aborted session failures', async ({
+    page,
+  }) => {
     const failedRequestTraffic = observeSessionTraffic(page);
     await page.route('**/api/auth/session', (route) => route.abort('failed'));
     await page.goto('/');
-    await expect
-      .poll(() => failedRequestTraffic.hasError())
-      .toBe(true);
+    await expect.poll(() => failedRequestTraffic.hasError()).toBe(true);
   });
 
   test('session observer tolerates a matched browser-aborted session fetch', async ({
@@ -394,15 +403,31 @@ test.describe('Broken Assets and Console Checks', () => {
     await expect
       .poll(() => sessionTraffic.requestFailures.length)
       .toBeGreaterThan(0);
+    await expect
+      .poll(() => sessionTraffic.consoleErrors)
+      .toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('[next-auth][error][CLIENT_FETCH_ERROR]'),
+        ]),
+      );
+    expect(
+      sessionTraffic.consoleErrors.some((error) =>
+        error.includes('[next-auth][error][CLIENT_FETCH_ERROR]'),
+      ),
+    ).toBe(true);
     expect(sessionTraffic.unmatchedSessionErrors()).toEqual([]);
     expect(sessionTraffic.invalidSessionFailures()).toEqual([]);
     expect(sessionTraffic.invalidSessionResponses()).toEqual([]);
   });
 
-  test('session observer reports unrelated console errors', async ({ page }) => {
+  test('session observer reports unrelated console errors', async ({
+    page,
+  }) => {
     const sessionTraffic = observeSessionTraffic(page);
     await page.goto('about:blank');
-    await page.evaluate(() => console.error('deliberate unrelated console error'));
+    await page.evaluate(() =>
+      console.error('deliberate unrelated console error'),
+    );
 
     await expect.poll(() => sessionTraffic.hasError()).toBe(true);
   });
@@ -411,7 +436,9 @@ test.describe('Broken Assets and Console Checks', () => {
     const sessionTraffic = observeSessionTraffic(page);
     await page.goto('about:blank');
     await page.evaluate(() =>
-      console.error('ResizeObserver loop completed with undelivered notifications.'),
+      console.error(
+        'ResizeObserver loop completed with undelivered notifications.',
+      ),
     );
 
     await expect.poll(() => sessionTraffic.hasError()).toBe(false);
