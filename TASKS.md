@@ -3,6 +3,7 @@
 Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the session logs now in `docs/history/`. Where status can't be confirmed, it's marked unknown rather than guessed.
 
 ## In Progress
+- **Stage 1 session-observer hardening is in progress on PR #23** (`security/dependency-upgrades`): the matcher now follows captured Chromium output, shares the existing console-noise ignore list, and has isolated regression coverage for tolerated aborts and real failures. CI verification is pending.
 - **Second case-study project not yet selected.** `entities/project/model/data.ts` has `title: "Second project"`, `description: "[PLACEHOLDER — project not yet selected]"`, `isPlaceholder: true`. `/projects/case-study-two` renders this placeholder via `CaseStudyLayout`.
 - **Log Analyser is a concept, not a built project.** `entities/project/model/data.ts` carries a `VERIFIED:` comment confirming (via a real GitHub API query against `SHIV1804`) that no implementation exists anywhere — the description accurately says "architecture design in progress." `app/projects/log-analyser/page.tsx` contains three explicit `[PLACEHOLDER: ...]` markers: an architecture-diagram description, a code snippet, and an OG image.
 - **About/Hero bio content is a placeholder.** `widgets/about-section/ui/AboutSection.tsx` and the 4th story beat in `widgets/hero-section/ui/HeroSection.tsx` both contain the literal text `[PLACEHOLDER: bio content pending owner review]`, pending real content from the site owner.
@@ -10,7 +11,7 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 ## Known Issues / Bugs (verified by reading the current source)
 - **`/resume.pdf` is referenced but not present.** `widgets/command-palette/ui/CommandPalette.tsx` and `widgets/terminal-easter-egg/lib/commands.ts` both `window.open('/resume.pdf')`; `public/` contains only the default Next.js starter SVGs (`file.svg`, `globe.svg`, `next.svg`, `vercel.svg`, `window.svg`) — no `resume.pdf`.
 - **OG images referenced but not present.** `app/page.tsx`, `app/projects/log-analyser/page.tsx`, `app/projects/case-study-two/page.tsx` all reference `/og-*.png` paths marked `// [PLACEHOLDER: OG image]`; none exist in `public/`. (`app/blog/[slug]/opengraph-image.tsx` generates blog OG images dynamically via `next/og` — that one is real and not affected.)
-- **Two lockfiles committed**: `package-lock.json` and `pnpm-lock.yaml` + `pnpm-workspace.yaml` are all present. `npm ci` (used to verify this doc) works fine, but which package manager is authoritative isn't documented anywhere.
+- **Package-manager transition is branch-scoped.** `main` still has the historical pnpm metadata, while PR #23 removes `pnpm-lock.yaml` and `pnpm-workspace.yaml` and uses npm only. The branch decision is recorded in `DECISIONS.md`; merge to `main` remains owner-controlled.
 - **`GITHUB_TOKEN` is currently unset in the verification sandbox** (expected — it's a secret), so `fetchDSAProblems()`, `fetchDSATrace()`, and `getGitHubData()` all return their empty/fallback states in any environment without it configured. Not a bug — documented behavior — but worth knowing when a page looks empty locally.
 
 ## Blocked

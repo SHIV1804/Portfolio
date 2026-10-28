@@ -42,3 +42,18 @@ Technical decisions with evidence in code, config, or this project's own history
 **Decision:** "No fabrication" content policy — placeholder content is marked `[PLACEHOLDER: ...]` inline, and confirmed factual claims are marked with a `VERIFIED:` comment stating what was checked and how.
 **Reason:** The site's primary audience is recruiters and technical interviewers; an unverifiable or invented claim undermines the portfolio's credibility more than an honest placeholder does. See `docs/CONTENT.md` for the current inventory of what's marked which way.
 **Impact:** Any AI agent adding content to this site must follow the same marker convention — see `AGENTS.md` rule 1.
+
+---
+**Decision:** npm is the authoritative package manager for the dependency-upgrades branch and its follow-up stages.
+**Reason:** `package-lock.json` is retained and the obsolete pnpm metadata was removed in `393f5f5`; CI installs with `npm ci`.
+**Impact:** Do not reintroduce `pnpm-lock.yaml` or `pnpm-workspace.yaml` while executing the staged dependency work.
+
+---
+**Decision:** Stay on NextAuth v4 for the staged dependency work.
+**Reason:** `next-auth` 4.24.15 is the latest stable v4 release verified for this branch; v5 remains beta and is a separate migration.
+**Impact:** Do not upgrade to a v5 beta as part of the safe-range or major-version stages.
+
+---
+**Decision:** The session-observer tests share one console-noise ignore list.
+**Reason:** The existing navigation and general console tests intentionally tolerate `ResizeObserver`, `Non-Error promise rejection`, and `Uncaught (in promise)` noise; keeping the list in the helper prevents the tests from silently diverging.
+**Impact:** New console-error assertions should use `isIgnorableConsoleError()` rather than adding test-local exceptions.

@@ -2,6 +2,11 @@ import type { Page } from '@playwright/test';
 
 const SESSION_PATH = '/api/auth/session';
 const CLIENT_FETCH_ERROR = '[next-auth][error][CLIENT_FETCH_ERROR]';
+const IGNORED_CONSOLE_ERROR_FRAGMENTS = [
+  'ResizeObserver',
+  'Non-Error promise rejection',
+  'Uncaught (in promise)',
+] as const;
 
 export type SessionRequestFailure = {
   url: string;
@@ -28,9 +33,18 @@ function isSessionUrl(url: string): boolean {
   return url.includes(SESSION_PATH);
 }
 
+export function isIgnorableConsoleError(message: string): boolean {
+  return IGNORED_CONSOLE_ERROR_FRAGMENTS.some((fragment) =>
+    message.includes(fragment),
+  );
+}
+
+// Chromium's message.text() renders NextAuth's metadata object inline as
+// "{error: Object, url: /api/auth/session, message: Failed to fetch}".
 function isAbortedSessionConsoleError(message: string): boolean {
   return (
     message.includes(CLIENT_FETCH_ERROR) &&
+    message.includes('Failed to fetch') &&
     message.includes('url: /api/auth/session') &&
     message.includes('message: Failed to fetch')
   );
@@ -72,7 +86,11 @@ export function observeSessionTraffic(page: Page): SessionObserver {
         (failure) => failure.errorText === 'net::ERR_ABORTED',
       );
       return consoleErrors.filter((error) => {
+        if (isIgnorableConsoleError(error)) return false;
         if (!isAbortedSessionConsoleError(error)) return true;
+        // Playwright exposes the request metadata in message.text(), not as a
+        // request identifier. Pair tolerated console messages to aborted
+        // session failures one-to-one by occurrence count.
         const match = unmatchedAborts.findIndex(() => true);
         if (match === -1) return true;
         unmatchedAborts.splice(match, 1);

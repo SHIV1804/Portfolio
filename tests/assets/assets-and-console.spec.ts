@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { observeSessionTraffic } from '../helpers/session-observer';
+import {
+  isIgnorableConsoleError,
+  observeSessionTraffic,
+} from '../helpers/session-observer';
 
 test.describe('Broken Assets and Console Checks', () => {
   test('no 404 errors for local assets on homepage', async ({
@@ -102,12 +105,7 @@ test.describe('Broken Assets and Console Checks', () => {
     }
 
     // Filter out known false positives
-    const realErrors = allErrors.filter(
-      (err) =>
-        !err.error.includes('ResizeObserver') &&
-        !err.error.includes('Non-Error promise rejection') &&
-        !err.error.includes('Uncaught (in promise)'),
-    );
+    const realErrors = allErrors.filter((err) => !isIgnorableConsoleError(err.error));
 
     expect(realErrors).toEqual([]);
   });
@@ -337,7 +335,7 @@ test.describe('Broken Assets and Console Checks', () => {
     expect(sessionTraffic.invalidSessionResponses()).toEqual([]);
   });
 
-  test('session observer reports real session failures', async ({ page }) => {
+  test('session observer reports HTTP 500 session failures', async ({ page }) => {
     const serverErrorTraffic = observeSessionTraffic(page);
     await page.route('**/api/auth/session', (route) =>
       route.fulfill({
@@ -350,14 +348,73 @@ test.describe('Broken Assets and Console Checks', () => {
     await expect
       .poll(() => serverErrorTraffic.hasError())
       .toBe(true);
+  });
 
-    await page.unroute('**/api/auth/session');
+  test('session observer reports aborted session failures', async ({ page }) => {
     const failedRequestTraffic = observeSessionTraffic(page);
     await page.route('**/api/auth/session', (route) => route.abort('failed'));
-    await page.reload();
+    await page.goto('/');
     await expect
       .poll(() => failedRequestTraffic.hasError())
       .toBe(true);
+  });
+
+  test('session observer tolerates a matched browser-aborted session fetch', async ({
+    page,
+  }) => {
+    const sessionTraffic = observeSessionTraffic(page);
+    let delayFirstSession = true;
+
+    await page.route('**/api/auth/session', async (route) => {
+      if (delayFirstSession) {
+        delayFirstSession = false;
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        try {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: 'null',
+          });
+        } catch {
+          // Navigation may cancel the delayed request before fulfillment.
+        }
+        return;
+      }
+
+      await route.continue();
+    });
+
+    const initialNavigation = page.goto('/').catch(() => undefined);
+    await page.waitForRequest((request) =>
+      request.url().includes('/api/auth/session'),
+    );
+    await page.goto('/projects/log-analyser');
+    await initialNavigation;
+
+    await expect
+      .poll(() => sessionTraffic.requestFailures.length)
+      .toBeGreaterThan(0);
+    expect(sessionTraffic.unmatchedSessionErrors()).toEqual([]);
+    expect(sessionTraffic.invalidSessionFailures()).toEqual([]);
+    expect(sessionTraffic.invalidSessionResponses()).toEqual([]);
+  });
+
+  test('session observer reports unrelated console errors', async ({ page }) => {
+    const sessionTraffic = observeSessionTraffic(page);
+    await page.goto('about:blank');
+    await page.evaluate(() => console.error('deliberate unrelated console error'));
+
+    await expect.poll(() => sessionTraffic.hasError()).toBe(true);
+  });
+
+  test('session observer ignores ResizeObserver noise', async ({ page }) => {
+    const sessionTraffic = observeSessionTraffic(page);
+    await page.goto('about:blank');
+    await page.evaluate(() =>
+      console.error('ResizeObserver loop completed with undelivered notifications.'),
+    );
+
+    await expect.poll(() => sessionTraffic.hasError()).toBe(false);
   });
 
   test('report summary of all warnings collected during usage', async ({
