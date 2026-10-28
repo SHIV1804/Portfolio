@@ -310,10 +310,15 @@ test.describe('Broken Assets and Console Checks', () => {
     const sessionTraffic = observeSessionTraffic(page);
 
     // Navigate through multiple routes, leaving each page only after its own
-    // startup /api/auth/session request has completed. Leaving mid-fetch makes the
-    // browser cancel the request, which NextAuth logs as CLIENT_FETCH_ERROR
-    // "Failed to fetch". Playwright disables the back/forward cache, so goBack()
-    // loads a new document that fetches the session again.
+    // startup /api/auth/session request has completed. SessionProvider can also
+    // start another session refetch after startup, likely on window focus or
+    // visibilitychange; leaving while that request is in flight aborts it, which
+    // NextAuth logs as CLIENT_FETCH_ERROR "Failed to fetch". The
+    // security/bisect-session-abort-cause branch only tested the mitigation
+    // refetchOnWindowFocus={false} and recorded no CI/result, so that trigger is
+    // not confirmed. networkidle is therefore needed to let these extra startup
+    // requests settle before navigation. Playwright disables the back/forward
+    // cache, so goBack() loads a new document that fetches the session again.
     let session = sessionTraffic.waitForSessionResponse();
     await page.goto('/');
     await session;
