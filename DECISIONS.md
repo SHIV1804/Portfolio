@@ -57,3 +57,10 @@ Technical decisions with evidence in code, config, or this project's own history
 **Decision:** The session-observer tests share one console-noise ignore list.
 **Reason:** The existing navigation and general console tests intentionally tolerate `ResizeObserver`, `Non-Error promise rejection`, and `Uncaught (in promise)` noise; keeping the list in the helper prevents the tests from silently diverging.
 **Impact:** New console-error assertions should use `isIgnorableConsoleError()` rather than adding test-local exceptions.
+
+---
+**Decision:** Upgrade `@hookform/resolvers` to `6.0.2` in its own Stage 3 PR.
+**Reason:** The official v6.0.2 release is a bug-fix release (TypeBox escaped-field-name validation errors). The repository uses only `zodResolver(contactSchema)` and the documented resolver signature remains compatible with the existing Zod v4 schema and React Hook Form setup.
+**Impact:** The only runtime usage is `features/contact-form/ui/ContactForm.tsx`; the server-side validation in `app/api/contact/route.ts` remains unchanged. CI must exercise the contact-form tests before merge.
+
+**Stage 3 evidence rule:** `@types/node` remains unchanged until the Vercel project Node setting is obtained from authenticated project evidence. CI is confirmed to use Node 22; no Node 26 assumption is permitted.

@@ -33,3 +33,10 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 ## Documentation gaps this pass could not close
 - Whether `main` or `dev` should be treated as the deploy branch is not stated anywhere in the repo (no CI config, no `vercel.json`).
 - No record of which package manager (npm vs pnpm) is intended, despite both lockfiles being committed.
+
+
+## Stage 3 — @hookform/resolvers 6
+- **In progress on `chore/upgrade-hookform-resolvers-6`:** `@hookform/resolvers` is being upgraded from `^5.4.0` to `^6.0.2` in a dedicated PR. The only usage is `zodResolver(contactSchema)` in `features/contact-form/ui/ContactForm.tsx`; the server-side validation remains unchanged.
+- **Compatibility review:** official v6.0.2 release notes list a TypeBox escaped-field-name bug fix only. The existing Zod v4 resolver usage matches the documented API.
+- **Audit baseline:** full `npm audit` on the dependency-upgrades base is 38 total (15 high, 2 critical); this resolver update is not expected to alter the production-only audit.
+- **Item 2 status:** `@types/node` remains blocked pending authenticated evidence of the Vercel project Node setting. CI is confirmed to use Node 22; Node 26 must not be assumed.
