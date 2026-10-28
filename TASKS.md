@@ -33,3 +33,9 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 ## Documentation gaps this pass could not close
 - Whether `main` or `dev` should be treated as the deploy branch is not stated anywhere in the repo (no CI config, no `vercel.json`).
 - No record of which package manager (npm vs pnpm) is intended, despite both lockfiles being committed.
+
+
+## Stage 3 — Lighthouse 13
+- **In progress on `chore/upgrade-lighthouse-13`:** Lighthouse upgraded from `^12.8.2` to `^13.6.0`; `package-lock.json` refreshed. Lighthouse is used only as a devDependency; no scripts or workflows invoke it.
+- **Audit baseline:** full `npm audit` reported 38 total vulnerabilities (15 high, 2 critical). After the Lighthouse upgrade it reports 8 total (4 high, 2 critical). Production-only `npm audit --omit=dev` remains separate from this devDependency change.
+- **Compatibility note:** official Lighthouse 13 requires Node `>=22.19`; CI uses `actions/setup-node` with `node-version: 22`, while this sandbox is Node `22.13.0` and reports an engine warning. CI verification is required before merge.
