@@ -317,22 +317,27 @@ test.describe('Broken Assets and Console Checks', () => {
     let session = sessionTraffic.waitForSessionResponse();
     await page.goto('/');
     await session;
+    await page.waitForLoadState('networkidle');
 
     session = sessionTraffic.waitForSessionResponse();
     await page.goto('/projects/log-analyser');
     await session;
+    await page.waitForLoadState('networkidle');
 
     session = sessionTraffic.waitForSessionResponse();
     await page.goBack();
     await session;
+    await page.waitForLoadState('networkidle');
 
     session = sessionTraffic.waitForSessionResponse();
     await page.goto('/projects/case-study-two');
     await session;
+    await page.waitForLoadState('networkidle');
 
     session = sessionTraffic.waitForSessionResponse();
     await page.goBack();
     await session;
+    await page.waitForLoadState('networkidle');
 
     expect(sessionTraffic.unmatchedSessionErrors()).toEqual([]);
     expect(
