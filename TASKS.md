@@ -33,3 +33,11 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 ## Documentation gaps this pass could not close
 - Whether `main` or `dev` should be treated as the deploy branch is not stated anywhere in the repo (no CI config, no `vercel.json`).
 - No record of which package manager (npm vs pnpm) is intended, despite both lockfiles being committed.
+
+
+## Stage 3 — ESLint 10
+- **In progress on `chore/upgrade-eslint-10` (dedicated PR planned):** `eslint` moved from `^9` to `^10.13.0`; `eslint-config-next` is paired at `^16.4.3` to match the repository's Next 16.4.3.
+- **Compatibility evidence:** Next's official ESLint documentation supports ESLint 10; `eslint-config-next@16.4.3` declares `eslint >=9.0.0`; ESLint 10.13.0 requires Node `^20.19 || ^22.13 || >=24`, met by CI Node 22.23.4. Existing flat config is already `eslint.config.mjs`; `@typescript-eslint/parser` and plugin 8.62.1 peer ranges include ESLint 10.
+- **Known peer-warning caveat:** the config's nested `eslint-plugin-import@2.32.0`, `eslint-plugin-jsx-a11y@6.10.2`, and `eslint-plugin-react@7.37.5` declare peer ranges ending at ESLint 9. npm emitted ERESOLVE override warnings during install/`npm ci`; a local `npm run lint` completed successfully. Full CI is still required before merge.
+- **Audit before/after:** `npm audit --package-lock-only` on the base reported 38 (1 low, 20 moderate, 15 high, 2 critical; exit 1); after the ESLint/config update it reported 37 (1 low, 20 moderate, 14 high, 2 critical; exit 1).
+- **CI:** pending on the dedicated branch. Do not merge until the full CI workflow passes.

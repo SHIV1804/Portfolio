@@ -57,3 +57,13 @@ Technical decisions with evidence in code, config, or this project's own history
 **Decision:** The session-observer tests share one console-noise ignore list.
 **Reason:** The existing navigation and general console tests intentionally tolerate `ResizeObserver`, `Non-Error promise rejection`, and `Uncaught (in promise)` noise; keeping the list in the helper prevents the tests from silently diverging.
 **Impact:** New console-error assertions should use `isIgnorableConsoleError()` rather than adding test-local exceptions.
+
+
+---
+**Decision:** Upgrade ESLint to `10.13.0` in a dedicated Stage 3 PR and pair it with `eslint-config-next@16.4.3`.
+**Reason:** Next.js 16.4.3 officially documents ESLint 10 support, and the config's peer range is `eslint >=9.0.0`. CI's Node 22.23.4 satisfies ESLint 10's Node minimum. The repo already uses flat config; existing `@typescript-eslint` 8.62.1 peer ranges include ESLint 10.
+**Impact:** The config's nested React/import/accessibility plugins still declare peer ranges ending at ESLint 9 and npm warns while overriding these peers. A local ESLint run succeeds; full CI must pass before merge, and the peer warnings must remain documented.
+
+---
+**Auth.js v5 follow-up:** Remove the `@auth/core` compatibility override when migrating to Auth.js v5.
+**Reason:** This override is a NextAuth v4 compatibility measure and must not be carried into the v5 migration without explicit verification.
