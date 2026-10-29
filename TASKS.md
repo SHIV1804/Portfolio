@@ -34,8 +34,8 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 - Whether `main` or `dev` should be treated as the deploy branch is not stated anywhere in the repo (no CI config, no `vercel.json`).
 - No record of which package manager (npm vs pnpm) is intended, despite both lockfiles being committed.
 
-
 ## Stage 3 — Lighthouse 13
-- **In progress on `chore/upgrade-lighthouse-13`:** Lighthouse upgraded from `^12.8.2` to `^13.6.0`; `package-lock.json` refreshed. Lighthouse is used only as a devDependency; no scripts or workflows invoke it.
-- **Audit baseline:** full `npm audit` reported 38 total vulnerabilities (15 high, 2 critical). After the Lighthouse upgrade it reports 8 total (4 high, 2 critical). Production-only `npm audit --omit=dev` remains separate from this devDependency change.
-- **Compatibility note:** official Lighthouse 13 requires Node `>=22.19`; CI uses `actions/setup-node` with `node-version: 22`, while this sandbox is Node `22.13.0` and reports an engine warning. CI verification is required before merge.
+- **Complete on `chore/upgrade-lighthouse-13` (PR #38), pending review/merge:** Lighthouse upgraded from `^12.8.2` to `^13.6.0`; repository search found no script or workflow invocation to migrate or exercise beyond the package installation/build.
+- **Audit evidence:** full `npm audit --package-lock-only` baseline on `security/dependency-upgrades` was 38 vulnerabilities (1 low, 20 moderate, 15 high, 2 critical; exit 1). After the Lighthouse update it was 8 (1 low, 1 moderate, 4 high, 2 critical; exit 1).
+- **CI evidence:** run [40937913936](https://github.com/SHIV1804/Portfolio/actions/runs/40937913936) succeeded on Node 22.23.4. `TypeScript check`, `Lint`, `Build application`, and `Run end-to-end tests` all succeeded; Playwright reported 210 passed and 1 skipped. This satisfies Lighthouse 13.6.0's Node `>=22.19` requirement.
+- **Stage 3 item 2 blocked:** CI evidence is `.github/workflows/ci.yml` `node-version: 22`; the run resolved 22.23.4. The actual Vercel project Node setting is not verified: the checked branch has no `vercel.json`, `.vercel` project settings, or `engines.node`, and dashboard access was unavailable. Do not create an `@types/node` PR until Vercel's configured version is confirmed; do not assume Node 26.
