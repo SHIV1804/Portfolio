@@ -41,3 +41,19 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 - **Audit before/after:** `npm audit --package-lock-only` on `security/dependency-upgrades` before the change reported 38 findings (1 low, 20 moderate, 15 high, 2 critical; exit 1). After the resolver update it remained 38 with the same severity distribution (exit 1).
 - **CI:** full run [40941772607](https://github.com/SHIV1804/Portfolio/actions/runs/40941772607) passed. `TypeScript check`, `Lint`, `Build application`, and `Run end-to-end tests` all concluded success. Real log excerpts: `npx tsc --noEmit`; `npm run lint` → `> eslint`; `npm run build` → `> next build`; `✓ Compiled successfully in 9.4s`; `✓ Generating static pages using 3 workers (37/37) in 2.9s`; Playwright: `210 passed (3.6m)`, `1 skipped`.
 - **Item 2 status:** `@types/node` remains blocked pending authenticated evidence of the Vercel project Node setting. CI is confirmed to use Node 22; Node 26 must not be assumed.
+
+
+### Successful CI output (run [40941772607](https://github.com/SHIV1804/Portfolio/actions/runs/40941772607))
+
+```text
+##[group]Run npx tsc --noEmit
+##[group]Run npm run lint
+> eslint
+##[group]Run npm run build
+> next build
+▲ Next.js 16.4.3 (Turbopack)
+✓ Compiled successfully in 9.4s
+✓ Generating static pages using 3 workers (37/37) in 2.9s
+1 skipped
+210 passed (3.6m)
+```
