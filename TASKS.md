@@ -41,3 +41,19 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 - **Audit evidence:** full `npm audit --package-lock-only` on the security base: 38 (1 low, 20 moderate, 15 high, 2 critical; exit 1). After the Framer Motion update: 38 with the same severity distribution (exit 1); this runtime dependency update did not alter audit findings.
 - **CI evidence:** full run [40940889046](https://github.com/SHIV1804/Portfolio/actions/runs/40940889046) succeeded. `TypeScript check`, `Lint`, `Build application`, and `Run end-to-end tests` all passed; Playwright reported 212 passed and 1 skipped. Initial run [40939849364](https://github.com/SHIV1804/Portfolio/actions/runs/40939849364) had one test-only strict locator ambiguity on the Two Sum page (two matching headings); the assertion was corrected, and the complete rerun passed.
 - **Item 2 status:** `@types/node` remains blocked pending the actual Vercel project Node setting. CI's workflow requests Node 22 and the completed Lighthouse CI run resolved Node 22.23.4; the private project setting could not be verified. Do not assume Node 26 or create a typings PR until Vercel evidence is available.
+
+
+### Successful CI output (run [40940889046](https://github.com/SHIV1804/Portfolio/actions/runs/40940889046))
+
+```text
+##[group]Run npx tsc --noEmit
+##[group]Run npm run lint
+> eslint
+##[group]Run npm run build
+> next build
+▲ Next.js 16.4.3 (Turbopack)
+✓ Compiled successfully in 6.3s
+✓ Generating static pages using 3 workers (37/37) in 2.7s
+1 skipped
+212 passed (2.9m)
+```
