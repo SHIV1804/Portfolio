@@ -39,3 +39,19 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 - **Audit evidence:** full `npm audit --package-lock-only` baseline on `security/dependency-upgrades` was 38 vulnerabilities (1 low, 20 moderate, 15 high, 2 critical; exit 1). After the Lighthouse update it was 8 (1 low, 1 moderate, 4 high, 2 critical; exit 1).
 - **CI evidence:** run [40937913936](https://github.com/SHIV1804/Portfolio/actions/runs/40937913936) succeeded on Node 22.23.4. `TypeScript check`, `Lint`, `Build application`, and `Run end-to-end tests` all succeeded; Playwright reported 210 passed and 1 skipped. This satisfies Lighthouse 13.6.0's Node `>=22.19` requirement.
 - **Stage 3 item 2 blocked:** CI evidence is `.github/workflows/ci.yml` `node-version: 22`; the run resolved 22.23.4. The actual Vercel project Node setting is not verified: the checked branch has no `vercel.json`, `.vercel` project settings, or `engines.node`, and dashboard access was unavailable. Do not create an `@types/node` PR until Vercel's configured version is confirmed; do not assume Node 26.
+
+
+### Successful CI output (run [40937913936](https://github.com/SHIV1804/Portfolio/actions/runs/40937913936))
+
+```text
+##[group]Run npx tsc --noEmit
+##[group]Run npm run lint
+> eslint
+##[group]Run npm run build
+> next build
+▲ Next.js 16.4.3 (Turbopack)
+✓ Compiled successfully in 9.6s
+✓ Generating static pages using 3 workers (37/37) in 2.4s
+1 skipped
+210 passed (3.3m)
+```
