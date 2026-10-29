@@ -10,13 +10,26 @@ const visualizerPages = [
     visualizer: 'Sliding Window Visualizer',
   },
   {
+    route: '/dsa/sliding-window/maximum-sum-subarray-of-size-k',
+    visualizer: 'Sliding Window Visualizer',
+  },
+  {
     route: '/dsa/binary-search/binary-search',
+    visualizer: 'Binary Search Visualizer',
+  },
+  {
+    route: '/dsa/binary-search/first-bad-version',
     visualizer: 'Binary Search Visualizer',
   },
 ];
 
+const flagshipPages = [
+  '/dsa/flagship/hash-map/two-sum',
+  '/dsa/flagship/sliding-window/maximum-sum-subarray-of-size-k',
+];
+
 test.describe('Framer Motion DSA consumers', () => {
-  test('each pattern visualizer renders on its real problem page', async ({ page }) => {
+  test('each pattern visualizer renders on every live problem page', async ({ page }) => {
     for (const { route, visualizer } of visualizerPages) {
       const response = await page.goto(route);
       expect(response?.status(), `${route} should load`).toBe(200);
@@ -24,10 +37,12 @@ test.describe('Framer Motion DSA consumers', () => {
     }
   });
 
-  test('the flagship walkthrough renders its animated array boxes', async ({ page }) => {
-    const response = await page.goto('/dsa/flagship/hash-map/two-sum');
-    expect(response?.status()).toBe(200);
-    await expect(page.getByRole('heading', { name: 'Two Sum' })).toBeVisible();
-    await expect(page.getByText('[0]', { exact: true }).first()).toBeVisible();
+  test('both flagship walkthroughs render their animated array boxes', async ({ page }) => {
+    for (const route of flagshipPages) {
+      const response = await page.goto(route);
+      expect(response?.status(), `${route} should load`).toBe(200);
+      await expect(page.locator('h1').first()).toBeVisible();
+      await expect(page.getByText('[0]', { exact: true }).first()).toBeVisible();
+    }
   });
 });
