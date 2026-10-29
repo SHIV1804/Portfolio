@@ -64,3 +64,11 @@ Technical decisions with evidence in code, config, or this project's own history
 **Impact:** The only runtime usage is `features/contact-form/ui/ContactForm.tsx`; the server-side validation in `app/api/contact/route.ts` remains unchanged. CI must exercise the contact-form tests before merge.
 
 **Stage 3 evidence rule:** `@types/node` remains unchanged until the Vercel project Node setting is obtained from authenticated project evidence. CI is confirmed to use Node 22; no Node 26 assumption is permitted.
+
+
+---
+**Auth.js v5 follow-up:** Remove the `@auth/core` compatibility override when migrating to Auth.js v5.
+**Reason:** This override is a NextAuth v4 compatibility measure and must not be carried into the v5 migration without explicit verification.
+
+---
+**Stage 3 PR #40 CI evidence:** Full run [40941772607](https://github.com/SHIV1804/Portfolio/actions/runs/40941772607) passed TypeScript, lint, build, and the Playwright suite (210 passed, 1 skipped), including the contact-form validation flows using `zodResolver`.

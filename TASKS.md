@@ -34,9 +34,10 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 - Whether `main` or `dev` should be treated as the deploy branch is not stated anywhere in the repo (no CI config, no `vercel.json`).
 - No record of which package manager (npm vs pnpm) is intended, despite both lockfiles being committed.
 
-
 ## Stage 3 — @hookform/resolvers 6
-- **In progress on `chore/upgrade-hookform-resolvers-6`:** `@hookform/resolvers` is being upgraded from `^5.4.0` to `^6.0.2` in a dedicated PR. The only usage is `zodResolver(contactSchema)` in `features/contact-form/ui/ContactForm.tsx`; the server-side validation remains unchanged.
-- **Compatibility review:** official v6.0.2 release notes list a TypeBox escaped-field-name bug fix only. The existing Zod v4 resolver usage matches the documented API.
-- **Audit baseline:** full `npm audit` on the dependency-upgrades base is 38 total (15 high, 2 critical); this resolver update is not expected to alter the production-only audit.
+- **Complete on `chore/upgrade-hookform-resolvers-6` (PR #40), pending review/merge:** `@hookform/resolvers` upgraded from `^5.4.0` to `^6.0.2` in its own PR. The sole code import/use is `zodResolver(contactSchema)` in `features/contact-form/ui/ContactForm.tsx`; server-side validation in `app/api/contact/route.ts` is unchanged.
+- **Compatibility/changelog review:** official v6.0.2 release notes list a TypeBox escaped-field-name validation bug fix. The v6.0.0 breaking change concerns only the `effect-ts` resolver, which this repo does not use. The existing Zod v4 and React Hook Form 7.81 setup is within the resolver's documented peer ranges.
+- **Page/tests:** the contact form appears on `/`; the complete CI Playwright run exercised `tests/contact-form/contact-form.spec.ts` including visible form, empty/invalid submission, valid submission, and accessibility cases.
+- **Audit before/after:** `npm audit --package-lock-only` on `security/dependency-upgrades` before the change reported 38 findings (1 low, 20 moderate, 15 high, 2 critical; exit 1). After the resolver update it remained 38 with the same severity distribution (exit 1).
+- **CI:** full run [40941772607](https://github.com/SHIV1804/Portfolio/actions/runs/40941772607) passed. `TypeScript check`, `Lint`, `Build application`, and `Run end-to-end tests` all concluded success. Real log excerpts: `npx tsc --noEmit`; `npm run lint` → `> eslint`; `npm run build` → `> next build`; `✓ Compiled successfully in 9.4s`; `✓ Generating static pages using 3 workers (37/37) in 2.9s`; Playwright: `210 passed (3.6m)`, `1 skipped`.
 - **Item 2 status:** `@types/node` remains blocked pending authenticated evidence of the Vercel project Node setting. CI is confirmed to use Node 22; Node 26 must not be assumed.
