@@ -67,3 +67,10 @@ Technical decisions with evidence in code, config, or this project's own history
 ---
 **Auth.js v5 follow-up:** Remove the `@auth/core` compatibility override when migrating to Auth.js v5.
 **Reason:** This override is a NextAuth v4 compatibility measure and must not be carried into the v5 migration without explicit verification.
+
+
+---
+**Stage 3 PR #41 CI evidence:** Full run [40943258369](https://github.com/SHIV1804/Portfolio/actions/runs/40943258369) passed dependency installation, Prisma generation, disposable CI migrations, TypeScript, lint, build, and Playwright (210 passed, 1 skipped). npm emitted peer override warnings for nested ESLint plugins whose declared ranges end at ESLint 9; the lint and full CI jobs nevertheless passed.
+
+---
+**Stage 3 item 5 — TypeScript 7.0.2 blocked:** The latest `typescript-eslint` parser/plugin release (8.72.1) declares TypeScript `>=4.8.4 <6.1.0`, excluding the requested 7.0.2. Next 16.4.3 itself permits TypeScript 7, but the repository's TypeScript-aware ESLint parser does not. Do not upgrade until tooling support or a separately tested TS 6 API alias strategy is available.
