@@ -85,13 +85,13 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 |---|---|---|---|---|
 | #23 | `security/dependency-upgrades` | `dev` ✅ (verified with GitHub API on 2026-10-31) | `6e90cd6` | run 40776871932 green |
 | #37 | `chore/safe-range-dependency-updates` | `security/dependency-upgrades` | `c80230d` — **MERGED** ✅ (merge commit `3b9e5d3`, 2026-10-31) | run 40780697711: 211 passed, 1 skipped |
-| #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `40fcb8f` | run 40937913936: 210 passed, 1 skipped |
+| #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `4a152cf` — restacked on `3b9e5d3` ✅ | [run 41123287928](https://github.com/SHIV1804/Portfolio/actions/runs/41123287928): 211 passed, 1 skipped, 0 failed; audit 29 → 0 |
 | #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | `security/dependency-upgrades` | `7d8c9f6` | run 40940889046: 212 passed, 1 skipped |
 | #40 Resolvers 6 | `chore/upgrade-hookform-resolvers-6` | `security/dependency-upgrades` | `dbb7b22` | run 40941772607: 210 passed, 1 skipped |
 | #41 ESLint 10 | `chore/upgrade-eslint-10` | `security/dependency-upgrades` | `beeea2f` | run 40943258369: 210 passed, 1 skipped |
 | #42 Prisma 7.10.1 | `chore/upgrade-prisma-7` | `security/dependency-upgrades` | `13a82e3` (code tested at `ad31ca2`; later commit is docs only) | run 41114978943: 211 passed, 1 skipped |
 
-**⚠ Integration problem (✅ verified by reviewer):** PRs #38–#42 all fork from `6e90cd6`, which is now 4 commits behind the new base `3b9e5d3` (PR #37 merged). Each of them conflicts with PR #37 (`package.json`, `package-lock.json`, `DECISIONS.md`; the resolvers branch conflicts only in `DECISIONS.md`). Every Stage 3 CI run tested its change **without** PR #37's `@auth/core` override, Playwright pin and safe-range updates. The combined stack is untested until the re-stack in section 10A is done.
+**⚠ Integration status:** PR #38 is now restacked on `3b9e5d3`; its package, lockfile, `DECISIONS.md`, and `TASKS.md` resolutions were verified, and exact-head CI passed. PRs #39–#42 still fork from the pre-#37 base and remain un-restacked; their existing CI results do not validate the combined stack.
 
 **Intended merge path (owner decides):** #37 → into `security/dependency-upgrades`; then #23 into `dev`; then `dev` → `main` (production). Before `main`: check the Vercel preview and the Vercel settings in section 10 (owner actions).
 
@@ -192,9 +192,10 @@ The criticals on PRs #38–#42 are the `@auth/core` peer issue that PR #37's ove
 2. In Vercel: read **Install Command** and **Node.js Version**; confirm `DATABASE_URL` is set. Tell Manus the Node version.
 3. ~~Merge PR #37 into `security/dependency-upgrades`~~ — **done** (`3b9e5d3`).
 
-### A. Re-stack Stage 3 (**GO — the owner confirmed PR #37 is merged; base is `security/dependency-upgrades` @ `3b9e5d3`**)
-Merge the target/base into each feature branch one at a time, as a chain, in this order: merge `security/dependency-upgrades` into `chore/upgrade-lighthouse-13`; then merge the previous chain branch into each next branch: `hookform-resolvers-6` → `framer-motion-14` → `eslint-10` → `prisma-7`. Each PR targets the previous branch. For every branch, resolve `package.json` as the base content plus that branch's dependency change; take the base `package-lock.json` then run `npm install` to regenerate it (never hand-edit the lockfile); preserve both sides of `DECISIONS.md` and `TASKS.md`. Push normally, fast-forward only. If a normal push is rejected as non-fast-forward, stop and report; never force-push or rewrite shared history. For each: run `tsc`, lint, build and the full Playwright suite in CI, report `npm audit`, update and push this file. The final stack must show **0 critical**. Do not merge.
+### A. Re-stack Stage 3 (**IN PROGRESS — Lighthouse completed; owner must authorize the next branch**)
+The Lighthouse item is complete on `chore/upgrade-lighthouse-13` at `4a152cf`, merged from `security/dependency-upgrades` at `3b9e5d3` with a normal fast-forward push. The exact-head CI run 41123287928 passed TypeScript, lint, build, and the full Playwright suite with 211 passed, 1 skipped, 0 failed. A real `npm audit --package-lock-only` measured 29 vulnerabilities on the new base (10 high, 19 moderate, 0 critical) and 0 on the Lighthouse head.
 
+Do not start the next branch until the owner explicitly authorizes it. When authorized, continue the chain with `chore/upgrade-hookform-resolvers-6`, merging the previous chain branch as directed, resolving `package.json` as the base plus that branch's dependency change, regenerating `package-lock.json` with npm, and preserving both sides of `DECISIONS.md` / `TASKS.md`. Push normally only; if rejected as non-fast-forward, stop and report. For each branch, run TypeScript, lint, build, and the full Playwright suite in CI, report `npm audit`, update this file, and never merge the PR.
 ### B. Prisma 7 follow-up (PR #42, after re-stack; disposable CI Postgres only)
 - Remove the silent localhost fallback in `shared/lib/prisma.ts`: fail loudly when `DATABASE_URL` is missing at runtime while keeping `next build` and CI working.
 - Inventory every tracked `.js`, `.cjs`, `.mjs` file and package/workflow script affected by `"type": "module"`; run each and record real output.
@@ -213,7 +214,7 @@ Merge the target/base into each feature branch one at a time, as a chain, in thi
 ## 11. NEXT ACTION (keep current)
 
 ```text
-NEXT ACTION: On `chore/upgrade-lighthouse-13`, merge `origin/security/dependency-upgrades` at `3b9e5d3`; resolve `package.json`, take the base lockfile and run `npm install`, and preserve both sides of `DECISIONS.md` / `TASKS.md`. Push normally only. If rejected as non-fast-forward, stop and report. Then run the required CI and audit, update PR #38 and this file, and stop for the owner's next-branch go-ahead.
+NEXT ACTION: STOP after Lighthouse. PR #38 is at `4a152cf`, based on `security/dependency-upgrades` `3b9e5d3`; PR description is updated, exact-head CI run 41123287928 passed (211 passed, 1 skipped, 0 failed), and npm audit is 0 vulnerabilities. Wait for the owner to authorize starting `chore/upgrade-hookform-resolvers-6`; do not touch the next branch yet.
 ```
 
 ---
@@ -246,7 +247,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-31 | PR #37 merged into `security/dependency-upgrades` (`3b9e5d3`); owner gave the explicit go-ahead for section 10A. |
 | 2026-10-31 | Replaced handoff with uploaded v2 byte-for-byte (commit `ba8e504`); verified `## 12.` exists and the obsolete `ensure prisma.config.ts uses DATABASE_URL_DIRECT` wording is absent. Ran section 12: fetch found 44 remote heads; `docs/manus-handoff` resolved to `ba8e504`; updated security base is `3b9e5d3`; #37 ancestor check printed `#37 merged`; upgrade heads and `package.json` versions matched the checklist; worktree clean, stash empty. The supplied exact text has trailing whitespace at line 69; it was preserved. No Stage 3 branch has yet been rebased because of the section 2 safety conflict. |
 | 2026-10-31 | Owner prohibited force-push/history rewrite and directed a merge-based stack. Section 10A and NEXT ACTION now require merging the target base into each feature branch, regenerating the lockfile with `npm install`, preserving both documentation sides, and pushing normally only; stop if non-fast-forward. |
-| _next_ | _append here_ |
+| 2026-10-31 | Lighthouse restack completed on `chore/upgrade-lighthouse-13` at `4a152cf`; PR #38 updated to base `3b9e5d3`, exact-head CI [41123287928](https://github.com/SHIV1804/Portfolio/actions/runs/41123287928) passed with 211 passed, 1 skipped, 0 failed, and real `npm audit --package-lock-only` measured 29 vulnerabilities on the base and 0 on the head. CI required manual dispatch because PR #38 targets `security/dependency-upgrades`, which is not an automatic CI target. Stopped before the hookform-resolvers branch pending owner authorization. |
 
 ---
 
