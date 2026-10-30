@@ -14,7 +14,9 @@ declare module "next-auth" {
 }
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as Adapter,
+  // Prisma 7 generates its client to a custom path; runtime compatibility is
+  // verified by the CI-only disposable-database adapter smoke test.
+  adapter: PrismaAdapter(prisma as never) as Adapter,
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID || "",

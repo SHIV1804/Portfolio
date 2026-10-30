@@ -33,3 +33,12 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 ## Documentation gaps this pass could not close
 - Whether `main` or `dev` should be treated as the deploy branch is not stated anywhere in the repo (no CI config, no `vercel.json`).
 - No record of which package manager (npm vs pnpm) is intended, despite both lockfiles being committed.
+
+
+## Stage 3 — Prisma 7.10.1
+- **In progress on `chore/upgrade-prisma-7` (dedicated PR planned):** moving `prisma` and `@prisma/client` together to stable `7.10.1` (not the Prisma 8 RC), adding `@prisma/adapter-pg@7.10.1`, `dotenv`, the required ESM package mode, `prisma.config.ts`, and the new Prisma client generator/output path.
+- **Official guide review:** Prisma v7 requires the explicit client output path and updated generated-client imports, moves CLI datasource URLs to `prisma.config.ts`, requires a PostgreSQL driver adapter in runtime client construction, and no longer loads env files by default. Existing `postinstall: prisma generate` is preserved and will be exercised by CI.
+- **Schema/migrations:** the project is PostgreSQL with three existing SQL migrations. The schema models are unchanged; only the generator/datasource configuration changes. No migration file is added or edited. CI's `DATABASE_URL` is `postgresql://ci:ci@localhost:5432/portfolio_ci` with a job-scoped PostgreSQL 16 service. `migrate deploy` and the adapter smoke test run only there; the test refuses Neon and non-local hosts. No Neon or production migration was run.
+- **Auth.js adapter:** `@auth/prisma-adapter@2.11.3` is retained. Its published peer range includes Prisma 7 but its declaration imports the default `@prisma/client` type while Prisma 7's generated client uses a custom output. A narrow adapter type cast is documented; a new CI-only test exercises create/read/delete user and session methods against the disposable database.
+- **Audit before/after:** before `npm audit --package-lock-only`: 38 findings (1 low, 20 moderate, 15 high, 2 critical; exit 1). After the package update: 38 with the same severity distribution (exit 1).
+- **CI:** pending; run the full workflow before opening/merging the PR. Do not run `migrate-production.yml` or any Neon/prod command.

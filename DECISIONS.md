@@ -57,3 +57,13 @@ Technical decisions with evidence in code, config, or this project's own history
 **Decision:** The session-observer tests share one console-noise ignore list.
 **Reason:** The existing navigation and general console tests intentionally tolerate `ResizeObserver`, `Non-Error promise rejection`, and `Uncaught (in promise)` noise; keeping the list in the helper prevents the tests from silently diverging.
 **Impact:** New console-error assertions should use `isIgnorableConsoleError()` rather than adding test-local exceptions.
+
+
+---
+**Decision:** Upgrade Prisma 6 to stable `7.10.1` with the official v7 generator/config path and `@prisma/adapter-pg@7.10.1`.
+**Reason:** Prisma v7 requires a driver adapter and explicit generated-client output; the existing app is PostgreSQL and CI already provides a disposable PostgreSQL service. Keep the existing three migration SQL files unchanged.
+**Impact:** Move the connection URL to root `prisma.config.ts`, keep `postinstall: prisma generate`, update all generated-client imports, and validate install/generate/migrate/build/runtime adapter behavior only in CI against `localhost:5432`. Never run migration commands against Neon or production. Prisma v7 uses node-postgres pool defaults; do not validate production connection behavior as part of this PR.
+
+---
+**Auth.js v5 follow-up:** Remove the `@auth/core` compatibility override when migrating to Auth.js v5.
+**Reason:** The compatibility override is tied to the current NextAuth v4 setup and should not be carried into an Auth.js v5 migration without explicit verification.
