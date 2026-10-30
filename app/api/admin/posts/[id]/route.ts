@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/shared/lib/prisma";
 import { authOptions } from "@/shared/lib/auth";
-import { PostStatus } from "@/generated/prisma/client";
+import { PostStatus } from "@/shared/lib/post-status";
 import { deleteCommunityPost } from "@/shared/lib/delete-community-post";
 
 export async function PATCH(

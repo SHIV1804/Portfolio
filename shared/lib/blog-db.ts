@@ -3,7 +3,7 @@
  */
 // Verifying graceful DB fallback behavior on this branch
 import { prisma } from "./prisma";
-import { PostStatus } from "@/generated/prisma/client";
+import { PostStatus } from "@/shared/lib/post-status";
 
 /**
  * Fetches all community blog posts that have been APPROVED by an admin.

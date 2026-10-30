@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/shared/lib/prisma";
-import { PostStatus } from "@/generated/prisma/client";
+import { PostStatus } from "@/shared/lib/post-status";
 import { authOptions } from "@/shared/lib/auth";
 import { getAllPosts } from "@/shared/lib/blog";
 
