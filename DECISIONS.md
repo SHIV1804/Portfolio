@@ -67,3 +67,7 @@ Technical decisions with evidence in code, config, or this project's own history
 ---
 **Auth.js v5 follow-up:** Remove the `@auth/core` compatibility override when migrating to Auth.js v5.
 **Reason:** The compatibility override is tied to the current NextAuth v4 setup and should not be carried into an Auth.js v5 migration without explicit verification.
+
+
+---
+**Stage 3 PR #42 CI evidence:** Full run [41114978943](https://github.com/SHIV1804/Portfolio/actions/runs/41114978943) passed postinstall and explicit Prisma 7.10.1 generation, disposable PostgreSQL migrations, TypeScript, lint, build, and Playwright (211 passed, 1 skipped). The Auth.js Prisma adapter create/read/delete smoke test ran against the job-scoped CI database. Two earlier CI findings were fixed: required `AdapterUser.id`, then a generated Prisma enum import in a client component that pulled in `node:module`; browser-safe enum constants now live in `shared/lib/post-status.ts`. No Neon or production database was touched.

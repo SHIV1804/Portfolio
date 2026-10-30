@@ -36,9 +36,30 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 
 
 ## Stage 3 — Prisma 7.10.1
-- **In progress on `chore/upgrade-prisma-7` (dedicated PR planned):** moving `prisma` and `@prisma/client` together to stable `7.10.1` (not the Prisma 8 RC), adding `@prisma/adapter-pg@7.10.1`, `dotenv`, the required ESM package mode, `prisma.config.ts`, and the new Prisma client generator/output path.
+- **Complete on `chore/upgrade-prisma-7` (PR [#42](https://github.com/SHIV1804/Portfolio/pull/42), pending review/merge):** upgraded `prisma` and `@prisma/client` together to stable `7.10.1` (not the Prisma 8 RC), added `@prisma/adapter-pg@7.10.1`, `dotenv`, ESM package mode, `prisma.config.ts`, and the new Prisma client generator/output path.
 - **Official guide review:** Prisma v7 requires the explicit client output path and updated generated-client imports, moves CLI datasource URLs to `prisma.config.ts`, requires a PostgreSQL driver adapter in runtime client construction, and no longer loads env files by default. Existing `postinstall: prisma generate` is preserved and will be exercised by CI.
 - **Schema/migrations:** the project is PostgreSQL with three existing SQL migrations. The schema models are unchanged; only the generator/datasource configuration changes. No migration file is added or edited. CI's `DATABASE_URL` is `postgresql://ci:ci@localhost:5432/portfolio_ci` with a job-scoped PostgreSQL 16 service. `migrate deploy` and the adapter smoke test run only there; the test refuses Neon and non-local hosts. No Neon or production migration was run.
 - **Auth.js adapter:** `@auth/prisma-adapter@2.11.3` is retained. Its published peer range includes Prisma 7 but its declaration imports the default `@prisma/client` type while Prisma 7's generated client uses a custom output. A narrow adapter type cast is documented; a new CI-only test exercises create/read/delete user and session methods against the disposable database.
 - **Audit before/after:** before `npm audit --package-lock-only`: 38 findings (1 low, 20 moderate, 15 high, 2 critical; exit 1). After the package update: 38 with the same severity distribution (exit 1).
-- **CI:** pending; run the full workflow before opening/merging the PR. Do not run `migrate-production.yml` or any Neon/prod command.
+- **Final CI:** run [41114978943](https://github.com/SHIV1804/Portfolio/actions/runs/41114978943) succeeded. It passed `npm ci` and the `postinstall` Prisma generation, explicit `prisma generate`, `prisma migrate deploy` on the disposable CI PostgreSQL service, `npx tsc --noEmit`, lint, build, and the complete Playwright suite. Build: compiled in 8.3s and generated 37/37 static pages. The new Auth.js Prisma adapter smoke test ran in Playwright; suite result: 211 passed, 1 skipped.
+- **Earlier CI iterations/fixes:** [41114254379](https://github.com/SHIV1804/Portfolio/actions/runs/41114254379) exposed the missing required `AdapterUser.id`; fixed by supplying a random id. [41114584018](https://github.com/SHIV1804/Portfolio/actions/runs/41114584018) exposed a Turbopack client-bundle error (`node:module`) from importing the generated Prisma enum into a `'use client'` page; replaced those imports with the browser-safe `shared/lib/post-status.ts`. The final run above is green.
+
+### Successful CI output (run [41114978943](https://github.com/SHIV1804/Portfolio/actions/runs/41114978943))
+
+```text
+##[group]Run npm ci
+> prisma generate
+✔ Generated Prisma Client (7.10.1) to ./generated/prisma in 45ms
+##[group]Run npx prisma generate
+✔ Generated Prisma Client (7.10.1) to ./generated/prisma in 52ms
+##[group]Run npx prisma migrate deploy
+##[group]Run npx tsc --noEmit
+##[group]Run npm run lint
+> eslint
+##[group]Run npm run build
+✓ Compiled successfully in 8.3s
+✓ Generating static pages using 3 workers (37/37) in 5.5s
+[116/212] tests/prisma/prisma-adapter-smoke.spec.ts › Auth.js Prisma adapter can create, read, and delete users and sessions on CI Postgres
+1 skipped
+211 passed (3.2m)
+```
