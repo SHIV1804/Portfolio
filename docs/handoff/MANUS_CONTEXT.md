@@ -79,11 +79,11 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 
 ## 5. Current state of work
 
-### Pull requests (all open, none merged)
+### Pull requests (#37 merged; PR #23 and Stage 3 PRs open)
 
 | PR | Branch | Target | Head ✅ | CI 🟡 |
 |---|---|---|---|---|
-| #23 | `security/dependency-upgrades` | `dev` 🟡 (reported by Manus; reviewer could not verify the base via API) | `6e90cd6` | run 40776871932 green |
+| #23 | `security/dependency-upgrades` | `dev` ✅ (verified with GitHub API on 2026-10-31) | `6e90cd6` | run 40776871932 green |
 | #37 | `chore/safe-range-dependency-updates` | `security/dependency-upgrades` | `c80230d` — **MERGED** ✅ (merge commit `3b9e5d3`, 2026-10-31) | run 40780697711: 211 passed, 1 skipped |
 | #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `40fcb8f` | run 40937913936: 210 passed, 1 skipped |
 | #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | `security/dependency-upgrades` | `7d8c9f6` | run 40940889046: 212 passed, 1 skipped |
@@ -195,6 +195,8 @@ The criticals on PRs #38–#42 are the `@auth/core` peer issue that PR #37's ove
 ### A. Re-stack Stage 3 (**GO — the owner confirmed PR #37 is merged; base is `security/dependency-upgrades` @ `3b9e5d3`**)
 Rebase one at a time, as a chain, in this order: `lighthouse-13` → `hookform-resolvers-6` → `framer-motion-14` → `eslint-10` → `prisma-7`. Each PR targets the previous branch. Regenerate `package-lock.json` with `npm install` (never hand-edit it); keep both sides in `DECISIONS.md` / `TASKS.md`. For each: run `tsc`, lint, build and the full Playwright suite in CI, report `npm audit`, update and push this file. The final stack must show **0 critical**. Do not merge.
 
+**Safety hold before changing the shared PR branch:** rebasing `chore/upgrade-lighthouse-13` changes its published history and requires a force-push to update the existing PR branch. Section 2 prohibits force-pushes and rewriting shared history. No branch rebase or PR-head update has been performed; ask the owner how to resolve this conflict before publishing the rebased branch or triggering its CI.
+
 ### B. Prisma 7 follow-up (PR #42, after re-stack; disposable CI Postgres only)
 - Remove the silent localhost fallback in `shared/lib/prisma.ts`: fail loudly when `DATABASE_URL` is missing at runtime while keeping `next build` and CI working.
 - Inventory every tracked `.js`, `.cjs`, `.mjs` file and package/workflow script affected by `"type": "module"`; run each and record real output.
@@ -213,8 +215,7 @@ Rebase one at a time, as a chain, in this order: `lighthouse-13` → `hookform-r
 ## 11. NEXT ACTION (keep current)
 
 ```text
-NEXT ACTION: PR #37 is merged (security/dependency-upgrades @ 3b9e5d3). Start section 10A now with
-chore/upgrade-lighthouse-13 rebased onto 3b9e5d3. Do one branch at a time; stop and report after each.
+NEXT ACTION: Section 12 is complete. Before rebasing the existing PR #38 branch, resolve the conflict between section 10A's rebase request and section 2's no-force-push/no-history-rewrite rule. Do not force-push or rewrite the shared branch until the owner resolves this.
 ```
 
 ---
@@ -245,6 +246,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-30/31 | Stage 3 PRs #38–#42 opened (branches off `6e90cd6`); TypeScript 7 and `@types/node` blocked; Stage 4 findings reported. |
 | 2026-10-31 | Reviewer verified: handoff branch exists (`1e27cf8`), five Stage 3 SHAs match, #37 not merged, all five Stage 3 branches conflict with #37, `prisma.config.ts` vs workflow already compatible. v2 of this file written. |
 | 2026-10-31 | PR #37 merged into `security/dependency-upgrades` (`3b9e5d3`); owner gave the explicit go-ahead for section 10A. |
+| 2026-10-31 | Replaced handoff with uploaded v2 byte-for-byte (commit `ba8e504`); verified `## 12.` exists and the obsolete `ensure prisma.config.ts uses DATABASE_URL_DIRECT` wording is absent. Ran section 12: fetch found 44 remote heads; `docs/manus-handoff` resolved to `ba8e504`; updated security base is `3b9e5d3`; #37 ancestor check printed `#37 merged`; upgrade heads and `package.json` versions matched the checklist; worktree clean, stash empty. The supplied exact text has trailing whitespace at line 69; it was preserved. No Stage 3 branch has yet been rebased because of the section 2 safety conflict. |
 | _next_ | _append here_ |
 
 ---
