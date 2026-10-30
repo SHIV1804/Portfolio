@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
+  isAbortedSessionConsoleError,
   isIgnorableConsoleError,
   observeSessionTraffic,
 } from '../helpers/session-observer';
@@ -376,6 +377,21 @@ test.describe('Broken Assets and Console Checks', () => {
     await page.route('**/api/auth/session', (route) => route.abort('failed'));
     await page.goto('/');
     await expect.poll(() => failedRequestTraffic.hasError()).toBe(true);
+  });
+
+  test('session matcher accepts the captured Chromium abort message only', () => {
+    const capturedChromiumMessage =
+      '[next-auth][error][CLIENT_FETCH_ERROR] \nhttps://next-auth.js.org/errors#client_fetch_error Failed to fetch {error: Object, url: /api/auth/session, message: Failed to fetch}';
+
+    expect(isAbortedSessionConsoleError(capturedChromiumMessage)).toBe(true);
+    expect(
+      isAbortedSessionConsoleError(
+        capturedChromiumMessage.replace(
+          'message: Failed to fetch',
+          'message: Network error',
+        ),
+      ),
+    ).toBe(false);
   });
 
   test('session observer tolerates a matched browser-aborted session fetch', async ({
