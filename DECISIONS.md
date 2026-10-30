@@ -64,3 +64,12 @@ Technical decisions with evidence in code, config, or this project's own history
 **Impact:** No application script or workflow invokes Lighthouse. Any future Lighthouse CLI use must run on Node `>=22.19`.
 
 **Auth.js v5 follow-up:** Remove the `@auth/core` compatibility override when migrating from NextAuth v4 to Auth.js v5; it is a v4 compatibility measure and must not be carried into the v5 migration.
+
+**Decision:** Pin `@playwright/test` exactly at `1.61.1` during Stage 2 safe-range updates.
+**Reason:** The required tolerated-abort regression test passed on 1.61.1 but failed consistently on 1.64.1 in CI and locally: the delayed navigation produced no `requestfailed` event or NextAuth `CLIENT_FETCH_ERROR`; the 1.64.1 capture instead showed 200 session responses and `requestfinished` events. This changes the behavior the test is designed to verify, so the package is reverted rather than weakening the assertion.
+**Impact:** Playwright 1.64.1 requires a separately designed test/observer investigation before adoption; the remaining approved safe-range updates proceed independently.
+
+---
+**Decision:** Keep the npm override forcing `@auth/core` to `0.41.3`.
+**Reason:** `npm install`, TypeScript, and dependency resolution all passed with the override, and the audit count fell from 32 to 29 with both critical advisories removed. `next-auth@4.24.15` resolves to the overridden `@auth/core@0.41.3` in the installed tree. `shared/lib/auth.ts` configures GitHub OAuth only; it has no email provider.
+**Impact:** This intentionally overrides next-auth's declared exact `@auth/core` peer range and must be revalidated when upgrading NextAuth. The remaining audit findings are non-critical transitive Lighthouse/OpenTelemetry/browser-tooling issues.
