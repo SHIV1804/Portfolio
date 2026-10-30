@@ -34,6 +34,7 @@ test("Auth.js Prisma adapter can create, read, and delete users and sessions on 
 
   try {
     const user = await adapter.createUser!({
+      id: randomUUID(),
       email,
       emailVerified: null,
       name: "Prisma adapter CI smoke test",
