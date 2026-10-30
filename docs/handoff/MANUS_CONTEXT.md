@@ -193,9 +193,7 @@ The criticals on PRs #38–#42 are the `@auth/core` peer issue that PR #37's ove
 3. ~~Merge PR #37 into `security/dependency-upgrades`~~ — **done** (`3b9e5d3`).
 
 ### A. Re-stack Stage 3 (**GO — the owner confirmed PR #37 is merged; base is `security/dependency-upgrades` @ `3b9e5d3`**)
-Rebase one at a time, as a chain, in this order: `lighthouse-13` → `hookform-resolvers-6` → `framer-motion-14` → `eslint-10` → `prisma-7`. Each PR targets the previous branch. Regenerate `package-lock.json` with `npm install` (never hand-edit it); keep both sides in `DECISIONS.md` / `TASKS.md`. For each: run `tsc`, lint, build and the full Playwright suite in CI, report `npm audit`, update and push this file. The final stack must show **0 critical**. Do not merge.
-
-**Safety hold before changing the shared PR branch:** rebasing `chore/upgrade-lighthouse-13` changes its published history and requires a force-push to update the existing PR branch. Section 2 prohibits force-pushes and rewriting shared history. No branch rebase or PR-head update has been performed; ask the owner how to resolve this conflict before publishing the rebased branch or triggering its CI.
+Merge the target/base into each feature branch one at a time, as a chain, in this order: merge `security/dependency-upgrades` into `chore/upgrade-lighthouse-13`; then merge the previous chain branch into each next branch: `hookform-resolvers-6` → `framer-motion-14` → `eslint-10` → `prisma-7`. Each PR targets the previous branch. For every branch, resolve `package.json` as the base content plus that branch's dependency change; take the base `package-lock.json` then run `npm install` to regenerate it (never hand-edit the lockfile); preserve both sides of `DECISIONS.md` and `TASKS.md`. Push normally, fast-forward only. If a normal push is rejected as non-fast-forward, stop and report; never force-push or rewrite shared history. For each: run `tsc`, lint, build and the full Playwright suite in CI, report `npm audit`, update and push this file. The final stack must show **0 critical**. Do not merge.
 
 ### B. Prisma 7 follow-up (PR #42, after re-stack; disposable CI Postgres only)
 - Remove the silent localhost fallback in `shared/lib/prisma.ts`: fail loudly when `DATABASE_URL` is missing at runtime while keeping `next build` and CI working.
@@ -215,7 +213,7 @@ Rebase one at a time, as a chain, in this order: `lighthouse-13` → `hookform-r
 ## 11. NEXT ACTION (keep current)
 
 ```text
-NEXT ACTION: Section 12 is complete. Before rebasing the existing PR #38 branch, resolve the conflict between section 10A's rebase request and section 2's no-force-push/no-history-rewrite rule. Do not force-push or rewrite the shared branch until the owner resolves this.
+NEXT ACTION: On `chore/upgrade-lighthouse-13`, merge `origin/security/dependency-upgrades` at `3b9e5d3`; resolve `package.json`, take the base lockfile and run `npm install`, and preserve both sides of `DECISIONS.md` / `TASKS.md`. Push normally only. If rejected as non-fast-forward, stop and report. Then run the required CI and audit, update PR #38 and this file, and stop for the owner's next-branch go-ahead.
 ```
 
 ---
@@ -247,6 +245,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-31 | Reviewer verified: handoff branch exists (`1e27cf8`), five Stage 3 SHAs match, #37 not merged, all five Stage 3 branches conflict with #37, `prisma.config.ts` vs workflow already compatible. v2 of this file written. |
 | 2026-10-31 | PR #37 merged into `security/dependency-upgrades` (`3b9e5d3`); owner gave the explicit go-ahead for section 10A. |
 | 2026-10-31 | Replaced handoff with uploaded v2 byte-for-byte (commit `ba8e504`); verified `## 12.` exists and the obsolete `ensure prisma.config.ts uses DATABASE_URL_DIRECT` wording is absent. Ran section 12: fetch found 44 remote heads; `docs/manus-handoff` resolved to `ba8e504`; updated security base is `3b9e5d3`; #37 ancestor check printed `#37 merged`; upgrade heads and `package.json` versions matched the checklist; worktree clean, stash empty. The supplied exact text has trailing whitespace at line 69; it was preserved. No Stage 3 branch has yet been rebased because of the section 2 safety conflict. |
+| 2026-10-31 | Owner prohibited force-push/history rewrite and directed a merge-based stack. Section 10A and NEXT ACTION now require merging the target base into each feature branch, regenerating the lockfile with `npm install`, preserving both documentation sides, and pushing normally only; stop if non-fast-forward. |
 | _next_ | _append here_ |
 
 ---
