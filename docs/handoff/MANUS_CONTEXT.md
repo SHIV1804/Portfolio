@@ -80,7 +80,7 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 
 ## 5. Current state of work
 
-### Pull requests (#23 and #37–#44 integrated; production deployment pending)
+### Pull requests (#23 and #37–#44 integrated; production deployment live; smoke test pending)
 
 | PR | Branch | Target | Head ✅ | CI 🟡 |
 |---|---|---|---|---|
@@ -202,7 +202,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: Monitor production deployment workflow/deployment status for main merge `a44a518`; once publicly reachable, smoke-test the public production URL over HTTP only. If anything fails, report immediately and direct the owner to roll back in Vercel.
+NEXT ACTION: Smoke-test the public production URL `https://shiv1804.github.io/Portfolio/` over HTTP only: home, `/dsa`, `/blog`, one blog post, and `/api/auth/session` expecting 200 JSON. If anything fails, report immediately and direct the owner to roll back in Vercel.
 ```
 ---
 ## 12. Re-verification checklist (run first, paste output)
@@ -249,6 +249,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-31 | Release PR [#44](https://github.com/SHIV1804/Portfolio/pull/44) opened from `dev` to `main` with the requested stack summary, Prisma 7/no-schema/no-migrations statement, versions, CI links, 19 moderate dev-only / 0 production audit, unverified Neon/Vercel items, Vercel Authentication preview limitation, and rollback note. Per authorization, it is not merged. |
 | 2026-10-31 | Release PR #44 CI [41214951480](https://github.com/SHIV1804/Portfolio/actions/runs/41214951480) passed completely: dependency install, Prisma generation, migrations, TypeScript, lint, build, Chromium setup, and full Playwright. PR #44 remains open and unmerged pending explicit “merge to main” authorization. |
 | 2026-10-31 | Owner authorized “merge to main”. PR #44 was merged with merge commit `a44a518` at [PR #44](https://github.com/SHIV1804/Portfolio/pull/44). `main` now contains `ebbec64`; production pages-build-deployment workflow [41215537322](https://github.com/SHIV1804/Portfolio/actions/runs/41215537322) is in progress. |
+| 2026-10-31 | Production deployment for main merge `a44a518` completed successfully: GitHub deployment `7460626998` in `github-pages` has status `success`; workflow [41215537322](https://github.com/SHIV1804/Portfolio/actions/runs/41215537322) succeeded. Public URL: `https://shiv1804.github.io/Portfolio/`. Smoke tests pending. |
 ## 14. If you are about to run out of context
 
 1. Update sections 5, 10, 11 and 13 with exact state (branch, head SHA, CI link + summary, what is half-done).
