@@ -80,7 +80,7 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 
 ## 5. Current state of work
 
-### Pull requests (#23 and #37–#44 integrated; Vercel production verification pending)
+### Pull requests (#23 and #37–#44 integrated; Vercel production smoke test passed)
 
 | PR | Branch | Target | Head ✅ | CI 🟡 |
 |---|---|---|---|---|
@@ -202,7 +202,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: HTTP-smoke-test the real Vercel production URL `https://portfolio-theta-ruby-31nqvqjqmc.vercel.app` only. Do not use GitHub Pages as production evidence. If the Vercel site is unreachable/protected, stop; if any required route fails, report the exact URL/error and advise rollback in Vercel.
+NEXT ACTION: Vercel production smoke test passed. No further release action is authorized. Remaining unverified items are database-backed pages beyond `/blog`, login flows, and the contact form.
 ```
 ---
 ## 12. Re-verification checklist (run first, paste output)
@@ -252,6 +252,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-31 | Production deployment for main merge `a44a518` completed successfully: GitHub deployment `7460626998` in `github-pages` has status `success`; workflow [41215537322](https://github.com/SHIV1804/Portfolio/actions/runs/41215537322) succeeded. Public URL: `https://shiv1804.github.io/Portfolio/`. Smoke tests pending. |
 | 2026-10-31 | Production HTTP smoke test failed at `https://shiv1804.github.io/Portfolio/`: `/` returned 200 HTML, but `/dsa` returned 404, `/blog` returned 404, and `/api/auth/session` returned 404 GitHub Pages HTML instead of 200 JSON. No blog post could be discovered because `/blog` was unavailable. **Immediate owner action: roll back in Vercel by promoting the previous production deployment.** |
 | 2026-10-31 | Correction: the prior Pages smoke test targeted the wrong site. `https://shiv1804.github.io/Portfolio/` is GitHub Pages, whose `pages-build-deployment` workflow served repository README/docs content and 404s for app routes; it is not the Vercel production site. The real production URL is `https://portfolio-theta-ruby-31nqvqjqmc.vercel.app`. The earlier “production deploys from main, per GitHub Production deployment c97b69a” statement is explicitly **UNVERIFIED**. For `a44a518`, GitHub reports Vercel context `success` with target dashboard `https://vercel.com/shariachourasia-gmailcoms-projects/portfolio/99HLJ8ZfRdQoDBpr4Puqbr5rftAk`. |
+| 2026-10-31 | Correct Vercel production smoke test passed at `https://portfolio-theta-ruby-31nqvqjqmc.vercel.app`: `/` 200 (`x-vercel-id=sin1::66f6v-1793461117760-2b8176474b38`, cache `PRERENDER`); `/dsa` 200 (`sin1::sjnhz-1793461119035-765f4c067fc9`, `PRERENDER`); `/blog` 200 (`sin1::zsn28-1793461120082-841282405413`, `PRERENDER`); discovered `/blog/engineering-philosophy` 200 (`sin1::xk6nw-1793461120937-b0c5ac18116b`, `PRERENDER`); `/api/auth/session` 200 JSON `{}` (`sin1::iad1::kmxz6-1793461121720-4230d8788f8c`, cache `MISS`). No error text. Database-backed pages beyond `/blog`, login, and contact form remain unverified. |
 ## 14. If you are about to run out of context
 
 1. Update sections 5, 10, 11 and 13 with exact state (branch, head SHA, CI link + summary, what is half-done).
