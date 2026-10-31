@@ -75,3 +75,6 @@ Requires Playwright browser binaries to be installed (`npx playwright install`) 
 
 ## Deployment
 Configured for Vercel (`@vercel/analytics` is wired into `app/layout.tsx`; `siteConfig.url` in `shared/config/site.ts` points at a `*.vercel.app` domain). No `vercel.json` is present — deployment relies on Vercel's Next.js defaults. `postinstall` runs `prisma generate` automatically (`package.json`), so Vercel's build environment (which has real network access) generates the client without the sandbox issue above.
+
+# Toggle the DSA online IDE. Default is off; set to true only when a backend judge is ready.
+IDE_ENABLED=
