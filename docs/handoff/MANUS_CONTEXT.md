@@ -85,7 +85,7 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 | PR | Branch | Target | Head ✅ | CI 🟡 |
 |---|---|---|---|---|
 | #23 | `security/dependency-upgrades` | `dev` | **MERGED** via `ebbec64` ✅ | CI run [41213705226](https://github.com/SHIV1804/Portfolio/actions/runs/41213705226): all checks passed |
-| #44 | `dev` | `main` | **OPEN; do not merge** | CI pending; release PR opened with audit, rollback and unverified-environment notes |
+| #44 | `dev` | `main` | **OPEN; do not merge** | CI run [41214951480](https://github.com/SHIV1804/Portfolio/actions/runs/41214951480) passed: TypeScript, lint, build, migrations and full Playwright |
 | #37 | `chore/safe-range-dependency-updates` | `security/dependency-upgrades` | `c80230d` — **MERGED** ✅ (merge commit `3b9e5d3`, 2026-10-31) | run 40780697711: 211 passed, 1 skipped |
 | #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `4a152cf` — **MERGED** via stack integration ✅ | run 41123287928 passed |
 | #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | stacked | `201d5e2` — ancestor of integrated security head; PR closed ✅ | run 41167455941 passed |
@@ -202,7 +202,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: PR #44 (`dev` → `main`) is open. Wait for its CI, report the run and results, and stop. Do not merge until the owner explicitly says “merge to main”.
+NEXT ACTION: PR #44 (`dev` → `main`) is open and its CI is green. Stop and wait for the owner’s explicit “merge to main”. If authorized later, merge only with a merge commit, then watch the production deployment and smoke-test the public production URL over HTTP only.
 ```
 ---
 ## 12. Re-verification checklist (run first, paste output)
@@ -247,6 +247,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-31 | Step 3 complete: PR #23 automatic verify run [41213705226](https://github.com/SHIV1804/Portfolio/actions/runs/41213705226) passed with all checks green. PR #23 merged into `dev` with merge commit `ebbec64`; no branch deletion or protection bypass. |
 | 2026-10-31 | Step 4 complete/blocked: `dev` push CI run [41214175066](https://github.com/SHIV1804/Portfolio/actions/runs/41214175066) passed all jobs. Exact merge-commit deployment `https://portfolio-1updshbr8-shariachourasia-gmailcoms-projects.vercel.app` reported success but is protected by Vercel Authentication; HTTP-only smoke tests for `/`, `/dsa`, `/blog`, blog-post discovery, and `/api/auth/session` returned 401 Protected deployment. Per authorization, stopped before opening `dev` → `main`. |
 | 2026-10-31 | Release PR [#44](https://github.com/SHIV1804/Portfolio/pull/44) opened from `dev` to `main` with the requested stack summary, Prisma 7/no-schema/no-migrations statement, versions, CI links, 19 moderate dev-only / 0 production audit, unverified Neon/Vercel items, Vercel Authentication preview limitation, and rollback note. Per authorization, it is not merged. |
+| 2026-10-31 | Release PR #44 CI [41214951480](https://github.com/SHIV1804/Portfolio/actions/runs/41214951480) passed completely: dependency install, Prisma generation, migrations, TypeScript, lint, build, Chromium setup, and full Playwright. PR #44 remains open and unmerged pending explicit “merge to main” authorization. |
 ## 14. If you are about to run out of context
 
 1. Update sections 5, 10, 11 and 13 with exact state (branch, head SHA, CI link + summary, what is half-done).
