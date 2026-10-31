@@ -42,3 +42,8 @@ Technical decisions with evidence in code, config, or this project's own history
 **Decision:** "No fabrication" content policy — placeholder content is marked `[PLACEHOLDER: ...]` inline, and confirmed factual claims are marked with a `VERIFIED:` comment stating what was checked and how.
 **Reason:** The site's primary audience is recruiters and technical interviewers; an unverifiable or invented claim undermines the portfolio's credibility more than an honest placeholder does. See `docs/CONTENT.md` for the current inventory of what's marked which way.
 **Impact:** Any AI agent adding content to this site must follow the same marker convention — see `AGENTS.md` rule 1.
+
+---
+**Decision:** Honor the owner’s explicit, scoped merge authorization dated 2026-10-31 only for the ordered workflow cancellation/merge sequence in this session.
+**Scope:** Cancel workflow run `40092064802` attempt 2 only if it is waiting/queued; merge PR #43 into `security/dependency-upgrades`, then merge PR #23 into `dev` only after green CI and without bypassing protections; open but do not merge `dev` → `main`.
+**Constraints:** No force-push, history rewrite, branch deletion, production/Neon access, production migration workflow execution, production approval, or branch-protection bypass. All other merge prohibitions remain active.

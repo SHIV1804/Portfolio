@@ -40,7 +40,7 @@ Docs in the repo you must follow: `AGENTS.md`, `CONVENTIONS.md`, `PROJECT_CONTEX
 ## 2. Non-negotiable rules
 
 - Never force-push. Never rewrite shared history.
-- **Never merge a PR.** Open or update PRs and stop for owner approval.
+- **Never merge a PR** except the exact merges explicitly authorized in the owner instruction received 2026-10-31: cancel workflow attempt 2 only if queued/waiting; merge #43 into `security/dependency-upgrades`, then merge #23 into `dev`, then open (but do not merge) `dev` → `main`. All other PR merges remain prohibited.
 - **Never run the production migration workflow. Never touch production or Neon. Never rerun workflow run `40092064802`.** Prisma generation, migrations and adapter tests use only the disposable PostgreSQL service in GitHub Actions.
 - Never print secrets, tokens or `.env` values.
 - One PR per item so failures can be bisected.
@@ -80,11 +80,11 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 
 ## 5. Current state of work
 
-### Pull requests (#37 merged; PR #23 and Stage 3 PRs open)
+### Pull requests (#37 merged; PR #23 and Stage 3 PRs open; owner-authorized merge sequence active)
 
 | PR | Branch | Target | Head ✅ | CI 🟡 |
 |---|---|---|---|---|
-| #23 | `security/dependency-upgrades` | `dev` ✅ (verified with GitHub API on 2026-10-31) | `6e90cd6` | run 40776871932 green |
+| #23 | `security/dependency-upgrades` | `dev` ✅ | current head must be rechecked after authorized stack merge | CI pending after stack merge |
 | #37 | `chore/safe-range-dependency-updates` | `security/dependency-upgrades` | `c80230d` — **MERGED** ✅ (merge commit `3b9e5d3`, 2026-10-31) | run 40780697711: 211 passed, 1 skipped |
 | #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `4a152cf` — restacked on `3b9e5d3` ✅ | [run 41123287928](https://github.com/SHIV1804/Portfolio/actions/runs/41123287928): 211 passed, 1 skipped, 0 failed; audit is time-sensitive; production-only audit 0 |
 | #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | `chore/upgrade-hookform-resolvers-6` | `201d5e2` — restacked ✅ | [run 41167455941](https://github.com/SHIV1804/Portfolio/actions/runs/41167455941): 213 passed, 1 skipped, 0 failed; audit 19 moderate |
@@ -94,7 +94,7 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 
 **⚠ Integration status:** PR #38 is restacked on `3b9e5d3`, PR #40 is restacked on #38 at `a8602d6`, PR #39 is restacked on #40 at `201d5e2`, and PR #41 is restacked on #39 at `99508e7`; all four exact-head CI runs passed. PR #42 is now based on `chore/upgrade-eslint-10` and its exact-head CI run 41175444023 passed.
 
-**Intended merge path (owner decides):** #37 → into `security/dependency-upgrades`; then #23 into `dev`; then `dev` → `main` (production). Before `main`: check the Vercel preview and the Vercel settings in section 10 (owner actions).
+**Owner-authorized merge path (2026-10-31):** cancel workflow 40092064802 attempt 2 only if queued/waiting; retarget and merge #43 into `security/dependency-upgrades` with a merge commit; confirm #38/#40/#39/#41/#42 merged or report/close only ancestor heads; wait for #23 CI and merge #23 into `dev` with a merge commit only if green and protections allow; verify dev CI and smoke-test a publicly reachable preview over HTTP only; open `dev` → `main` with the required release notes and stop for explicit owner approval. Do not delete branches or touch Neon/production.
 
 ### Stage 1 (PR #23) — summary
 `next` 16.2.10 → 16.4.3, `react`/`react-dom` 19.2.4 → 19.3.1, `next-auth` 4.24.15, `@auth/prisma-adapter` 2.11.3, overrides for `gray-matter/js-yaml` (3.15.2) and `nanoid` (3.3.18), pnpm metadata removed, `useTerminal.ts` hydration fix, session observer + refactored tests.
@@ -189,41 +189,21 @@ Audit totals move as new advisories are published and as npm resolves lockfile t
 ---
 
 ## 10. Remaining work (ordered)
+### Owner-authorized actions for this session
+1. Inspect workflow run `40092064802`; cancel attempt 2 only if it is waiting/queued. Never rerun or approve production deployment.
+2. Retarget PR #43 to `security/dependency-upgrades` and merge it with a merge commit. Confirm #38, #40, #39, #41 and #42 are merged; if any remain open, close only if their heads are ancestors of the new security head.
+3. Wait for PR #23 CI; if green, merge it into `dev` with a merge commit. If not green, diagnose/fix forward without weakening tests, or stop.
+4. Verify dev CI and smoke-test a public preview over HTTP only; stop if protected/unreachable.
+5. Open `dev` → `main` with the required release description and stop for explicit owner approval; do not merge it.
 
-### Owner-only actions (you cannot do these)
-1. Inspect and cancel workflow run `40092064802` (attempt 2 `waiting`); add `NEON_API_KEY` and `NEON_PROJECT_ID` secrets before any new run.
-2. In Vercel: read **Install Command** and **Node.js Version**; confirm `DATABASE_URL` is set. Tell Manus the Node version.
-3. ~~Merge PR #37 into `security/dependency-upgrades`~~ — **done** (`3b9e5d3`).
-
-### A. Re-stack Stage 3 (**PAUSED — Lighthouse, resolvers, Framer Motion, and ESLint completed; owner authorization required**)
-The stacked chain is complete through ESLint: Lighthouse is `4a152cf`, resolvers is `a8602d6`, Framer Motion is `201d5e2`, and ESLint is `99508e7`. PR #41 targets Framer Motion at `201d5e2`. The ESLint restack used a normal merge and normal push, preserved both documentation sides, and has no conflict markers. Exact-head CI run [41169872136](https://github.com/SHIV1804/Portfolio/actions/runs/41169872136) passed TypeScript, lint, build, and the full Playwright suite with 213 passed, 1 skipped, 0 failed.
-
-ESLint install emitted three ERESOLVE peer-override warning groups for nested `eslint-plugin-import`, `eslint-plugin-jsx-a11y`, and `eslint-plugin-react` packages whose peer ranges end at ESLint 9; the warnings are accepted and documented. A fresh full `npm audit --package-lock-only` returned 19 moderate dev-only findings; `npm audit --package-lock-only --omit=dev` returned 0 vulnerabilities. Do not use `npm audit fix --force` or add glob/minimatch overrides.
-
-Stop here pending owner authorization. Do not start Prisma (#42). Any future stacked PR targeting a non-`dev`/`main` branch requires manual exact-head CI dispatch.
-### B. Prisma 7 follow-up (PR #42) — complete
-- Lazy client, no localhost fallback, ESM inventory, config/workflow compatibility check, adapter smoke test, duplicate-manifest test, and exact-head CI are complete.
-- The duplicate arose during the merge because the predecessor already had `prisma@^6.2.1` under `dependencies` while the Prisma branch added `prisma@7.10.1` under `devDependencies`; `dotenv` was also left only in `devDependencies`. The fix places exact `prisma@7.10.1` and `dotenv@17.2.3` in `dependencies` because the CLI/config are used by install/build flows. Vercel install behavior for devDependencies remains unverified.
-- Do not execute the production migration workflow or touch Neon.
-
-### C. New PRs after the stack is ready
-- TypeScript 5 → **6.0.3**: official Next documentation lists TypeScript 5.1+ as the minimum for Next 16 and documents use of newer TypeScript releases; official typescript-eslint documentation gives `>=4.8.4 <6.1.0`, which covers 6.0.3. Create the separate PR from fixed Prisma head `4d7e813`, target `chore/upgrade-prisma-7`, and run exact-head CI.
-- `@types/node`: wait for the owner's Vercel Node version; match it against CI (Node 22).
-
-### D. Report-only
-- Branch-retirement proposal (`archive/<name>` tags). No deletions.
-- Placeholders from `TASKS.md` needing owner input: second case study, Log Analyser content, bio, `/resume.pdf`, OG images.
-
+### Persistent prohibitions
+Never force-push, rewrite history, delete branches, access Neon/production data, run or rerun the production migration workflow, approve production deployment, or bypass branch protection.
 ---
-
 ## 11. NEXT ACTION (keep current)
-
 ```text
-NEXT ACTION: Create branch chore/upgrade-typescript-6 from fixed Prisma head 4d7e813, open PR targeting chore/upgrade-prisma-7, update only TypeScript to 6.0.3 plus any type/config fixes it requires, dispatch ci.yml on the exact head, and report TypeScript, lint, build, full Playwright, and both audits. Do not start @types/node, merge PRs, access Neon/production, or rerun 40092064802.
+NEXT ACTION: Execute the owner-authorized merge sequence: inspect/cancel workflow 40092064802 attempt 2 only if waiting/queued; retarget and merge PR #43 into security/dependency-upgrades with a merge commit; confirm the stacked PRs; then wait for PR #23 CI and merge it into dev only if green and branch protections allow. After dev verification, open dev → main with the required release notes and stop for explicit owner approval.
 ```
-
 ---
-
 ## 12. Re-verification checklist (run first, paste output)
 
 ```bash
@@ -260,6 +240,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 
 ---
 
+| 2026-10-31 | Owner explicitly authorized only the ordered merges in the current instruction: workflow attempt-2 cancellation if waiting/queued; #43 → `security/dependency-upgrades`; then #23 → `dev`; then open but do not merge `dev` → `main`. Required precondition check passed: TypeScript `7119c15`, Prisma `4d7e813`, security base `3b9e5d3`; section 12 output verified 45 heads, handoff ref `7e6c7ce`, #37 ancestor, Stage 3 SHAs, clean main worktree/stash, and required package versions. No merge action taken yet. |
 ## 14. If you are about to run out of context
 
 1. Update sections 5, 10, 11 and 13 with exact state (branch, head SHA, CI link + summary, what is half-done).
