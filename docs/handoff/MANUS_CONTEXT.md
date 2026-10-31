@@ -80,19 +80,19 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 
 ## 5. Current state of work
 
-### Pull requests (#37 merged; PR #23 and Stage 3 PRs open; owner-authorized merge sequence active)
+### Pull requests (#37–#43 stack integrated into `security/dependency-upgrades`; PR #23 pending)
 
 | PR | Branch | Target | Head ✅ | CI 🟡 |
 |---|---|---|---|---|
 | #23 | `security/dependency-upgrades` | `dev` ✅ | current head must be rechecked after authorized stack merge | CI pending after stack merge |
 | #37 | `chore/safe-range-dependency-updates` | `security/dependency-upgrades` | `c80230d` — **MERGED** ✅ (merge commit `3b9e5d3`, 2026-10-31) | run 40780697711: 211 passed, 1 skipped |
-| #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `4a152cf` — restacked on `3b9e5d3` ✅ | [run 41123287928](https://github.com/SHIV1804/Portfolio/actions/runs/41123287928): 211 passed, 1 skipped, 0 failed; audit is time-sensitive; production-only audit 0 |
-| #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | `chore/upgrade-hookform-resolvers-6` | `201d5e2` — restacked ✅ | [run 41167455941](https://github.com/SHIV1804/Portfolio/actions/runs/41167455941): 213 passed, 1 skipped, 0 failed; audit 19 moderate |
-| #40 Resolvers 6 | `chore/upgrade-hookform-resolvers-6` | `chore/upgrade-lighthouse-13` | `a8602d6` — restacked ✅ | [run 41166816190](https://github.com/SHIV1804/Portfolio/actions/runs/41166816190): 211 passed, 1 skipped, 0 failed; audit 19 moderate |
-| #41 ESLint 10 | `chore/upgrade-eslint-10` | `chore/upgrade-framer-motion-14` | `99508e7` — restacked ✅ | [run 41169872136](https://github.com/SHIV1804/Portfolio/actions/runs/41169872136): 213 passed, 1 skipped, 0 failed; audit 19 moderate dev-only / production 0 |
-| #42 Prisma 7.10.1 | `chore/upgrade-prisma-7` | `chore/upgrade-eslint-10` | `4d7e813` — duplicate Prisma/dotenv placement fixed ✅ | [run 41175444023](https://github.com/SHIV1804/Portfolio/actions/runs/41175444023): 215 passed, 1 skipped, 0 failed |
+| #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `4a152cf` — **MERGED** via stack integration ✅ | run 41123287928 passed |
+| #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | stacked | `201d5e2` — ancestor of integrated security head; PR closed ✅ | run 41167455941 passed |
+| #40 Resolvers 6 | `chore/upgrade-hookform-resolvers-6` | stacked | `a8602d6` — ancestor of integrated security head; PR closed ✅ | run 41166816190 passed |
+| #41 ESLint 10 | `chore/upgrade-eslint-10` | stacked | `99508e7` — ancestor of integrated security head; PR closed ✅ | run 41169872136 passed |
+| #42 Prisma 7.10.1 | `chore/upgrade-prisma-7` | stacked | `4d7e813` — ancestor of integrated security head; PR closed ✅ | run 41175444023 passed |
 
-**⚠ Integration status:** PR #38 is restacked on `3b9e5d3`, PR #40 is restacked on #38 at `a8602d6`, PR #39 is restacked on #40 at `201d5e2`, and PR #41 is restacked on #39 at `99508e7`; all four exact-head CI runs passed. PR #42 is now based on `chore/upgrade-eslint-10` and its exact-head CI run 41175444023 passed.
+**✅ Integration status:** PR #43 merged into `security/dependency-upgrades` with merge commit `54f0999`. PR #38 was already merged; PRs #40, #39, #41 and #42 were confirmed ancestors of the integrated security head and closed without branch deletion. All exact-head CI runs passed.
 
 **Owner-authorized merge path (2026-10-31):** cancel workflow 40092064802 attempt 2 only if queued/waiting; retarget and merge #43 into `security/dependency-upgrades` with a merge commit; confirm #38/#40/#39/#41/#42 merged or report/close only ancestor heads; wait for #23 CI and merge #23 into `dev` with a merge commit only if green and protections allow; verify dev CI and smoke-test a publicly reachable preview over HTTP only; open `dev` → `main` with the required release notes and stop for explicit owner approval. Do not delete branches or touch Neon/production.
 
@@ -191,7 +191,7 @@ Audit totals move as new advisories are published and as npm resolves lockfile t
 ## 10. Remaining work (ordered)
 ### Owner-authorized actions for this session
 1. Inspect workflow run `40092064802`; cancel attempt 2 only if it is waiting/queued. Never rerun or approve production deployment.
-2. Retarget PR #43 to `security/dependency-upgrades` and merge it with a merge commit. Confirm #38, #40, #39, #41 and #42 are merged; if any remain open, close only if their heads are ancestors of the new security head.
+2. **Complete:** PR #43 merged into `security/dependency-upgrades` as `54f0999`; #38 was merged and #40/#39/#41/#42 were ancestor-confirmed and closed without deleting branches.
 3. Wait for PR #23 CI; if green, merge it into `dev` with a merge commit. If not green, diagnose/fix forward without weakening tests, or stop.
 4. Verify dev CI and smoke-test a public preview over HTTP only; stop if protected/unreachable.
 5. Open `dev` → `main` with the required release description and stop for explicit owner approval; do not merge it.
@@ -201,7 +201,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: Execute the owner-authorized merge sequence: inspect/cancel workflow 40092064802 attempt 2 only if waiting/queued; retarget and merge PR #43 into security/dependency-upgrades with a merge commit; confirm the stacked PRs; then wait for PR #23 CI and merge it into dev only if green and branch protections allow. After dev verification, open dev → main with the required release notes and stop for explicit owner approval.
+NEXT ACTION: Wait for PR #23 CI on the integrated security/dependency-upgrades head. If green and branch protections allow, merge PR #23 into dev with a merge commit. Then verify dev CI, smoke-test a public preview over HTTP only, and open dev → main with the required release notes; stop for explicit owner approval before merging main.
 ```
 ---
 ## 12. Re-verification checklist (run first, paste output)
@@ -242,6 +242,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 
 | 2026-10-31 | Owner explicitly authorized only the ordered merges in the current instruction: workflow attempt-2 cancellation if waiting/queued; #43 → `security/dependency-upgrades`; then #23 → `dev`; then open but do not merge `dev` → `main`. Required precondition check passed: TypeScript `7119c15`, Prisma `4d7e813`, security base `3b9e5d3`; section 12 output verified 45 heads, handoff ref `7e6c7ce`, #37 ancestor, Stage 3 SHAs, clean main worktree/stash, and required package versions. No merge action taken yet. |
 | 2026-10-31 | Step 1 complete: workflow run [40092064802](https://github.com/SHIV1804/Portfolio/actions/runs/40092064802) attempt 2 was verified as `waiting` on `main` and a cancellation request was submitted. GitHub still showed `waiting` immediately afterward; no rerun or production approval was performed. |
+| 2026-10-31 | Step 2 complete: PR #43 was retargeted and merged into `security/dependency-upgrades` with merge commit `54f0999`. PR #38 was already merged. PRs #40, #39, #41 and #42 were verified ancestor heads of `54f0999` and closed without deleting branches. |
 ## 14. If you are about to run out of context
 
 1. Update sections 5, 10, 11 and 13 with exact state (branch, head SHA, CI link + summary, what is half-done).
