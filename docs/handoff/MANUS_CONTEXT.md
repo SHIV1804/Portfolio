@@ -2,7 +2,7 @@
 
 > **Purpose.** Single source of truth for the dependency-upgrade / test-hardening work on `SHIV1804/Portfolio`. If your context runs out or the sandbox resets, a fresh agent must be able to continue from this file alone.
 >
-> **Last verified:** 2026-10-31 against GitHub (git refs). PR #37 is MERGED into `security/dependency-upgrades` (head `3b9e5d3`); the owner has given the go-ahead for the re-stack (section 10A). **Re-run section 12 before acting.**
+> **Last verified:** 2026-10-31 against GitHub (git refs). PR #37 is MERGED into `security/dependency-upgrades`; PR #42 is open against `chore/upgrade-eslint-10` at fixed head `4d7e813`. The Prisma duplicate-dependency defect is fixed; the next action is a separate TypeScript 6 PR. **Re-run section 12 before acting.**
 >
 > **Legend.** ✅ verified from git/GitHub by the reviewer. 🟡 reported by Manus or CI, not independently re-checked. ❓ unknown / needs the owner.
 >
@@ -90,9 +90,9 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 | #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | `chore/upgrade-hookform-resolvers-6` | `201d5e2` — restacked ✅ | [run 41167455941](https://github.com/SHIV1804/Portfolio/actions/runs/41167455941): 213 passed, 1 skipped, 0 failed; audit 19 moderate |
 | #40 Resolvers 6 | `chore/upgrade-hookform-resolvers-6` | `chore/upgrade-lighthouse-13` | `a8602d6` — restacked ✅ | [run 41166816190](https://github.com/SHIV1804/Portfolio/actions/runs/41166816190): 211 passed, 1 skipped, 0 failed; audit 19 moderate |
 | #41 ESLint 10 | `chore/upgrade-eslint-10` | `chore/upgrade-framer-motion-14` | `99508e7` — restacked ✅ | [run 41169872136](https://github.com/SHIV1804/Portfolio/actions/runs/41169872136): 213 passed, 1 skipped, 0 failed; audit 19 moderate dev-only / production 0 |
-| #42 Prisma 7.10.1 | `chore/upgrade-prisma-7` | `security/dependency-upgrades` | `13a82e3` (code tested at `ad31ca2`; later commit is docs only) | run 41114978943: 211 passed, 1 skipped |
+| #42 Prisma 7.10.1 | `chore/upgrade-prisma-7` | `chore/upgrade-eslint-10` | `4d7e813` — duplicate Prisma/dotenv placement fixed ✅ | [run 41175444023](https://github.com/SHIV1804/Portfolio/actions/runs/41175444023): 215 passed, 1 skipped, 0 failed |
 
-**⚠ Integration status:** PR #38 is restacked on `3b9e5d3`, PR #40 is restacked on #38 at `a8602d6`, PR #39 is restacked on #40 at `201d5e2`, and PR #41 is restacked on #39 at `99508e7`; all four exact-head CI runs passed. PR #42 still forks from the pre-#37 base and remains un-restacked; its existing CI result does not validate the combined stack.
+**⚠ Integration status:** PR #38 is restacked on `3b9e5d3`, PR #40 is restacked on #38 at `a8602d6`, PR #39 is restacked on #40 at `201d5e2`, and PR #41 is restacked on #39 at `99508e7`; all four exact-head CI runs passed. PR #42 is now based on `chore/upgrade-eslint-10` and its exact-head CI run 41175444023 passed.
 
 **Intended merge path (owner decides):** #37 → into `security/dependency-upgrades`; then #23 into `dev`; then `dev` → `main` (production). Before `main`: check the Vercel preview and the Vercel settings in section 10 (owner actions).
 
@@ -107,7 +107,7 @@ Safe-range updates (Tailwind 4.3.3, `@types/react*` 19.3.0, `zod` 4.6.7, `shiki`
 - **#39 Framer Motion 12 → 14.7.1.** Consumers: `TwoPointersVisualizer`, `SlidingWindowVisualizer`, `BinarySearchVisualizer`, `ArrayBox`. Focused DSA page tests added to coverage. Current full audit is 19 moderate dev-only; production-only audit is 0.
 - **#40 `@hookform/resolvers` 5 → 6.0.2.** Only `zodResolver(contactSchema)` in `features/contact-form/ui/ContactForm.tsx`. Current full audit is 19 moderate dev-only; production-only audit is 0.
 - **#41 ESLint 9 → 10.13.0** with `eslint-config-next@16.4.3`. npm prints three peer-override warning groups for nested `eslint-plugin-import`, `eslint-plugin-jsx-a11y`, and `eslint-plugin-react` packages still declaring ESLint 9; install, lint, build and CI pass. Current full audit is 19 moderate dev-only; production-only audit is 0.
-- **#42 Prisma 6 → 7.10.1** (not the 8 RC). ESM (`"type": "module"`), `prisma-client` generator output `generated/prisma` (gitignored), `prisma.config.ts` with `dotenv`, runtime `PrismaPg` adapter (`@prisma/adapter-pg@7.10.1`), enum moved to `shared/lib/post-status.ts`, adapter CRUD smoke test (`tests/prisma/prisma-adapter-smoke.spec.ts`, refuses non-local hosts). Two CI fixes were needed (`AdapterUser.id`, Turbopack `node:module` error). Audit unchanged (38).
+- **#42 Prisma 6 → 7.10.1** (not the 8 RC). ESM (`"type": "module"`), `prisma-client` generator output `generated/prisma` (gitignored), `prisma.config.ts` with `dotenv`, runtime `PrismaPg` adapter (`@prisma/adapter-pg@7.10.1`), enum moved to `shared/lib/post-status.ts`, adapter CRUD smoke test (`tests/prisma/prisma-adapter-smoke.spec.ts`, refuses non-local hosts), lazy Prisma client, and manifest regression test. The merge initially left `prisma@^6.2.1` in `dependencies` and `prisma@7.10.1` in `devDependencies`, and left `dotenv` only in `devDependencies`; commit `4d7e813` moved exact `prisma@7.10.1` and `dotenv@17.2.3` to `dependencies`, removed duplicates, regenerated the lockfile, and passed local `npm ci --ignore-scripts`. Vercel's install behavior for devDependencies is unverified. Final CI [41175444023](https://github.com/SHIV1804/Portfolio/actions/runs/41175444023): 215 passed, 1 skipped; first run [41175315476](https://github.com/SHIV1804/Portfolio/actions/runs/41175315476) failed at npm ci on the stale lockfile. Full audit is 19 moderate; production-only audit is 0.
 - **TypeScript 7.0.2 — BLOCKED ✅.** `typescript-eslint` / `@typescript-eslint/parser` 8.72.1 require `typescript >=4.8.4 <6.1.0`. TypeScript **6.0.3** exists and is inside that range → a separate TS 5 → 6.0.3 step is possible.
 - **`@types/node` — BLOCKED on owner input.** CI uses Node 22 (22.23.4). The Vercel Node setting is ❓. Do not guess.
 
@@ -184,7 +184,7 @@ Audit totals move as new advisories are published and as npm resolves lockfile t
 - `main`'s `package.json` was last changed on 2026-07-18 before PR #23. The upgrade work lives on PR branches.
 - The session-test file had three earlier fixes on `main` (2026-10-17 ×2; 2026-10-20 `a4a469d`).
 - `prisma.config.ts` (PR #42) reads `process.env.DATABASE_URL`. The `migrate-production.yml` workflow maps `secrets.DATABASE_URL_DIRECT` **into** `DATABASE_URL` for `prisma migrate status` and `deploy`. So the config and workflow are already compatible. **Do not change `prisma.config.ts` to read `DATABASE_URL_DIRECT`** — that would break CI and local use.
-- `shared/lib/prisma.ts` (PR #42) silently falls back to `postgresql://ci:ci@127.0.0.1:5432/portfolio_ci` when `DATABASE_URL` is unset. That is a production footgun (to be fixed, section 10).
+- `shared/lib/prisma.ts` (PR #42) now constructs lazily and throws a clear missing-`DATABASE_URL` error on first use; no localhost fallback remains. This was verified locally and by final CI.
 
 ---
 
@@ -201,13 +201,13 @@ The stacked chain is complete through ESLint: Lighthouse is `4a152cf`, resolvers
 ESLint install emitted three ERESOLVE peer-override warning groups for nested `eslint-plugin-import`, `eslint-plugin-jsx-a11y`, and `eslint-plugin-react` packages whose peer ranges end at ESLint 9; the warnings are accepted and documented. A fresh full `npm audit --package-lock-only` returned 19 moderate dev-only findings; `npm audit --package-lock-only --omit=dev` returned 0 vulnerabilities. Do not use `npm audit fix --force` or add glob/minimatch overrides.
 
 Stop here pending owner authorization. Do not start Prisma (#42). Any future stacked PR targeting a non-`dev`/`main` branch requires manual exact-head CI dispatch.
-### B. Prisma 7 follow-up (PR #42, after re-stack; disposable CI Postgres only)
-- Remove the silent localhost fallback in `shared/lib/prisma.ts`: fail loudly when `DATABASE_URL` is missing at runtime while keeping `next build` and CI working.
-- Inventory every tracked `.js`, `.cjs`, `.mjs` file and package/workflow script affected by `"type": "module"`; run each and record real output.
-- Verify (do **not** change) that `prisma.config.ts` plus `migrate-production.yml` remain compatible, as in section 9. Do not execute the workflow.
+### B. Prisma 7 follow-up (PR #42) — complete
+- Lazy client, no localhost fallback, ESM inventory, config/workflow compatibility check, adapter smoke test, duplicate-manifest test, and exact-head CI are complete.
+- The duplicate arose during the merge because the predecessor already had `prisma@^6.2.1` under `dependencies` while the Prisma branch added `prisma@7.10.1` under `devDependencies`; `dotenv` was also left only in `devDependencies`. The fix places exact `prisma@7.10.1` and `dotenv@17.2.3` in `dependencies` because the CLI/config are used by install/build flows. Vercel install behavior for devDependencies remains unverified.
+- Do not execute the production migration workflow or touch Neon.
 
 ### C. New PRs after the stack is ready
-- TypeScript 5 → **6.0.3**: confirm Next 16.4.3 support and the `typescript-eslint` peer range; run full CI.
+- TypeScript 5 → **6.0.3**: official Next documentation lists TypeScript 5.1+ as the minimum for Next 16 and documents use of newer TypeScript releases; official typescript-eslint documentation gives `>=4.8.4 <6.1.0`, which covers 6.0.3. Create the separate PR from fixed Prisma head `4d7e813`, target `chore/upgrade-prisma-7`, and run exact-head CI.
 - `@types/node`: wait for the owner's Vercel Node version; match it against CI (Node 22).
 
 ### D. Report-only
@@ -219,7 +219,7 @@ Stop here pending owner authorization. Do not start Prisma (#42). Any future sta
 ## 11. NEXT ACTION (keep current)
 
 ```text
-NEXT ACTION: STOP. ESLint head `99508e7` is complete with PR #41 targeting Framer Motion and exact-head CI run 41169872136 passing (213 passed, 1 skipped, 0 failed). Full audit is 19 moderate dev-only findings; production-only audit is 0. Wait for explicit owner authorization before starting Prisma (#42).
+NEXT ACTION: Create branch chore/upgrade-typescript-6 from fixed Prisma head 4d7e813, open PR targeting chore/upgrade-prisma-7, update only TypeScript to 6.0.3 plus any type/config fixes it requires, dispatch ci.yml on the exact head, and report TypeScript, lint, build, full Playwright, and both audits. Do not start @types/node, merge PRs, access Neon/production, or rerun 40092064802.
 ```
 
 ---
@@ -256,6 +256,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-31 | Resolver restack completed on `chore/upgrade-hookform-resolvers-6` at `a8602d6`; PR #40 retargeted to Lighthouse `4a152cf`, exact-head CI [41166816190](https://github.com/SHIV1804/Portfolio/actions/runs/41166816190) passed with 211 passed, 1 skipped, 0 failed. The fresh audit returned 19 moderate vulnerabilities on both predecessor and head; this is npm advisory/lock resolution drift from the earlier 0 result, not an increase caused by resolvers. Conflicts in `DECISIONS.md`, `TASKS.md`, and `package-lock.json` were resolved by preserving both documentation sides and regenerating the lockfile. Authorized to continue with Framer Motion; do not start ESLint or Prisma. |
 | 2026-10-31 | Framer Motion restack completed on `chore/upgrade-framer-motion-14` at `201d5e2`; PR #39 retargeted to resolver `a8602d6`, exact-head CI [41167455941](https://github.com/SHIV1804/Portfolio/actions/runs/41167455941) passed with 213 passed, 1 skipped, 0 failed. Conflicts in `package.json`, `package-lock.json`, `DECISIONS.md`, and `TASKS.md` were resolved by using the resolver predecessor plus only the Framer Motion bump, regenerating the lockfile with npm to resolve `14.7.1`, and preserving both documentation sides. The fresh audit returned 19 moderate vulnerabilities, matching the predecessor under current npm advisory data. Stopped before ESLint and Prisma pending owner authorization. |
 | 2026-10-31 | ESLint restack completed on `chore/upgrade-eslint-10` at `99508e7`; PR #41 retargeted to Framer Motion `201d5e2`, exact-head CI [41169872136](https://github.com/SHIV1804/Portfolio/actions/runs/41169872136) passed with 213 passed, 1 skipped, 0 failed. Conflicts in `package.json`, `package-lock.json`, `DECISIONS.md`, and `TASKS.md` were resolved by using the Framer predecessor plus ESLint `^10.13.0` / eslint-config-next `^16.4.3`, regenerating the lockfile with npm, and preserving both documentation sides. npm emitted three peer-override warning groups for nested ESLint 9 plugins. Full audit: 19 moderate dev-only; production-only audit: 0. Recorded acceptance of the glob/minimatch advisories and stopped before Prisma pending owner authorization. |
+| 2026-10-31 | Prisma follow-up: PR #42 was retargeted to `chore/upgrade-eslint-10`. Run [41175315476](https://github.com/SHIV1804/Portfolio/actions/runs/41175315476) failed at `npm ci` because the merged lockfile was stale (`effect@3.20.0` vs required `effect@4.1.1`). Commit `6b42dc0` synchronized the lockfile; commit `4d7e813` fixed duplicate `prisma` declarations and moved `dotenv` to runtime dependencies. Local `npm ls` showed Prisma and client 7.10.1, overlap script returned `[]`, `npm ci --ignore-scripts` passed, and manifest test passed. Final CI [41175444023](https://github.com/SHIV1804/Portfolio/actions/runs/41175444023) passed with 215 passed, 1 skipped. Full audit 19 moderate; production-only audit 0. The real next action is the separate TypeScript 6 PR. Also recorded that `docs/history/AI_HANDOFF.md` has 16 stray line-number-prefixed lines, present on main; report-only, not fixed here.
 
 ---
 
