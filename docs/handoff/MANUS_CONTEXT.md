@@ -80,11 +80,11 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 
 ## 5. Current state of work
 
-### Pull requests (#37–#43 stack integrated into `security/dependency-upgrades`; PR #23 pending)
+### Pull requests (#23 and #37–#43 integrated; dev verification pending)
 
 | PR | Branch | Target | Head ✅ | CI 🟡 |
 |---|---|---|---|---|
-| #23 | `security/dependency-upgrades` | `dev` ✅ | current head must be rechecked after authorized stack merge | CI pending after stack merge |
+| #23 | `security/dependency-upgrades` | `dev` | **MERGED** via `ebbec64` ✅ | CI run [41213705226](https://github.com/SHIV1804/Portfolio/actions/runs/41213705226): all checks passed |
 | #37 | `chore/safe-range-dependency-updates` | `security/dependency-upgrades` | `c80230d` — **MERGED** ✅ (merge commit `3b9e5d3`, 2026-10-31) | run 40780697711: 211 passed, 1 skipped |
 | #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `4a152cf` — **MERGED** via stack integration ✅ | run 41123287928 passed |
 | #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | stacked | `201d5e2` — ancestor of integrated security head; PR closed ✅ | run 41167455941 passed |
@@ -192,7 +192,7 @@ Audit totals move as new advisories are published and as npm resolves lockfile t
 ### Owner-authorized actions for this session
 1. Inspect workflow run `40092064802`; cancel attempt 2 only if it is waiting/queued. Never rerun or approve production deployment.
 2. **Complete:** PR #43 merged into `security/dependency-upgrades` as `54f0999`; #38 was merged and #40/#39/#41/#42 were ancestor-confirmed and closed without deleting branches.
-3. Wait for PR #23 CI; if green, merge it into `dev` with a merge commit. If not green, diagnose/fix forward without weakening tests, or stop.
+3. **Complete:** PR #23 CI run [41213705226](https://github.com/SHIV1804/Portfolio/actions/runs/41213705226) passed; PR #23 merged into `dev` with merge commit `ebbec64`.
 4. Verify dev CI and smoke-test a public preview over HTTP only; stop if protected/unreachable.
 5. Open `dev` → `main` with the required release description and stop for explicit owner approval; do not merge it.
 
@@ -201,7 +201,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: Wait for PR #23 CI on the integrated security/dependency-upgrades head. If green and branch protections allow, merge PR #23 into dev with a merge commit. Then verify dev CI, smoke-test a public preview over HTTP only, and open dev → main with the required release notes; stop for explicit owner approval before merging main.
+NEXT ACTION: Verify the push CI on dev at merge commit `ebbec64`; locate the public Vercel preview/deployment URL and smoke-test home, /dsa, /blog, a real blog post, and /api/auth/session over HTTP only. If preview access is protected/unreachable, report and stop. If publicly reachable, open dev → main with the required release notes and stop for explicit owner approval before merging main.
 ```
 ---
 ## 12. Re-verification checklist (run first, paste output)
@@ -243,6 +243,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-31 | Owner explicitly authorized only the ordered merges in the current instruction: workflow attempt-2 cancellation if waiting/queued; #43 → `security/dependency-upgrades`; then #23 → `dev`; then open but do not merge `dev` → `main`. Required precondition check passed: TypeScript `7119c15`, Prisma `4d7e813`, security base `3b9e5d3`; section 12 output verified 45 heads, handoff ref `7e6c7ce`, #37 ancestor, Stage 3 SHAs, clean main worktree/stash, and required package versions. No merge action taken yet. |
 | 2026-10-31 | Step 1 complete: workflow run [40092064802](https://github.com/SHIV1804/Portfolio/actions/runs/40092064802) attempt 2 was verified as `waiting` on `main` and a cancellation request was submitted. GitHub still showed `waiting` immediately afterward; no rerun or production approval was performed. |
 | 2026-10-31 | Step 2 complete: PR #43 was retargeted and merged into `security/dependency-upgrades` with merge commit `54f0999`. PR #38 was already merged. PRs #40, #39, #41 and #42 were verified ancestor heads of `54f0999` and closed without deleting branches. |
+| 2026-10-31 | Step 3 complete: PR #23 automatic verify run [41213705226](https://github.com/SHIV1804/Portfolio/actions/runs/41213705226) passed with all checks green. PR #23 merged into `dev` with merge commit `ebbec64`; no branch deletion or protection bypass. |
 ## 14. If you are about to run out of context
 
 1. Update sections 5, 10, 11 and 13 with exact state (branch, head SHA, CI link + summary, what is half-done).
