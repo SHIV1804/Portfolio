@@ -34,6 +34,8 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 - Whether `main` or `dev` should be treated as the deploy branch is not stated anywhere in the repo (no CI config, no `vercel.json`).
 - No record of which package manager (npm vs pnpm) is intended, despite both lockfiles being committed.
 
+## Feature work
+- **Online IDE on DSA problem pages**: added a local code editor and `Run`/`Submit` buttons to the problem detail page. Sign-in is required only if the user clicks either action; otherwise, the page remains browsable without forcing authentication.
 
 ## Stage 3 — Prisma 7.10.1
 - **Complete on `chore/upgrade-prisma-7` (PR [#42](https://github.com/SHIV1804/Portfolio/pull/42), pending review/merge):** upgraded `prisma` and `@prisma/client` together to stable `7.10.1` (not the Prisma 8 RC), added `@prisma/adapter-pg@7.10.1`, `dotenv`, ESM package mode, `prisma.config.ts`, and the new Prisma client generator/output path.
