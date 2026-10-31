@@ -1,4 +1,9 @@
 import { test, expect } from '@playwright/test';
+import {
+  isAbortedSessionConsoleError,
+  isIgnorableConsoleError,
+  observeSessionTraffic,
+} from '../helpers/session-observer';
 
 test.describe('Broken Assets and Console Checks', () => {
   test('no 404 errors for local assets on homepage', async ({
@@ -102,10 +107,7 @@ test.describe('Broken Assets and Console Checks', () => {
 
     // Filter out known false positives
     const realErrors = allErrors.filter(
-      (err) =>
-        !err.error.includes('ResizeObserver') &&
-        !err.error.includes('Non-Error promise rejection') &&
-        !err.error.includes('Uncaught (in promise)'),
+      (err) => !isIgnorableConsoleError(err.error),
     );
 
     expect(realErrors).toEqual([]);
@@ -132,7 +134,10 @@ test.describe('Broken Assets and Console Checks', () => {
     }
   });
 
-  test('all internal navigation links are accessible', async ({ page, context }) => {
+  test('all internal navigation links are accessible', async ({
+    page,
+    context,
+  }) => {
     const brokenLinks: string[] = [];
 
     context.on('response', (response) => {
@@ -197,9 +202,7 @@ test.describe('Broken Assets and Console Checks', () => {
     expect(placeholderUrls).toEqual([]);
   });
 
-  test('placeholder URLs are detected in command palette', async ({
-    page,
-  }) => {
+  test('placeholder URLs are detected in command palette', async ({ page }) => {
     await page.goto('/');
 
     const placeholders: string[] = [];
@@ -217,7 +220,10 @@ test.describe('Broken Assets and Console Checks', () => {
     expect(placeholders.length).toBeGreaterThan(0);
   });
 
-  test('no uncaught exceptions in network requests', async ({ page, context }) => {
+  test('no uncaught exceptions in network requests', async ({
+    page,
+    context,
+  }) => {
     const networkErrors: string[] = [];
 
     context.on('response', (response) => {
@@ -286,9 +292,7 @@ test.describe('Broken Assets and Console Checks', () => {
     expect(content).not.toContain('[PLACEHOLDER');
   });
 
-  test('verify resume link exists but may be placeholder', async ({
-    page,
-  }) => {
+  test('verify resume link exists but may be placeholder', async ({ page }) => {
     await page.goto('/');
 
     // Open command palette
@@ -304,50 +308,166 @@ test.describe('Broken Assets and Console Checks', () => {
   });
 
   test('navigation does not create console errors', async ({ page }) => {
-    const navigationErrors: string[] = [];
-
-    page.on('console', (msg) => {
-      if (msg.type() === 'error') {
-        navigationErrors.push(msg.text());
-      }
-    });
+    const sessionTraffic = observeSessionTraffic(page);
 
     // Navigate through multiple routes, leaving each page only after its own
-    // startup /api/auth/session request has completed. Leaving mid-fetch makes the
-    // browser cancel the request, which NextAuth logs as CLIENT_FETCH_ERROR
-    // "Failed to fetch". Playwright disables the back/forward cache, so goBack()
-    // loads a new document that fetches the session again.
-    const sessionResponse = () =>
-      page.waitForResponse((res) => res.url().includes('/api/auth/session'));
-
-    let session = sessionResponse();
+    // startup /api/auth/session request has completed. SessionProvider can also
+    // start another session refetch after startup, likely on window focus or
+    // visibilitychange; leaving while that request is in flight aborts it, which
+    // NextAuth logs as CLIENT_FETCH_ERROR "Failed to fetch". The
+    // security/bisect-session-abort-cause branch only tested the mitigation
+    // refetchOnWindowFocus={false} and recorded no CI/result, so that trigger is
+    // not confirmed. networkidle is therefore needed to let these extra startup
+    // requests settle before navigation. Playwright disables the back/forward
+    // cache, so goBack() loads a new document that fetches the session again.
+    let session = sessionTraffic.waitForSessionResponse();
     await page.goto('/');
     await session;
+    await page.waitForLoadState('networkidle');
 
-    session = sessionResponse();
+    session = sessionTraffic.waitForSessionResponse();
     await page.goto('/projects/log-analyser');
     await session;
+    await page.waitForLoadState('networkidle');
 
-    session = sessionResponse();
+    session = sessionTraffic.waitForSessionResponse();
     await page.goBack();
     await session;
+    await page.waitForLoadState('networkidle');
 
-    session = sessionResponse();
+    session = sessionTraffic.waitForSessionResponse();
     await page.goto('/projects/case-study-two');
     await session;
+    await page.waitForLoadState('networkidle');
 
-    session = sessionResponse();
+    session = sessionTraffic.waitForSessionResponse();
     await page.goBack();
     await session;
+    await page.waitForLoadState('networkidle');
 
-    // Filter out known false positives
-    const realErrors = navigationErrors.filter(
-      (err) =>
-        !err.includes('ResizeObserver') &&
-        !err.includes('Non-Error promise rejection'),
+    expect(sessionTraffic.unmatchedSessionErrors()).toEqual([]);
+    expect(
+      sessionTraffic.requestFailures.filter(
+        (failure) => failure.errorText === 'net::ERR_ABORTED',
+      ),
+    ).toEqual([]);
+    expect(sessionTraffic.invalidSessionFailures()).toEqual([]);
+    expect(sessionTraffic.invalidSessionResponses()).toEqual([]);
+  });
+
+  test('session observer reports HTTP 500 session failures', async ({
+    page,
+  }) => {
+    const serverErrorTraffic = observeSessionTraffic(page);
+    await page.route('**/api/auth/session', (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'test failure' }),
+      }),
+    );
+    await page.goto('/');
+    await expect.poll(() => serverErrorTraffic.hasError()).toBe(true);
+  });
+
+  test('session observer reports aborted session failures', async ({
+    page,
+  }) => {
+    const failedRequestTraffic = observeSessionTraffic(page);
+    await page.route('**/api/auth/session', (route) => route.abort('failed'));
+    await page.goto('/');
+    await expect.poll(() => failedRequestTraffic.hasError()).toBe(true);
+  });
+
+  test('session matcher accepts the captured Chromium abort message only', () => {
+    const capturedChromiumMessage =
+      '[next-auth][error][CLIENT_FETCH_ERROR] \nhttps://next-auth.js.org/errors#client_fetch_error Failed to fetch {error: Object, url: /api/auth/session, message: Failed to fetch}';
+
+    expect(isAbortedSessionConsoleError(capturedChromiumMessage)).toBe(true);
+    expect(
+      isAbortedSessionConsoleError(
+        capturedChromiumMessage.replace(
+          'message: Failed to fetch',
+          'message: Network error',
+        ),
+      ),
+    ).toBe(false);
+  });
+
+  test('session observer tolerates a matched browser-aborted session fetch', async ({
+    page,
+  }) => {
+    const sessionTraffic = observeSessionTraffic(page);
+    let delayFirstSession = true;
+
+    await page.route('**/api/auth/session', async (route) => {
+      if (delayFirstSession) {
+        delayFirstSession = false;
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        try {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: 'null',
+          });
+        } catch {
+          // Navigation may cancel the delayed request before fulfillment.
+        }
+        return;
+      }
+
+      await route.continue();
+    });
+
+    const initialNavigation = page.goto('/').catch(() => undefined);
+    await page.waitForRequest((request) =>
+      request.url().includes('/api/auth/session'),
+    );
+    await page.goto('/projects/log-analyser');
+    await initialNavigation;
+
+    await expect
+      .poll(() => sessionTraffic.requestFailures.length)
+      .toBeGreaterThan(0);
+    await expect
+      .poll(() => sessionTraffic.consoleErrors)
+      .toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('[next-auth][error][CLIENT_FETCH_ERROR]'),
+        ]),
+      );
+    expect(
+      sessionTraffic.consoleErrors.some((error) =>
+        error.includes('[next-auth][error][CLIENT_FETCH_ERROR]'),
+      ),
+    ).toBe(true);
+    expect(sessionTraffic.unmatchedSessionErrors()).toEqual([]);
+    expect(sessionTraffic.invalidSessionFailures()).toEqual([]);
+    expect(sessionTraffic.invalidSessionResponses()).toEqual([]);
+  });
+
+  test('session observer reports unrelated console errors', async ({
+    page,
+  }) => {
+    const sessionTraffic = observeSessionTraffic(page);
+    await page.goto('about:blank');
+    await page.evaluate(() =>
+      console.error('deliberate unrelated console error'),
     );
 
-    expect(realErrors).toEqual([]);
+    await expect.poll(() => sessionTraffic.hasError()).toBe(true);
+  });
+
+  test('session observer ignores ResizeObserver noise', async ({ page }) => {
+    const sessionTraffic = observeSessionTraffic(page);
+    await page.goto('about:blank');
+    await page.evaluate(() =>
+      console.error(
+        'ResizeObserver loop completed with undelivered notifications.',
+      ),
+    );
+
+    await expect.poll(() => sessionTraffic.hasError()).toBe(false);
   });
 
   test('report summary of all warnings collected during usage', async ({

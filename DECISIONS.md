@@ -42,3 +42,97 @@ Technical decisions with evidence in code, config, or this project's own history
 **Decision:** "No fabrication" content policy — placeholder content is marked `[PLACEHOLDER: ...]` inline, and confirmed factual claims are marked with a `VERIFIED:` comment stating what was checked and how.
 **Reason:** The site's primary audience is recruiters and technical interviewers; an unverifiable or invented claim undermines the portfolio's credibility more than an honest placeholder does. See `docs/CONTENT.md` for the current inventory of what's marked which way.
 **Impact:** Any AI agent adding content to this site must follow the same marker convention — see `AGENTS.md` rule 1.
+
+---
+**Decision:** npm is the authoritative package manager for the dependency-upgrades branch and its follow-up stages.
+**Reason:** `package-lock.json` is retained and the obsolete pnpm metadata was removed in `393f5f5`; CI installs with `npm ci`.
+**Impact:** Do not reintroduce `pnpm-lock.yaml` or `pnpm-workspace.yaml` while executing the staged dependency work.
+
+---
+**Decision:** Stay on NextAuth v4 for the staged dependency work.
+**Reason:** `next-auth` 4.24.15 is the latest stable v4 release verified for this branch; v5 remains beta and is a separate migration.
+**Impact:** Do not upgrade to a v5 beta as part of the safe-range or major-version stages.
+
+---
+**Decision:** The session-observer tests share one console-noise ignore list.
+**Reason:** The existing navigation and general console tests intentionally tolerate `ResizeObserver`, `Non-Error promise rejection`, and `Uncaught (in promise)` noise; keeping the list in the helper prevents the tests from silently diverging.
+**Impact:** New console-error assertions should use `isIgnorableConsoleError()` rather than adding test-local exceptions.
+
+
+---
+**Decision:** Upgrade Prisma 6 to stable `7.10.1` with the official v7 generator/config path and `@prisma/adapter-pg@7.10.1`.
+**Reason:** Prisma v7 requires a driver adapter and explicit generated-client output; the existing app is PostgreSQL and CI already provides a disposable PostgreSQL service. Keep the existing three migration SQL files unchanged.
+**Impact:** Move the connection URL to root `prisma.config.ts`, keep `postinstall: prisma generate`, update all generated-client imports, and validate install/generate/migrate/build/runtime adapter behavior only in CI against `localhost:5432`. Never run migration commands against Neon or production. Prisma v7 uses node-postgres pool defaults; do not validate production connection behavior as part of this PR.
+
+---
+**Auth.js v5 follow-up:** Remove the `@auth/core` compatibility override when migrating to Auth.js v5.
+**Reason:** The compatibility override is tied to the current NextAuth v4 setup and should not be carried into an Auth.js v5 migration without explicit verification.
+
+
+---
+**Stage 3 PR #42 CI evidence:** Full run [41114978943](https://github.com/SHIV1804/Portfolio/actions/runs/41114978943) passed postinstall and explicit Prisma 7.10.1 generation, disposable PostgreSQL migrations, TypeScript, lint, build, and Playwright (211 passed, 1 skipped). The Auth.js Prisma adapter create/read/delete smoke test ran against the job-scoped CI database. Two earlier CI findings were fixed: required `AdapterUser.id`, then a generated Prisma enum import in a client component that pulled in `node:module`; browser-safe enum constants now live in `shared/lib/post-status.ts`. No Neon or production database was touched.
+
+**Decision:** Upgrade ESLint to `10.13.0` in a dedicated Stage 3 PR and pair it with `eslint-config-next@16.4.3`.
+**Reason:** Next.js 16.4.3 officially documents ESLint 10 support, and the config's peer range is `eslint >=9.0.0`. CI's Node 22.23.4 satisfies ESLint 10's Node minimum. The repo already uses flat config; existing `@typescript-eslint` 8.62.1 peer ranges include ESLint 10.
+**Impact:** The config's nested React/import/accessibility plugins still declare peer ranges ending at ESLint 9 and npm warns while overriding these peers. A local ESLint run succeeds; full CI must pass before merge, and the peer warnings must remain documented.
+
+---
+**Auth.js v5 follow-up:** Remove the `@auth/core` compatibility override when migrating to Auth.js v5.
+**Reason:** This override is a NextAuth v4 compatibility measure and must not be carried into the v5 migration without explicit verification.
+
+
+---
+**Stage 3 PR #41 CI evidence:** Full run [40943258369](https://github.com/SHIV1804/Portfolio/actions/runs/40943258369) passed dependency installation, Prisma generation, disposable CI migrations, TypeScript, lint, build, and Playwright (210 passed, 1 skipped). npm emitted peer override warnings for nested ESLint plugins whose declared ranges end at ESLint 9; the lint and full CI jobs nevertheless passed.
+
+---
+**Stage 3 item 5 — TypeScript 7.0.2 blocked:** The latest `typescript-eslint` parser/plugin release (8.72.1) declares TypeScript `>=4.8.4 <6.1.0`, excluding the requested 7.0.2. Next 16.4.3 itself permits TypeScript 7, but the repository's TypeScript-aware ESLint parser does not. Do not upgrade until tooling support or a separately tested TS 6 API alias strategy is available.
+**Decision:** Upgrade `framer-motion` to `14.7.1` in its own Stage 3 PR.
+**Reason:** The official Motion upgrade guide reports no breaking changes for the relevant JavaScript API in Motion 13 or 14. This repository uses only the React `motion` component API through `framer-motion`; it does not use the Motion One APIs called out in the guide (`animate`, `scroll`, `inView`, `stagger`, or `glide`).
+**Impact:** The affected usage is limited to `widgets/dsa/ui/visualizers/TwoPointersVisualizer.tsx`, `SlidingWindowVisualizer.tsx`, `BinarySearchVisualizer.tsx`, and `widgets/dsa/ui/flagship/ArrayBox.tsx`. CI must exercise the DSA pages and reduced-motion tests before merge.
+
+**Stage 3 evidence rule:** `@types/node` remains unchanged until the Vercel project Node setting is obtained from authenticated project evidence. CI is confirmed to use Node 22; no Node 26 assumption is permitted.
+
+
+---
+**Auth.js v5 follow-up:** Remove the `@auth/core` compatibility override when migrating to Auth.js v5.
+**Reason:** This override is a NextAuth v4 compatibility measure and must not be carried into the v5 migration without explicit verification.
+
+---
+**Stage 3 PR #39 CI evidence:** Run [40940889046](https://github.com/SHIV1804/Portfolio/actions/runs/40940889046) passed TypeScript, lint, build, and the full Playwright suite (212 passed, 1 skipped), including the actual DSA detail and flagship routes that exercise all Framer Motion consumers.
+**Decision:** Upgrade `@hookform/resolvers` to `6.0.2` in its own Stage 3 PR.
+**Reason:** The official v6.0.2 release is a bug-fix release (TypeBox escaped-field-name validation errors). The repository uses only `zodResolver(contactSchema)` and the documented resolver signature remains compatible with the existing Zod v4 schema and React Hook Form setup.
+**Impact:** The only runtime usage is `features/contact-form/ui/ContactForm.tsx`; the server-side validation in `app/api/contact/route.ts` remains unchanged. CI must exercise the contact-form tests before merge.
+
+**Stage 3 evidence rule:** `@types/node` remains unchanged until the Vercel project Node setting is obtained from authenticated project evidence. CI is confirmed to use Node 22; no Node 26 assumption is permitted.
+
+
+---
+**Auth.js v5 follow-up:** Remove the `@auth/core` compatibility override when migrating to Auth.js v5.
+**Reason:** This override is a NextAuth v4 compatibility measure and must not be carried into the v5 migration without explicit verification.
+
+---
+**Stage 3 PR #40 CI evidence:** Full run [40941772607](https://github.com/SHIV1804/Portfolio/actions/runs/40941772607) passed TypeScript, lint, build, and the Playwright suite (210 passed, 1 skipped), including the contact-form validation flows using `zodResolver`.
+
+---
+**Decision:** Upgrade the Lighthouse devDependency to `13.6.0` as the first Stage 3 dependency change.
+**Reason:** Lighthouse 13.6.0 removes the Lighthouse 12-era high-severity transitive findings and is compatible with the repository's CLI-only usage. Official release notes require Node `>=22.19`; CI requests Node 22, so CI's resolved Node 22 patch must satisfy that engine requirement. The sandbox's Node `22.13.0` reports `EBADENGINE`, although installation and the application build remain functional.
+**Impact:** No application script or workflow invokes Lighthouse. Any future Lighthouse CLI use must run on Node `>=22.19`.
+
+
+**Decision:** Pin `@playwright/test` exactly at `1.61.1` during Stage 2 safe-range updates.
+**Reason:** The required tolerated-abort regression test passed on 1.61.1 but failed consistently on 1.64.1 in CI and locally: the delayed navigation produced no `requestfailed` event or NextAuth `CLIENT_FETCH_ERROR`; the 1.64.1 capture instead showed 200 session responses and `requestfinished` events. This changes the behavior the test is designed to verify, so the package is reverted rather than weakening the assertion.
+**Impact:** Playwright 1.64.1 requires a separately designed test/observer investigation before adoption; the remaining approved safe-range updates proceed independently.
+
+---
+**Decision:** Keep the npm override forcing `@auth/core` to `0.41.3`.
+**Reason:** `npm install`, TypeScript, and dependency resolution all passed with the override, and the audit count fell from 32 to 29 with both critical advisories removed. `next-auth@4.24.15` resolves to the overridden `@auth/core@0.41.3` in the installed tree. `shared/lib/auth.ts` configures GitHub OAuth only; it has no email provider.
+
+---
+**Decision:** Accept the current 19 moderate `npm audit --package-lock-only` findings as development-tooling-only advisories during Stage 3.
+**Reason:** The findings are `glob` and `minimatch` advisories reached through ESLint, TypeScript-ESLint, Lighthouse, and Sentry tooling. Patched majors `minimatch@11.0.3` and `glob@14.0.3` would break the current lint/toolchain compatibility, while npm's suggested forced downgrades are not acceptable. The production-only audit (`npm audit --package-lock-only --omit=dev`) is the security metric for deployed dependencies and remains 0.
+**Impact:** Do not run `npm audit fix --force` and do not add `glob`/`minimatch` overrides. Revisit when the surrounding toolchain supports the patched majors.
+
+---
+**Decision:** Declare `prisma@7.10.1` and `dotenv@17.2.3` in `dependencies`, not `devDependencies`, and declare each package exactly once.
+**Reason:** The merge combined the Prisma branch's `devDependencies` entries with the predecessor branch's existing runtime `prisma` entry, leaving two Prisma declarations with incompatible ranges. The Prisma CLI is invoked by the `postinstall` script and `prisma.config.ts` imports `dotenv`; placing both in runtime dependencies avoids relying on whether the deployment platform installs development dependencies during its build.
+**Impact:** The manifest now has one exact Prisma 7 declaration, one `@prisma/client@7.10.1` declaration, and runtime `dotenv`. Vercel's exact install behavior for `devDependencies` in this project remains unverified and must not be assumed.

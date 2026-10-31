@@ -7,22 +7,17 @@ import { useTheme } from '@/features/theme-toggle';
 const HISTORY_STORAGE_KEY = 'terminal-history';
 
 export function useTerminal(isOpen: boolean, onClose: () => void) {
-  const [history, setHistory] = useState<string[]>([]);
+  const [history, setHistory] = useState<string[]>(() => {
+    if (typeof window === 'undefined') return [];
+    const saved = window.localStorage.getItem(HISTORY_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  });
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [output, setOutput] = useState<{ type: 'input' | 'output'; content: string }[]>([
     { type: 'output', content: 'Welcome to Shivam Terminal v1.0.0\nType "help" for available commands.' }
   ]);
   const [input, setInput] = useState('');
   const { setTheme } = useTheme();
-
-  // Load history from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem(HISTORY_STORAGE_KEY);
-    if (saved) {
-      const frame = requestAnimationFrame(() => setHistory(JSON.parse(saved)));
-      return () => cancelAnimationFrame(frame);
-    }
-  }, []);
 
   // Save history to localStorage
   useEffect(() => {

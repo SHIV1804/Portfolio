@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, Check, X, AlertCircle, Calendar, User } from 'lucide-react';
-import { PostStatus } from '@prisma/client';
+import { PostStatus } from '@/shared/lib/post-status';
 
 interface Post {
   id: string;
