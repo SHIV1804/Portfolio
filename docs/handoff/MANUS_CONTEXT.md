@@ -57,7 +57,7 @@ Docs in the repo you must follow: `AGENTS.md`, `CONVENTIONS.md`, `PROJECT_CONTEX
 - The unauthenticated GitHub REST API rate-limits quickly. Prefer `git fetch` / `git log` / `git diff`.
 - Shallow or single-branch clones hide branches. Use `git remote set-branches origin '*' && git fetch origin`.
 - The private Vercel and Neon dashboards are not accessible to you (login redirect). Anything that depends on them is ❓ and needs the owner.
-- Stacked Stage 3 PRs targeting non-`dev`/`main` branches do not trigger CI automatically; dispatch `.github/workflows/ci.yml` manually against each exact head.
+- Stacked Stage 3 PRs targeting non-`dev`/`main` branches do not trigger CI automatically; dispatch `.github/workflows/ci.yml` manually against each exact head. This was required for exact heads `4a152cf`, `a8602d6`, and `201d5e2`.
 
 ---
 
@@ -87,12 +87,12 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 | #23 | `security/dependency-upgrades` | `dev` ✅ (verified with GitHub API on 2026-10-31) | `6e90cd6` | run 40776871932 green |
 | #37 | `chore/safe-range-dependency-updates` | `security/dependency-upgrades` | `c80230d` — **MERGED** ✅ (merge commit `3b9e5d3`, 2026-10-31) | run 40780697711: 211 passed, 1 skipped |
 | #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `4a152cf` — restacked on `3b9e5d3` ✅ | [run 41123287928](https://github.com/SHIV1804/Portfolio/actions/runs/41123287928): 211 passed, 1 skipped, 0 failed; audit 29 → 0 |
-| #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | `security/dependency-upgrades` | `7d8c9f6` | run 40940889046: 212 passed, 1 skipped |
+| #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | `chore/upgrade-hookform-resolvers-6` | `201d5e2` — restacked ✅ | [run 41167455941](https://github.com/SHIV1804/Portfolio/actions/runs/41167455941): 213 passed, 1 skipped, 0 failed; audit 19 moderate |
 | #40 Resolvers 6 | `chore/upgrade-hookform-resolvers-6` | `chore/upgrade-lighthouse-13` | `a8602d6` — restacked ✅ | [run 41166816190](https://github.com/SHIV1804/Portfolio/actions/runs/41166816190): 211 passed, 1 skipped, 0 failed; audit 19 moderate |
 | #41 ESLint 10 | `chore/upgrade-eslint-10` | `security/dependency-upgrades` | `beeea2f` | run 40943258369: 210 passed, 1 skipped |
 | #42 Prisma 7.10.1 | `chore/upgrade-prisma-7` | `security/dependency-upgrades` | `13a82e3` (code tested at `ad31ca2`; later commit is docs only) | run 41114978943: 211 passed, 1 skipped |
 
-**⚠ Integration status:** PR #38 is restacked on `3b9e5d3`, and PR #40 is now restacked on #38 at `a8602d6`; both exact-head CI runs passed. PRs #39, #41, and #42 still fork from the pre-#37 base and remain un-restacked; their existing CI results do not validate the combined stack.
+**⚠ Integration status:** PR #38 is restacked on `3b9e5d3`, PR #40 is restacked on #38 at `a8602d6`, and PR #39 is restacked on #40 at `201d5e2`; all three exact-head CI runs passed. PRs #41 and #42 still fork from the pre-#37 base and remain un-restacked; their existing CI results do not validate the combined stack.
 
 **Intended merge path (owner decides):** #37 → into `security/dependency-upgrades`; then #23 into `dev`; then `dev` → `main` (production). Before `main`: check the Vercel preview and the Vercel settings in section 10 (owner actions).
 
@@ -193,12 +193,12 @@ The criticals on PRs #38–#42 are the `@auth/core` peer issue that PR #37's ove
 2. In Vercel: read **Install Command** and **Node.js Version**; confirm `DATABASE_URL` is set. Tell Manus the Node version.
 3. ~~Merge PR #37 into `security/dependency-upgrades`~~ — **done** (`3b9e5d3`).
 
-### A. Re-stack Stage 3 (**IN PROGRESS — Lighthouse and resolvers completed; owner authorized Framer Motion next**)
-The Lighthouse item is complete on `chore/upgrade-lighthouse-13` at `4a152cf`, merged from `security/dependency-upgrades` at `3b9e5d3`. The resolver item is complete on `chore/upgrade-hookform-resolvers-6` at `a8602d6`, merged from Lighthouse with a normal push and PR #40 retargeted to the Lighthouse branch. Resolver exact-head CI run 41166816190 passed TypeScript, lint, build, and the full Playwright suite with 211 passed, 1 skipped, 0 failed.
+### A. Re-stack Stage 3 (**PAUSED — Lighthouse, resolvers, and Framer Motion completed; owner authorization required**)
+The stacked chain is complete through Framer Motion: Lighthouse is `4a152cf`, resolvers is `a8602d6`, and Framer Motion is `201d5e2`. PR #40 targets Lighthouse and PR #39 targets resolvers. Both restacks used normal merge commits and normal pushes, preserved both documentation sides, and have no conflict markers. Exact-head CI passed for both branches: resolver run 41166816190 reported 211 passed, 1 skipped, 0 failed; Framer Motion run 41167455941 reported 213 passed, 1 skipped, 0 failed.
 
-A fresh `npm audit --package-lock-only` on both the clean Lighthouse predecessor and resolver head returned 19 moderate vulnerabilities (exit 1). This differs from the earlier 0 result because npm advisory/lock resolution data changed; the resolver did not increase the result. No `npm audit fix --force` was used.
+A fresh `npm audit --package-lock-only` on both the resolver and Framer Motion heads returned 19 moderate vulnerabilities (exit 1), with 0 high and 0 critical. The clean Lighthouse predecessor returned the same 19 moderate findings when re-run under the current npm advisory/lock resolution data; neither subsequent dependency change increased the result. No `npm audit fix --force` was used.
 
-The owner has authorized the next branch: merge `chore/upgrade-hookform-resolvers-6` into `chore/upgrade-framer-motion-14`, retarget PR #39 to the resolver branch, resolve `package.json` as predecessor plus the Framer Motion change, regenerate `package-lock.json` with npm, preserve both sides of `DECISIONS.md` / `TASKS.md`, manually dispatch exact-head CI, and update this file. Push normally only; if rejected as non-fast-forward, stop and report. Do not start ESLint or Prisma.
+Stop here pending owner authorization. Do not start ESLint (#41) or Prisma (#42). Any future stacked PR targeting a non-`dev`/`main` branch requires manual exact-head CI dispatch.
 ### B. Prisma 7 follow-up (PR #42, after re-stack; disposable CI Postgres only)
 - Remove the silent localhost fallback in `shared/lib/prisma.ts`: fail loudly when `DATABASE_URL` is missing at runtime while keeping `next build` and CI working.
 - Inventory every tracked `.js`, `.cjs`, `.mjs` file and package/workflow script affected by `"type": "module"`; run each and record real output.
@@ -217,7 +217,7 @@ The owner has authorized the next branch: merge `chore/upgrade-hookform-resolver
 ## 11. NEXT ACTION (keep current)
 
 ```text
-NEXT ACTION: On `chore/upgrade-framer-motion-14`, merge `origin/chore/upgrade-hookform-resolvers-6` at `a8602d6`; resolve the manifest/lockfile/documentation as instructed, push normally, retarget PR #39, manually dispatch exact-head CI, run npm audit, update PR #39 and this handoff, then stop before ESLint/Prisma.
+NEXT ACTION: STOP. The authorized two-branch chain is complete: resolver head `a8602d6` with CI run 41166816190 and Framer Motion head `201d5e2` with CI run 41167455941. PR #40 targets Lighthouse and PR #39 targets resolvers. Wait for explicit owner authorization before starting ESLint (#41) or Prisma (#42).
 ```
 
 ---
@@ -252,6 +252,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-31 | Owner prohibited force-push/history rewrite and directed a merge-based stack. Section 10A and NEXT ACTION now require merging the target base into each feature branch, regenerating the lockfile with `npm install`, preserving both documentation sides, and pushing normally only; stop if non-fast-forward. |
 | 2026-10-31 | Lighthouse restack completed on `chore/upgrade-lighthouse-13` at `4a152cf`; PR #38 updated to base `3b9e5d3`, exact-head CI [41123287928](https://github.com/SHIV1804/Portfolio/actions/runs/41123287928) passed with 211 passed, 1 skipped, 0 failed, and real `npm audit --package-lock-only` measured 29 vulnerabilities on the base and 0 on the head. CI required manual dispatch because PR #38 targets `security/dependency-upgrades`, which is not an automatic CI target. Stopped before the hookform-resolvers branch pending owner authorization. |
 | 2026-10-31 | Resolver restack completed on `chore/upgrade-hookform-resolvers-6` at `a8602d6`; PR #40 retargeted to Lighthouse `4a152cf`, exact-head CI [41166816190](https://github.com/SHIV1804/Portfolio/actions/runs/41166816190) passed with 211 passed, 1 skipped, 0 failed. The fresh audit returned 19 moderate vulnerabilities on both predecessor and head; this is npm advisory/lock resolution drift from the earlier 0 result, not an increase caused by resolvers. Conflicts in `DECISIONS.md`, `TASKS.md`, and `package-lock.json` were resolved by preserving both documentation sides and regenerating the lockfile. Authorized to continue with Framer Motion; do not start ESLint or Prisma. |
+| 2026-10-31 | Framer Motion restack completed on `chore/upgrade-framer-motion-14` at `201d5e2`; PR #39 retargeted to resolver `a8602d6`, exact-head CI [41167455941](https://github.com/SHIV1804/Portfolio/actions/runs/41167455941) passed with 213 passed, 1 skipped, 0 failed. Conflicts in `package.json`, `package-lock.json`, `DECISIONS.md`, and `TASKS.md` were resolved by using the resolver predecessor plus only the Framer Motion bump, regenerating the lockfile with npm to resolve `14.7.1`, and preserving both documentation sides. The fresh audit returned 19 moderate vulnerabilities, matching the predecessor under current npm advisory data. Stopped before ESLint and Prisma pending owner authorization. |
 
 ---
 
