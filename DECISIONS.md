@@ -74,3 +74,48 @@ Technical decisions with evidence in code, config, or this project's own history
 
 ---
 **Stage 3 item 5 — TypeScript 7.0.2 blocked:** The latest `typescript-eslint` parser/plugin release (8.72.1) declares TypeScript `>=4.8.4 <6.1.0`, excluding the requested 7.0.2. Next 16.4.3 itself permits TypeScript 7, but the repository's TypeScript-aware ESLint parser does not. Do not upgrade until tooling support or a separately tested TS 6 API alias strategy is available.
+**Decision:** Upgrade `framer-motion` to `14.7.1` in its own Stage 3 PR.
+**Reason:** The official Motion upgrade guide reports no breaking changes for the relevant JavaScript API in Motion 13 or 14. This repository uses only the React `motion` component API through `framer-motion`; it does not use the Motion One APIs called out in the guide (`animate`, `scroll`, `inView`, `stagger`, or `glide`).
+**Impact:** The affected usage is limited to `widgets/dsa/ui/visualizers/TwoPointersVisualizer.tsx`, `SlidingWindowVisualizer.tsx`, `BinarySearchVisualizer.tsx`, and `widgets/dsa/ui/flagship/ArrayBox.tsx`. CI must exercise the DSA pages and reduced-motion tests before merge.
+
+**Stage 3 evidence rule:** `@types/node` remains unchanged until the Vercel project Node setting is obtained from authenticated project evidence. CI is confirmed to use Node 22; no Node 26 assumption is permitted.
+
+
+---
+**Auth.js v5 follow-up:** Remove the `@auth/core` compatibility override when migrating to Auth.js v5.
+**Reason:** This override is a NextAuth v4 compatibility measure and must not be carried into the v5 migration without explicit verification.
+
+---
+**Stage 3 PR #39 CI evidence:** Run [40940889046](https://github.com/SHIV1804/Portfolio/actions/runs/40940889046) passed TypeScript, lint, build, and the full Playwright suite (212 passed, 1 skipped), including the actual DSA detail and flagship routes that exercise all Framer Motion consumers.
+**Decision:** Upgrade `@hookform/resolvers` to `6.0.2` in its own Stage 3 PR.
+**Reason:** The official v6.0.2 release is a bug-fix release (TypeBox escaped-field-name validation errors). The repository uses only `zodResolver(contactSchema)` and the documented resolver signature remains compatible with the existing Zod v4 schema and React Hook Form setup.
+**Impact:** The only runtime usage is `features/contact-form/ui/ContactForm.tsx`; the server-side validation in `app/api/contact/route.ts` remains unchanged. CI must exercise the contact-form tests before merge.
+
+**Stage 3 evidence rule:** `@types/node` remains unchanged until the Vercel project Node setting is obtained from authenticated project evidence. CI is confirmed to use Node 22; no Node 26 assumption is permitted.
+
+
+---
+**Auth.js v5 follow-up:** Remove the `@auth/core` compatibility override when migrating to Auth.js v5.
+**Reason:** This override is a NextAuth v4 compatibility measure and must not be carried into the v5 migration without explicit verification.
+
+---
+**Stage 3 PR #40 CI evidence:** Full run [40941772607](https://github.com/SHIV1804/Portfolio/actions/runs/40941772607) passed TypeScript, lint, build, and the Playwright suite (210 passed, 1 skipped), including the contact-form validation flows using `zodResolver`.
+
+---
+**Decision:** Upgrade the Lighthouse devDependency to `13.6.0` as the first Stage 3 dependency change.
+**Reason:** Lighthouse 13.6.0 removes the Lighthouse 12-era high-severity transitive findings and is compatible with the repository's CLI-only usage. Official release notes require Node `>=22.19`; CI requests Node 22, so CI's resolved Node 22 patch must satisfy that engine requirement. The sandbox's Node `22.13.0` reports `EBADENGINE`, although installation and the application build remain functional.
+**Impact:** No application script or workflow invokes Lighthouse. Any future Lighthouse CLI use must run on Node `>=22.19`.
+
+
+**Decision:** Pin `@playwright/test` exactly at `1.61.1` during Stage 2 safe-range updates.
+**Reason:** The required tolerated-abort regression test passed on 1.61.1 but failed consistently on 1.64.1 in CI and locally: the delayed navigation produced no `requestfailed` event or NextAuth `CLIENT_FETCH_ERROR`; the 1.64.1 capture instead showed 200 session responses and `requestfinished` events. This changes the behavior the test is designed to verify, so the package is reverted rather than weakening the assertion.
+**Impact:** Playwright 1.64.1 requires a separately designed test/observer investigation before adoption; the remaining approved safe-range updates proceed independently.
+
+---
+**Decision:** Keep the npm override forcing `@auth/core` to `0.41.3`.
+**Reason:** `npm install`, TypeScript, and dependency resolution all passed with the override, and the audit count fell from 32 to 29 with both critical advisories removed. `next-auth@4.24.15` resolves to the overridden `@auth/core@0.41.3` in the installed tree. `shared/lib/auth.ts` configures GitHub OAuth only; it has no email provider.
+
+---
+**Decision:** Accept the current 19 moderate `npm audit --package-lock-only` findings as development-tooling-only advisories during Stage 3.
+**Reason:** The findings are `glob` and `minimatch` advisories reached through ESLint, TypeScript-ESLint, Lighthouse, and Sentry tooling. Patched majors `minimatch@11.0.3` and `glob@14.0.3` would break the current lint/toolchain compatibility, while npm's suggested forced downgrades are not acceptable. The production-only audit (`npm audit --package-lock-only --omit=dev`) is the security metric for deployed dependencies and remains 0.
+**Impact:** Do not run `npm audit fix --force` and do not add `glob`/`minimatch` overrides. Revisit when the surrounding toolchain supports the patched majors.

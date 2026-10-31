@@ -41,7 +41,7 @@ export function isIgnorableConsoleError(message: string): boolean {
 
 // Chromium's message.text() renders NextAuth's metadata object inline as
 // "{error: Object, url: /api/auth/session, message: Failed to fetch}".
-function isAbortedSessionConsoleError(message: string): boolean {
+export function isAbortedSessionConsoleError(message: string): boolean {
   return (
     message.includes(CLIENT_FETCH_ERROR) &&
     message.includes('url: /api/auth/session') &&
