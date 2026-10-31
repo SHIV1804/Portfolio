@@ -80,12 +80,12 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 
 ## 5. Current state of work
 
-### Pull requests (#23 and #37–#44 integrated; production smoke test failed)
+### Pull requests (#23 and #37–#44 integrated; Vercel production verification pending)
 
 | PR | Branch | Target | Head ✅ | CI 🟡 |
 |---|---|---|---|---|
 | #23 | `security/dependency-upgrades` | `dev` | **MERGED** via `ebbec64` ✅ | CI run [41213705226](https://github.com/SHIV1804/Portfolio/actions/runs/41213705226): all checks passed |
-| #44 | `dev` | `main` | **MERGED** via `a44a518` ✅ | PR CI [41214951480](https://github.com/SHIV1804/Portfolio/actions/runs/41214951480) passed; production deployment pending |
+| #44 | `dev` | `main` | **MERGED** via `a44a518` ✅ | PR CI [41214951480](https://github.com/SHIV1804/Portfolio/actions/runs/41214951480) passed; Vercel status success, target [deployment](https://vercel.com/shariachourasia-gmailcoms-projects/portfolio/99HLJ8ZfRdQoDBpr4Puqbr5rftAk) |
 | #37 | `chore/safe-range-dependency-updates` | `security/dependency-upgrades` | `c80230d` — **MERGED** ✅ (merge commit `3b9e5d3`, 2026-10-31) | run 40780697711: 211 passed, 1 skipped |
 | #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `4a152cf` — **MERGED** via stack integration ✅ | run 41123287928 passed |
 | #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | stacked | `201d5e2` — ancestor of integrated security head; PR closed ✅ | run 41167455941 passed |
@@ -113,7 +113,7 @@ Safe-range updates (Tailwind 4.3.3, `@types/react*` 19.3.0, `zod` 4.6.7, `shiki`
 - **`@types/node` — BLOCKED on owner input.** CI uses Node 22 (22.23.4). The Vercel Node setting is ❓. Do not guess.
 
 ### Stage 4 findings
-- Production deploys from `main` 🟡. The Vercel install command / package-manager / Node setting is ❓ (no `vercel.json`, no `packageManager`, no `engines` in the repo).
+- **UNVERIFIED:** The earlier claim “Production deploys from `main`, per GitHub Production deployment c97b69a” was based on GitHub Pages metadata, not Vercel. GitHub Pages is a separate site serving the repository README/docs; it is not proof of Vercel production deployment. The real production URL is `https://portfolio-theta-ruby-31nqvqjqmc.vercel.app`. For `a44a518`, GitHub commit status `Vercel` is `success` with target `https://vercel.com/shariachourasia-gmailcoms-projects/portfolio/99HLJ8ZfRdQoDBpr4Puqbr5rftAk`. The Vercel install command / package-manager / Node setting remains ❓ (no `vercel.json`, no `packageManager`, no `engines` in the repo).
 - Workflow run `40092064802`, attempt 1: failed at the Neon backup step before migrations; `NEON_API_KEY` and `NEON_PROJECT_ID` were empty; HTTP 400. Attempt 2 was `waiting` at verification, probably for `production` environment approval. Cancellation was submitted on 2026-10-31 after confirming the waiting state; do not rerun or approve it. Owner should add the two secrets.
 - 33 stale branch candidates (none deleted):
   ```text
@@ -202,7 +202,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: Production smoke test failed. Owner must roll back in Vercel by promoting the previous production deployment. Do not run migrations, access Neon, or treat this release as healthy until routing/API deployment is corrected and a new authorized release is made.
+NEXT ACTION: HTTP-smoke-test the real Vercel production URL `https://portfolio-theta-ruby-31nqvqjqmc.vercel.app` only. Do not use GitHub Pages as production evidence. If the Vercel site is unreachable/protected, stop; if any required route fails, report the exact URL/error and advise rollback in Vercel.
 ```
 ---
 ## 12. Re-verification checklist (run first, paste output)
@@ -251,6 +251,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-31 | Owner authorized “merge to main”. PR #44 was merged with merge commit `a44a518` at [PR #44](https://github.com/SHIV1804/Portfolio/pull/44). `main` now contains `ebbec64`; production pages-build-deployment workflow [41215537322](https://github.com/SHIV1804/Portfolio/actions/runs/41215537322) is in progress. |
 | 2026-10-31 | Production deployment for main merge `a44a518` completed successfully: GitHub deployment `7460626998` in `github-pages` has status `success`; workflow [41215537322](https://github.com/SHIV1804/Portfolio/actions/runs/41215537322) succeeded. Public URL: `https://shiv1804.github.io/Portfolio/`. Smoke tests pending. |
 | 2026-10-31 | Production HTTP smoke test failed at `https://shiv1804.github.io/Portfolio/`: `/` returned 200 HTML, but `/dsa` returned 404, `/blog` returned 404, and `/api/auth/session` returned 404 GitHub Pages HTML instead of 200 JSON. No blog post could be discovered because `/blog` was unavailable. **Immediate owner action: roll back in Vercel by promoting the previous production deployment.** |
+| 2026-10-31 | Correction: the prior Pages smoke test targeted the wrong site. `https://shiv1804.github.io/Portfolio/` is GitHub Pages, whose `pages-build-deployment` workflow served repository README/docs content and 404s for app routes; it is not the Vercel production site. The real production URL is `https://portfolio-theta-ruby-31nqvqjqmc.vercel.app`. The earlier “production deploys from main, per GitHub Production deployment c97b69a” statement is explicitly **UNVERIFIED**. For `a44a518`, GitHub reports Vercel context `success` with target dashboard `https://vercel.com/shariachourasia-gmailcoms-projects/portfolio/99HLJ8ZfRdQoDBpr4Puqbr5rftAk`. |
 ## 14. If you are about to run out of context
 
 1. Update sections 5, 10, 11 and 13 with exact state (branch, head SHA, CI link + summary, what is half-done).
