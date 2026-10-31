@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { PostStatus } from '@prisma/client';
+import { PostStatus } from '../../shared/lib/post-status';
 import { prisma } from '../../shared/lib/prisma';
 
 const SAFE_DATABASE_HOSTS = new Set(['localhost', '127.0.0.1', '::1', 'postgres']);
