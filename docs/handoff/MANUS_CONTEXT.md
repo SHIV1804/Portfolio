@@ -86,13 +86,13 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 |---|---|---|---|---|
 | #23 | `security/dependency-upgrades` | `dev` ✅ (verified with GitHub API on 2026-10-31) | `6e90cd6` | run 40776871932 green |
 | #37 | `chore/safe-range-dependency-updates` | `security/dependency-upgrades` | `c80230d` — **MERGED** ✅ (merge commit `3b9e5d3`, 2026-10-31) | run 40780697711: 211 passed, 1 skipped |
-| #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `4a152cf` — restacked on `3b9e5d3` ✅ | [run 41123287928](https://github.com/SHIV1804/Portfolio/actions/runs/41123287928): 211 passed, 1 skipped, 0 failed; audit 29 → 0 |
+| #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `4a152cf` — restacked on `3b9e5d3` ✅ | [run 41123287928](https://github.com/SHIV1804/Portfolio/actions/runs/41123287928): 211 passed, 1 skipped, 0 failed; audit is time-sensitive; production-only audit 0 |
 | #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | `chore/upgrade-hookform-resolvers-6` | `201d5e2` — restacked ✅ | [run 41167455941](https://github.com/SHIV1804/Portfolio/actions/runs/41167455941): 213 passed, 1 skipped, 0 failed; audit 19 moderate |
 | #40 Resolvers 6 | `chore/upgrade-hookform-resolvers-6` | `chore/upgrade-lighthouse-13` | `a8602d6` — restacked ✅ | [run 41166816190](https://github.com/SHIV1804/Portfolio/actions/runs/41166816190): 211 passed, 1 skipped, 0 failed; audit 19 moderate |
-| #41 ESLint 10 | `chore/upgrade-eslint-10` | `security/dependency-upgrades` | `beeea2f` | run 40943258369: 210 passed, 1 skipped |
+| #41 ESLint 10 | `chore/upgrade-eslint-10` | `chore/upgrade-framer-motion-14` | `99508e7` — restacked ✅ | [run 41169872136](https://github.com/SHIV1804/Portfolio/actions/runs/41169872136): 213 passed, 1 skipped, 0 failed; audit 19 moderate dev-only / production 0 |
 | #42 Prisma 7.10.1 | `chore/upgrade-prisma-7` | `security/dependency-upgrades` | `13a82e3` (code tested at `ad31ca2`; later commit is docs only) | run 41114978943: 211 passed, 1 skipped |
 
-**⚠ Integration status:** PR #38 is restacked on `3b9e5d3`, PR #40 is restacked on #38 at `a8602d6`, and PR #39 is restacked on #40 at `201d5e2`; all three exact-head CI runs passed. PRs #41 and #42 still fork from the pre-#37 base and remain un-restacked; their existing CI results do not validate the combined stack.
+**⚠ Integration status:** PR #38 is restacked on `3b9e5d3`, PR #40 is restacked on #38 at `a8602d6`, PR #39 is restacked on #40 at `201d5e2`, and PR #41 is restacked on #39 at `99508e7`; all four exact-head CI runs passed. PR #42 still forks from the pre-#37 base and remains un-restacked; its existing CI result does not validate the combined stack.
 
 **Intended merge path (owner decides):** #37 → into `security/dependency-upgrades`; then #23 into `dev`; then `dev` → `main` (production). Before `main`: check the Vercel preview and the Vercel settings in section 10 (owner actions).
 
@@ -103,10 +103,10 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 Safe-range updates (Tailwind 4.3.3, `@types/react*` 19.3.0, `zod` 4.6.7, `shiki` 4.5.0, `resend` 6.35.0, `recharts` 3.10.1, `react-hook-form` 7.91.0, `geist` 1.8.2, `lucide-react` 1.63.0, `tailwind-merge` 3.7.0, `tsx` 4.23.15, `rehype-pretty-code` 0.14.5, `remark-gfm` 4.0.1, `remark-rehype` 11.1.2); Playwright pinned 1.61.1; matcher unit test; `npm audit fix`; `@auth/core` override 0.41.3.
 
 ### Stage 3 — per-item results (🟡 from Manus' report, spot-checked)
-- **#38 Lighthouse 12 → 13.6.0.** Needs Node >=22.19 (CI resolved 22.23.4). No app script or workflow invokes Lighthouse. Audit 38 → 8.
-- **#39 Framer Motion 12 → 14.7.1.** Consumers: `TwoPointersVisualizer`, `SlidingWindowVisualizer`, `BinarySearchVisualizer`, `ArrayBox`. Focused DSA page tests added to coverage. Audit unchanged (38).
-- **#40 `@hookform/resolvers` 5 → 6.0.2.** Only `zodResolver(contactSchema)` in `features/contact-form/ui/ContactForm.tsx`. Audit unchanged.
-- **#41 ESLint 9 → 10.13.0** with `eslint-config-next@16.4.3`. npm prints peer-override warnings for nested plugins still declaring ESLint 9; install, lint, build and CI pass. Audit 38 → 37.
+- **#38 Lighthouse 12 → 13.6.0.** Needs Node >=22.19 (CI resolved 22.23.4). No app script or workflow invokes Lighthouse. Historical audit snapshots changed as advisories were published; current production-only audit is the relevant metric and is 0.
+- **#39 Framer Motion 12 → 14.7.1.** Consumers: `TwoPointersVisualizer`, `SlidingWindowVisualizer`, `BinarySearchVisualizer`, `ArrayBox`. Focused DSA page tests added to coverage. Current full audit is 19 moderate dev-only; production-only audit is 0.
+- **#40 `@hookform/resolvers` 5 → 6.0.2.** Only `zodResolver(contactSchema)` in `features/contact-form/ui/ContactForm.tsx`. Current full audit is 19 moderate dev-only; production-only audit is 0.
+- **#41 ESLint 9 → 10.13.0** with `eslint-config-next@16.4.3`. npm prints three peer-override warning groups for nested `eslint-plugin-import`, `eslint-plugin-jsx-a11y`, and `eslint-plugin-react` packages still declaring ESLint 9; install, lint, build and CI pass. Current full audit is 19 moderate dev-only; production-only audit is 0.
 - **#42 Prisma 6 → 7.10.1** (not the 8 RC). ESM (`"type": "module"`), `prisma-client` generator output `generated/prisma` (gitignored), `prisma.config.ts` with `dotenv`, runtime `PrismaPg` adapter (`@prisma/adapter-pg@7.10.1`), enum moved to `shared/lib/post-status.ts`, adapter CRUD smoke test (`tests/prisma/prisma-adapter-smoke.spec.ts`, refuses non-local hosts). Two CI fixes were needed (`AdapterUser.id`, Turbopack `node:module` error). Audit unchanged (38).
 - **TypeScript 7.0.2 — BLOCKED ✅.** `typescript-eslint` / `@typescript-eslint/parser` 8.72.1 require `typescript >=4.8.4 <6.1.0`. TypeScript **6.0.3** exists and is inside that range → a separate TS 5 → 6.0.3 step is possible.
 - **`@types/node` — BLOCKED on owner input.** CI uses Node 22 (22.23.4). The Vercel Node setting is ❓. Do not guess.
@@ -146,7 +146,7 @@ Safe-range updates (Tailwind 4.3.3, `@types/react*` 19.3.0, `zod` 4.6.7, `shiki`
 
 ---
 
-## 7. Security audit status (`npm audit --package-lock-only`)
+## 7. Security audit status (time-sensitive; production metric uses `--omit=dev`)
 
 | State | Total | Crit | High | Mod | Low |
 |---|---:|---:|---:|---:|---:|
@@ -155,9 +155,11 @@ Safe-range updates (Tailwind 4.3.3, `@types/react*` 19.3.0, `zod` 4.6.7, `shiki`
 | PR #37 final ✅ | 29 | 0 | 10 | 19 | 0 |
 | PR #38 alone (Lighthouse 13) 🟡 | 8 | 2 | 4 | 1 | 1 |
 | PR #41 alone (ESLint 10) 🟡 | 37 | 2 | 14 | 20 | 1 |
-| PR #37 + Lighthouse 13, lockfile-only estimate ✅ (reviewer) | **0** | 0 | 0 | 0 | 0 |
+| PR #37 + Lighthouse 13, lockfile-only estimate ✅ (historical snapshot) | **0** | 0 | 0 | 0 | 0 |
+| Current stacked Stage 3 heads (full audit) 🟡 | **19** | 0 | 0 | 19 | 0 |
+| Current stacked Stage 3 heads (`--omit=dev`) ✅ | **0** | 0 | 0 | 0 | 0 |
 
-The criticals on PRs #38–#42 are the `@auth/core` peer issue that PR #37's override removes. `npm audit fix --force` may suggest `next-auth@4.24.7` — that is a **downgrade; ignore it**. The 0 estimate must be confirmed by a real run after the re-stack.
+Audit totals move as new advisories are published and as npm resolves lockfile trees. The current 19 moderate findings are dev-only `glob`/`minimatch` advisories via ESLint/Lighthouse tooling; patched majors would break the current toolchain. The production-only `--omit=dev` result is 0. Do not run `npm audit fix --force` or add glob/minimatch overrides.
 
 ---
 
@@ -193,12 +195,12 @@ The criticals on PRs #38–#42 are the `@auth/core` peer issue that PR #37's ove
 2. In Vercel: read **Install Command** and **Node.js Version**; confirm `DATABASE_URL` is set. Tell Manus the Node version.
 3. ~~Merge PR #37 into `security/dependency-upgrades`~~ — **done** (`3b9e5d3`).
 
-### A. Re-stack Stage 3 (**PAUSED — Lighthouse, resolvers, and Framer Motion completed; owner authorization required**)
-The stacked chain is complete through Framer Motion: Lighthouse is `4a152cf`, resolvers is `a8602d6`, and Framer Motion is `201d5e2`. PR #40 targets Lighthouse and PR #39 targets resolvers. Both restacks used normal merge commits and normal pushes, preserved both documentation sides, and have no conflict markers. Exact-head CI passed for both branches: resolver run 41166816190 reported 211 passed, 1 skipped, 0 failed; Framer Motion run 41167455941 reported 213 passed, 1 skipped, 0 failed.
+### A. Re-stack Stage 3 (**PAUSED — Lighthouse, resolvers, Framer Motion, and ESLint completed; owner authorization required**)
+The stacked chain is complete through ESLint: Lighthouse is `4a152cf`, resolvers is `a8602d6`, Framer Motion is `201d5e2`, and ESLint is `99508e7`. PR #41 targets Framer Motion at `201d5e2`. The ESLint restack used a normal merge and normal push, preserved both documentation sides, and has no conflict markers. Exact-head CI run [41169872136](https://github.com/SHIV1804/Portfolio/actions/runs/41169872136) passed TypeScript, lint, build, and the full Playwright suite with 213 passed, 1 skipped, 0 failed.
 
-A fresh `npm audit --package-lock-only` on both the resolver and Framer Motion heads returned 19 moderate vulnerabilities (exit 1), with 0 high and 0 critical. The clean Lighthouse predecessor returned the same 19 moderate findings when re-run under the current npm advisory/lock resolution data; neither subsequent dependency change increased the result. No `npm audit fix --force` was used.
+ESLint install emitted three ERESOLVE peer-override warning groups for nested `eslint-plugin-import`, `eslint-plugin-jsx-a11y`, and `eslint-plugin-react` packages whose peer ranges end at ESLint 9; the warnings are accepted and documented. A fresh full `npm audit --package-lock-only` returned 19 moderate dev-only findings; `npm audit --package-lock-only --omit=dev` returned 0 vulnerabilities. Do not use `npm audit fix --force` or add glob/minimatch overrides.
 
-Stop here pending owner authorization. Do not start ESLint (#41) or Prisma (#42). Any future stacked PR targeting a non-`dev`/`main` branch requires manual exact-head CI dispatch.
+Stop here pending owner authorization. Do not start Prisma (#42). Any future stacked PR targeting a non-`dev`/`main` branch requires manual exact-head CI dispatch.
 ### B. Prisma 7 follow-up (PR #42, after re-stack; disposable CI Postgres only)
 - Remove the silent localhost fallback in `shared/lib/prisma.ts`: fail loudly when `DATABASE_URL` is missing at runtime while keeping `next build` and CI working.
 - Inventory every tracked `.js`, `.cjs`, `.mjs` file and package/workflow script affected by `"type": "module"`; run each and record real output.
@@ -217,7 +219,7 @@ Stop here pending owner authorization. Do not start ESLint (#41) or Prisma (#42)
 ## 11. NEXT ACTION (keep current)
 
 ```text
-NEXT ACTION: STOP. The authorized two-branch chain is complete: resolver head `a8602d6` with CI run 41166816190 and Framer Motion head `201d5e2` with CI run 41167455941. PR #40 targets Lighthouse and PR #39 targets resolvers. Wait for explicit owner authorization before starting ESLint (#41) or Prisma (#42).
+NEXT ACTION: STOP. ESLint head `99508e7` is complete with PR #41 targeting Framer Motion and exact-head CI run 41169872136 passing (213 passed, 1 skipped, 0 failed). Full audit is 19 moderate dev-only findings; production-only audit is 0. Wait for explicit owner authorization before starting Prisma (#42).
 ```
 
 ---
@@ -253,6 +255,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-31 | Lighthouse restack completed on `chore/upgrade-lighthouse-13` at `4a152cf`; PR #38 updated to base `3b9e5d3`, exact-head CI [41123287928](https://github.com/SHIV1804/Portfolio/actions/runs/41123287928) passed with 211 passed, 1 skipped, 0 failed, and real `npm audit --package-lock-only` measured 29 vulnerabilities on the base and 0 on the head. CI required manual dispatch because PR #38 targets `security/dependency-upgrades`, which is not an automatic CI target. Stopped before the hookform-resolvers branch pending owner authorization. |
 | 2026-10-31 | Resolver restack completed on `chore/upgrade-hookform-resolvers-6` at `a8602d6`; PR #40 retargeted to Lighthouse `4a152cf`, exact-head CI [41166816190](https://github.com/SHIV1804/Portfolio/actions/runs/41166816190) passed with 211 passed, 1 skipped, 0 failed. The fresh audit returned 19 moderate vulnerabilities on both predecessor and head; this is npm advisory/lock resolution drift from the earlier 0 result, not an increase caused by resolvers. Conflicts in `DECISIONS.md`, `TASKS.md`, and `package-lock.json` were resolved by preserving both documentation sides and regenerating the lockfile. Authorized to continue with Framer Motion; do not start ESLint or Prisma. |
 | 2026-10-31 | Framer Motion restack completed on `chore/upgrade-framer-motion-14` at `201d5e2`; PR #39 retargeted to resolver `a8602d6`, exact-head CI [41167455941](https://github.com/SHIV1804/Portfolio/actions/runs/41167455941) passed with 213 passed, 1 skipped, 0 failed. Conflicts in `package.json`, `package-lock.json`, `DECISIONS.md`, and `TASKS.md` were resolved by using the resolver predecessor plus only the Framer Motion bump, regenerating the lockfile with npm to resolve `14.7.1`, and preserving both documentation sides. The fresh audit returned 19 moderate vulnerabilities, matching the predecessor under current npm advisory data. Stopped before ESLint and Prisma pending owner authorization. |
+| 2026-10-31 | ESLint restack completed on `chore/upgrade-eslint-10` at `99508e7`; PR #41 retargeted to Framer Motion `201d5e2`, exact-head CI [41169872136](https://github.com/SHIV1804/Portfolio/actions/runs/41169872136) passed with 213 passed, 1 skipped, 0 failed. Conflicts in `package.json`, `package-lock.json`, `DECISIONS.md`, and `TASKS.md` were resolved by using the Framer predecessor plus ESLint `^10.13.0` / eslint-config-next `^16.4.3`, regenerating the lockfile with npm, and preserving both documentation sides. npm emitted three peer-override warning groups for nested ESLint 9 plugins. Full audit: 19 moderate dev-only; production-only audit: 0. Recorded acceptance of the glob/minimatch advisories and stopped before Prisma pending owner authorization. |
 
 ---
 
