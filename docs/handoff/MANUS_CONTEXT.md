@@ -113,7 +113,7 @@ Safe-range updates (Tailwind 4.3.3, `@types/react*` 19.3.0, `zod` 4.6.7, `shiki`
 
 ### Stage 4 findings
 - Production deploys from `main` 🟡. The Vercel install command / package-manager / Node setting is ❓ (no `vercel.json`, no `packageManager`, no `engines` in the repo).
-- Workflow run `40092064802`, attempt 1: failed at the Neon backup step before migrations; `NEON_API_KEY` and `NEON_PROJECT_ID` were empty; HTTP 400. Attempt 2 was `waiting` at verification, probably for `production` environment approval. **Do not rerun or modify.** Owner should cancel/inspect it and add the two secrets.
+- Workflow run `40092064802`, attempt 1: failed at the Neon backup step before migrations; `NEON_API_KEY` and `NEON_PROJECT_ID` were empty; HTTP 400. Attempt 2 was `waiting` at verification, probably for `production` environment approval. Cancellation was submitted on 2026-10-31 after confirming the waiting state; do not rerun or approve it. Owner should add the two secrets.
 - 33 stale branch candidates (none deleted):
   ```text
   bisect-do-not-merge-terminal-history-fix, chore/migrate-workflow, chore/sync-main-into-dev, ci/pr-checks,
@@ -241,6 +241,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 ---
 
 | 2026-10-31 | Owner explicitly authorized only the ordered merges in the current instruction: workflow attempt-2 cancellation if waiting/queued; #43 → `security/dependency-upgrades`; then #23 → `dev`; then open but do not merge `dev` → `main`. Required precondition check passed: TypeScript `7119c15`, Prisma `4d7e813`, security base `3b9e5d3`; section 12 output verified 45 heads, handoff ref `7e6c7ce`, #37 ancestor, Stage 3 SHAs, clean main worktree/stash, and required package versions. No merge action taken yet. |
+| 2026-10-31 | Step 1 complete: workflow run [40092064802](https://github.com/SHIV1804/Portfolio/actions/runs/40092064802) attempt 2 was verified as `waiting` on `main` and a cancellation request was submitted. GitHub still showed `waiting` immediately afterward; no rerun or production approval was performed. |
 ## 14. If you are about to run out of context
 
 1. Update sections 5, 10, 11 and 13 with exact state (branch, head SHA, CI link + summary, what is half-done).
