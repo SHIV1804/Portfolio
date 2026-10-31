@@ -193,7 +193,7 @@ Audit totals move as new advisories are published and as npm resolves lockfile t
 1. Inspect workflow run `40092064802`; cancel attempt 2 only if it is waiting/queued. Never rerun or approve production deployment.
 2. **Complete:** PR #43 merged into `security/dependency-upgrades` as `54f0999`; #38 was merged and #40/#39/#41/#42 were ancestor-confirmed and closed without deleting branches.
 3. **Complete:** PR #23 CI run [41213705226](https://github.com/SHIV1804/Portfolio/actions/runs/41213705226) passed; PR #23 merged into `dev` with merge commit `ebbec64`.
-4. Verify dev CI and smoke-test a public preview over HTTP only; stop if protected/unreachable.
+4. **Complete/blocked:** dev CI passed, but the exact `ebbec64` Vercel deployment is protected by Vercel Authentication; all requested HTTP smoke tests returned 401. Stop here; do not open the release PR until the owner provides a publicly reachable preview or verifies settings.
 5. Open `dev` → `main` with the required release description and stop for explicit owner approval; do not merge it.
 
 ### Persistent prohibitions
@@ -201,7 +201,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: Verify the push CI on dev at merge commit `ebbec64`; locate the public Vercel preview/deployment URL and smoke-test home, /dsa, /blog, a real blog post, and /api/auth/session over HTTP only. If preview access is protected/unreachable, report and stop. If publicly reachable, open dev → main with the required release notes and stop for explicit owner approval before merging main.
+NEXT ACTION: STOP pending owner action. The exact `dev` deployment is Vercel-auth protected and cannot be smoke-tested without login. Owner must provide a public preview or verify Vercel settings; do not open or merge `dev` → `main` yet.
 ```
 ---
 ## 12. Re-verification checklist (run first, paste output)
@@ -244,6 +244,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-31 | Step 1 complete: workflow run [40092064802](https://github.com/SHIV1804/Portfolio/actions/runs/40092064802) attempt 2 was verified as `waiting` on `main` and a cancellation request was submitted. GitHub still showed `waiting` immediately afterward; no rerun or production approval was performed. |
 | 2026-10-31 | Step 2 complete: PR #43 was retargeted and merged into `security/dependency-upgrades` with merge commit `54f0999`. PR #38 was already merged. PRs #40, #39, #41 and #42 were verified ancestor heads of `54f0999` and closed without deleting branches. |
 | 2026-10-31 | Step 3 complete: PR #23 automatic verify run [41213705226](https://github.com/SHIV1804/Portfolio/actions/runs/41213705226) passed with all checks green. PR #23 merged into `dev` with merge commit `ebbec64`; no branch deletion or protection bypass. |
+| 2026-10-31 | Step 4 complete/blocked: `dev` push CI run [41214175066](https://github.com/SHIV1804/Portfolio/actions/runs/41214175066) passed all jobs. Exact merge-commit deployment `https://portfolio-1updshbr8-shariachourasia-gmailcoms-projects.vercel.app` reported success but is protected by Vercel Authentication; HTTP-only smoke tests for `/`, `/dsa`, `/blog`, blog-post discovery, and `/api/auth/session` returned 401 Protected deployment. Per authorization, stopped before opening `dev` → `main`. |
 ## 14. If you are about to run out of context
 
 1. Update sections 5, 10, 11 and 13 with exact state (branch, head SHA, CI link + summary, what is half-done).
