@@ -80,11 +80,12 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 
 ## 5. Current state of work
 
-### Pull requests (#23 and #37–#43 integrated; dev verification pending)
+### Pull requests (#23 and #37–#43 integrated; release PR #44 open)
 
 | PR | Branch | Target | Head ✅ | CI 🟡 |
 |---|---|---|---|---|
 | #23 | `security/dependency-upgrades` | `dev` | **MERGED** via `ebbec64` ✅ | CI run [41213705226](https://github.com/SHIV1804/Portfolio/actions/runs/41213705226): all checks passed |
+| #44 | `dev` | `main` | **OPEN; do not merge** | CI pending; release PR opened with audit, rollback and unverified-environment notes |
 | #37 | `chore/safe-range-dependency-updates` | `security/dependency-upgrades` | `c80230d` — **MERGED** ✅ (merge commit `3b9e5d3`, 2026-10-31) | run 40780697711: 211 passed, 1 skipped |
 | #38 Lighthouse 13 | `chore/upgrade-lighthouse-13` | `security/dependency-upgrades` | `4a152cf` — **MERGED** via stack integration ✅ | run 41123287928 passed |
 | #39 Framer Motion 14 | `chore/upgrade-framer-motion-14` | stacked | `201d5e2` — ancestor of integrated security head; PR closed ✅ | run 41167455941 passed |
@@ -201,7 +202,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: STOP pending owner action. The exact `dev` deployment is Vercel-auth protected and cannot be smoke-tested without login. Owner must provide a public preview or verify Vercel settings; do not open or merge `dev` → `main` yet.
+NEXT ACTION: PR #44 (`dev` → `main`) is open. Wait for its CI, report the run and results, and stop. Do not merge until the owner explicitly says “merge to main”.
 ```
 ---
 ## 12. Re-verification checklist (run first, paste output)
@@ -245,6 +246,7 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-10-31 | Step 2 complete: PR #43 was retargeted and merged into `security/dependency-upgrades` with merge commit `54f0999`. PR #38 was already merged. PRs #40, #39, #41 and #42 were verified ancestor heads of `54f0999` and closed without deleting branches. |
 | 2026-10-31 | Step 3 complete: PR #23 automatic verify run [41213705226](https://github.com/SHIV1804/Portfolio/actions/runs/41213705226) passed with all checks green. PR #23 merged into `dev` with merge commit `ebbec64`; no branch deletion or protection bypass. |
 | 2026-10-31 | Step 4 complete/blocked: `dev` push CI run [41214175066](https://github.com/SHIV1804/Portfolio/actions/runs/41214175066) passed all jobs. Exact merge-commit deployment `https://portfolio-1updshbr8-shariachourasia-gmailcoms-projects.vercel.app` reported success but is protected by Vercel Authentication; HTTP-only smoke tests for `/`, `/dsa`, `/blog`, blog-post discovery, and `/api/auth/session` returned 401 Protected deployment. Per authorization, stopped before opening `dev` → `main`. |
+| 2026-10-31 | Release PR [#44](https://github.com/SHIV1804/Portfolio/pull/44) opened from `dev` to `main` with the requested stack summary, Prisma 7/no-schema/no-migrations statement, versions, CI links, 19 moderate dev-only / 0 production audit, unverified Neon/Vercel items, Vercel Authentication preview limitation, and rollback note. Per authorization, it is not merged. |
 ## 14. If you are about to run out of context
 
 1. Update sections 5, 10, 11 and 13 with exact state (branch, head SHA, CI link + summary, what is half-done).
