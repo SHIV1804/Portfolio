@@ -131,3 +131,8 @@ Technical decisions with evidence in code, config, or this project's own history
 **Decision:** Accept the current 19 moderate `npm audit --package-lock-only` findings as development-tooling-only advisories during Stage 3.
 **Reason:** The findings are `glob` and `minimatch` advisories reached through ESLint, TypeScript-ESLint, Lighthouse, and Sentry tooling. Patched majors `minimatch@11.0.3` and `glob@14.0.3` would break the current lint/toolchain compatibility, while npm's suggested forced downgrades are not acceptable. The production-only audit (`npm audit --package-lock-only --omit=dev`) is the security metric for deployed dependencies and remains 0.
 **Impact:** Do not run `npm audit fix --force` and do not add `glob`/`minimatch` overrides. Revisit when the surrounding toolchain supports the patched majors.
+
+---
+**Decision:** Declare `prisma@7.10.1` and `dotenv@17.2.3` in `dependencies`, not `devDependencies`, and declare each package exactly once.
+**Reason:** The merge combined the Prisma branch's `devDependencies` entries with the predecessor branch's existing runtime `prisma` entry, leaving two Prisma declarations with incompatible ranges. The Prisma CLI is invoked by the `postinstall` script and `prisma.config.ts` imports `dotenv`; placing both in runtime dependencies avoids relying on whether the deployment platform installs development dependencies during its build.
+**Impact:** The manifest now has one exact Prisma 7 declaration, one `@prisma/client@7.10.1` declaration, and runtime `dotenv`. Vercel's exact install behavior for `devDependencies` in this project remains unverified and must not be assumed.
