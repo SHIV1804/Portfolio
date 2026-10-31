@@ -52,6 +52,19 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 ✔ Generated Prisma Client (7.10.1) to ./generated/prisma in 45ms
 ##[group]Run npx prisma generate
 ✔ Generated Prisma Client (7.10.1) to ./generated/prisma in 52ms
+
+## Stage 3 — ESLint 10
+- **Complete on `chore/upgrade-eslint-10` (PR #41), pending review/merge:** upgraded ESLint 9 to `10.13.0` and paired `eslint-config-next@16.4.3` with Next `16.4.3`.
+- **Compatibility evidence:** Next's official ESLint documentation supports ESLint 10; `eslint-config-next@16.4.3` declares `eslint >=9.0.0`; ESLint 10.13.0 requires Node `^20.19 || ^22.13 || >=24`, met by CI Node 22.23.4. The repo already uses flat config; `@typescript-eslint` 8.62.1 declares ESLint 10 support. Three nested plugins declare peer ranges ending at ESLint 9, so npm logs ERESOLVE peer-override warnings. Local lint and the full CI run pass with ESLint 10.
+- **Audit before/after:** baseline `npm audit --package-lock-only`: 38 findings (1 low, 20 moderate, 15 high, 2 critical; exit 1). After: 37 (1 low, 20 moderate, 14 high, 2 critical; exit 1).
+- **CI:** full run [40943258369](https://github.com/SHIV1804/Portfolio/actions/runs/40943258369) succeeded. Dependency install, Prisma generation, disposable-database migrations, `npx tsc --noEmit`, lint, build, and Playwright all passed. Playwright: 210 passed, 1 skipped.
+
+### Successful CI output (run [40943258369](https://github.com/SHIV1804/Portfolio/actions/runs/40943258369))
+
+```text
+##[group]Run npm ci
+npm warn ERESOLVE overriding peer dependency
+##[group]Run npx prisma generate
 ##[group]Run npx prisma migrate deploy
 ##[group]Run npx tsc --noEmit
 ##[group]Run npm run lint
@@ -62,4 +75,87 @@ Status as of commit `b9b057a` (`dev` branch), evidenced from the code and the se
 [116/212] tests/prisma/prisma-adapter-smoke.spec.ts › Auth.js Prisma adapter can create, read, and delete users and sessions on CI Postgres
 1 skipped
 211 passed (3.2m)
+
+> next build
+▲ Next.js 16.4.3 (Turbopack)
+✓ Compiled successfully in 11.9s
+✓ Generating static pages using 3 workers (37/37) in 2.9s
+1 skipped
+210 passed (4.0m)
+```
+
+## Stage 3 item 5 — TypeScript 7.0.2 (blocked; no branch/PR)
+- Next 16.4.3's TypeScript documentation permits TypeScript 7.0.2, but the repository's TypeScript-aware ESLint tooling does not support it. Registry metadata for the latest `@typescript-eslint/parser`, `@typescript-eslint/eslint-plugin`, and `typescript-eslint` (`8.72.1`) declares `typescript >=4.8.4 <6.1.0`; the requested `7.0.2` is outside that peer range. This is the exact blocker. No TypeScript dependency change or PR was created. Resume only when the parser/tooling declares support for TypeScript 7 or the repo adopts a separately supported TypeScript 6 API alias strategy and validates it in CI.
+
+---
+## Stage 3 — Framer Motion 14
+- **Complete on `chore/upgrade-framer-motion-14` (PR #39), pending review/merge:** `framer-motion` upgraded from `^12.42.2` to `^14.7.1`. The official React upgrade guide reports no relevant breaking API changes in Motion 13/14; the repo uses none of the Motion One APIs or Emotion/Styled Components integrations noted by the guide.
+- **Every source import inventoried:** `widgets/dsa/ui/visualizers/TwoPointersVisualizer.tsx`, `SlidingWindowVisualizer.tsx`, `BinarySearchVisualizer.tsx`, and `widgets/dsa/ui/flagship/ArrayBox.tsx`. `PatternVisualizer.tsx` selects the three pattern components; `ExecutionPanel.tsx` and `app/dsa/flagship/[pattern]/[slug]/page.tsx` render `ArrayBox`.
+- **Focused Playwright routes:** `/dsa/two-pointers/two-sum-ii-input-array-is-sorted`; `/dsa/sliding-window/longest-substring-without-repeating`; `/dsa/sliding-window/maximum-sum-subarray-of-size-k`; `/dsa/binary-search/binary-search`; `/dsa/binary-search/first-bad-version`; and both `/dsa/flagship/hash-map/two-sum` and `/dsa/flagship/sliding-window/maximum-sum-subarray-of-size-k` for `ArrayBox`.
+- **Audit evidence:** full `npm audit --package-lock-only` on the security base: 38 (1 low, 20 moderate, 15 high, 2 critical; exit 1). After the Framer Motion update: 38 with the same severity distribution (exit 1); this runtime dependency update did not alter audit findings.
+- **CI evidence:** full run [40940889046](https://github.com/SHIV1804/Portfolio/actions/runs/40940889046) succeeded. `TypeScript check`, `Lint`, `Build application`, and `Run end-to-end tests` all passed; Playwright reported 212 passed and 1 skipped. Initial run [40939849364](https://github.com/SHIV1804/Portfolio/actions/runs/40939849364) had one test-only strict locator ambiguity on the Two Sum page (two matching headings); the assertion was corrected, and the complete rerun passed.
+- **Item 2 status:** `@types/node` remains blocked pending the actual Vercel project Node setting. CI's workflow requests Node 22 and the completed Lighthouse CI run resolved Node 22.23.4; the private project setting could not be verified. Do not assume Node 26 or create a typings PR until Vercel evidence is available.
+
+
+### Successful CI output (run [40940889046](https://github.com/SHIV1804/Portfolio/actions/runs/40940889046))
+
+```text
+##[group]Run npx tsc --noEmit
+##[group]Run npm run lint
+> eslint
+##[group]Run npm run build
+> next build
+▲ Next.js 16.4.3 (Turbopack)
+✓ Compiled successfully in 6.3s
+✓ Generating static pages using 3 workers (37/37) in 2.7s
+1 skipped
+212 passed (2.9m)
+```
+
+---
+## Stage 3 — @hookform/resolvers 6
+- **Complete on `chore/upgrade-hookform-resolvers-6` (PR #40), pending review/merge:** `@hookform/resolvers` upgraded from `^5.4.0` to `^6.0.2` in its own PR. The sole code import/use is `zodResolver(contactSchema)` in `features/contact-form/ui/ContactForm.tsx`; server-side validation in `app/api/contact/route.ts` is unchanged.
+- **Compatibility/changelog review:** official v6.0.2 release notes list a TypeBox escaped-field-name validation bug fix. The v6.0.0 breaking change concerns only the `effect-ts` resolver, which this repo does not use. The existing Zod v4 and React Hook Form 7.81 setup is within the resolver's documented peer ranges.
+- **Page/tests:** the contact form appears on `/`; the complete CI Playwright run exercised `tests/contact-form/contact-form.spec.ts` including visible form, empty/invalid submission, valid submission, and accessibility cases.
+- **Audit before/after:** `npm audit --package-lock-only` on `security/dependency-upgrades` before the change reported 38 findings (1 low, 20 moderate, 15 high, 2 critical; exit 1). After the resolver update it remained 38 with the same severity distribution (exit 1).
+- **CI:** full run [40941772607](https://github.com/SHIV1804/Portfolio/actions/runs/40941772607) passed. `TypeScript check`, `Lint`, `Build application`, and `Run end-to-end tests` all concluded success. Real log excerpts: `npx tsc --noEmit`; `npm run lint` → `> eslint`; `npm run build` → `> next build`; `✓ Compiled successfully in 9.4s`; `✓ Generating static pages using 3 workers (37/37) in 2.9s`; Playwright: `210 passed (3.6m)`, `1 skipped`.
+- **Item 2 status:** `@types/node` remains blocked pending authenticated evidence of the Vercel project Node setting. CI is confirmed to use Node 22; Node 26 must not be assumed.
+
+
+### Successful CI output (run [40941772607](https://github.com/SHIV1804/Portfolio/actions/runs/40941772607))
+
+```text
+##[group]Run npx tsc --noEmit
+##[group]Run npm run lint
+> eslint
+##[group]Run npm run build
+> next build
+▲ Next.js 16.4.3 (Turbopack)
+✓ Compiled successfully in 9.4s
+✓ Generating static pages using 3 workers (37/37) in 2.9s
+1 skipped
+210 passed (3.6m)
+```
+
+---
+## Stage 3 — Lighthouse 13
+- **Complete on `chore/upgrade-lighthouse-13` (PR #38), pending review/merge:** Lighthouse upgraded from `^12.8.2` to `^13.6.0`; repository search found no script or workflow invocation to migrate or exercise beyond the package installation/build.
+- **Audit evidence:** full `npm audit --package-lock-only` baseline on `security/dependency-upgrades` was 38 vulnerabilities (1 low, 20 moderate, 15 high, 2 critical; exit 1). After the Lighthouse update it was 8 (1 low, 1 moderate, 4 high, 2 critical; exit 1).
+- **CI evidence:** run [40937913936](https://github.com/SHIV1804/Portfolio/actions/runs/40937913936) succeeded on Node 22.23.4. `TypeScript check`, `Lint`, `Build application`, and `Run end-to-end tests` all succeeded; Playwright reported 210 passed and 1 skipped. This satisfies Lighthouse 13.6.0's Node `>=22.19` requirement.
+- **Stage 3 item 2 blocked:** CI evidence is `.github/workflows/ci.yml` `node-version: 22`; the run resolved 22.23.4. The actual Vercel project Node setting is not verified: the checked branch has no `vercel.json`, `.vercel` project settings, or `engines.node`, and dashboard access was unavailable. Do not create an `@types/node` PR until Vercel's configured version is confirmed; do not assume Node 26.
+
+
+### Successful CI output (run [40937913936](https://github.com/SHIV1804/Portfolio/actions/runs/40937913936))
+
+```text
+##[group]Run npx tsc --noEmit
+##[group]Run npm run lint
+> eslint
+##[group]Run npm run build
+> next build
+▲ Next.js 16.4.3 (Turbopack)
+✓ Compiled successfully in 9.6s
+✓ Generating static pages using 3 workers (37/37) in 2.4s
+1 skipped
+210 passed (3.3m)
 ```
