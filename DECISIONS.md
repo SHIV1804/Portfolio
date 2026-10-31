@@ -72,3 +72,17 @@ Technical decisions with evidence in code, config, or this project's own history
 
 ---
 **Stage 3 PR #40 CI evidence:** Full run [40941772607](https://github.com/SHIV1804/Portfolio/actions/runs/40941772607) passed TypeScript, lint, build, and the Playwright suite (210 passed, 1 skipped), including the contact-form validation flows using `zodResolver`.
+
+---
+**Decision:** Upgrade the Lighthouse devDependency to `13.6.0` as the first Stage 3 dependency change.
+**Reason:** Lighthouse 13.6.0 removes the Lighthouse 12-era high-severity transitive findings and is compatible with the repository's CLI-only usage. Official release notes require Node `>=22.19`; CI requests Node 22, so CI's resolved Node 22 patch must satisfy that engine requirement. The sandbox's Node `22.13.0` reports `EBADENGINE`, although installation and the application build remain functional.
+**Impact:** No application script or workflow invokes Lighthouse. Any future Lighthouse CLI use must run on Node `>=22.19`.
+
+
+**Decision:** Pin `@playwright/test` exactly at `1.61.1` during Stage 2 safe-range updates.
+**Reason:** The required tolerated-abort regression test passed on 1.61.1 but failed consistently on 1.64.1 in CI and locally: the delayed navigation produced no `requestfailed` event or NextAuth `CLIENT_FETCH_ERROR`; the 1.64.1 capture instead showed 200 session responses and `requestfinished` events. This changes the behavior the test is designed to verify, so the package is reverted rather than weakening the assertion.
+**Impact:** Playwright 1.64.1 requires a separately designed test/observer investigation before adoption; the remaining approved safe-range updates proceed independently.
+
+---
+**Decision:** Keep the npm override forcing `@auth/core` to `0.41.3`.
+**Reason:** `npm install`, TypeScript, and dependency resolution all passed with the override, and the audit count fell from 32 to 29 with both critical advisories removed. `next-auth@4.24.15` resolves to the overridden `@auth/core@0.41.3` in the installed tree. `shared/lib/auth.ts` configures GitHub OAuth only; it has no email provider.
