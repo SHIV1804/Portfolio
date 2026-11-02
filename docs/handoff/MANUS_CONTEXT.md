@@ -210,7 +210,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: PR #46 (revert/pr-45-ide-stub → main) is open at commit 2d5ceb4. Wait for its CI; if green, merge PR #46 with a merge commit. Then open main → dev and wait for green CI before merging that sync PR with a merge commit.
+NEXT ACTION: PR #46 CI run 41371937388 is green (all checks including E2E passed). Merge PR #46 with a merge commit. Then open main → dev and wait for green CI before merging that sync PR with a merge commit.
 ```
 
 ---
