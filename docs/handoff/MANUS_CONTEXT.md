@@ -210,7 +210,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: PR #47 was merged into dev with merge commit 7584ad8 after green CI. Wait for the Vercel status/deployment for the synchronized refs, then run the authorized HTTP-only smoke tests against https://portfolio-theta-ruby-31nqvqjqmc.vercel.app and record exact status codes/findings.
+NEXT ACTION: This owner-authorized PR #45 revert sequence is complete. PR #46 and PR #47 were merged with merge commits, the Vercel deployment for 7584ad8 completed successfully, and all requested HTTP-only production smoke tests passed. No further action is authorized in this sequence.
 ```
 
 ---
@@ -273,3 +273,4 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-11-02 | PR [#46](https://github.com/SHIV1804/Portfolio/pull/46) merged into `main` with merge commit `c450062` after green CI. Source branch was not deleted. Next authorized action is the `main` → `dev` sync PR. |
 | 2026-11-02 | Opened authorized sync PR [#47](https://github.com/SHIV1804/Portfolio/pull/47) from `main` to `dev`; `origin/dev` is an ancestor of `origin/main`, so no conflict is present at creation. Waiting for PR #47 CI; no merge taken. |
 | 2026-11-02 | PR [#47](https://github.com/SHIV1804/Portfolio/pull/47) merged into `dev` with merge commit `7584ad8` after green CI. Main and dev now contain the PR #45 revert. Source branches were not deleted. Next action is the authorized HTTP-only Vercel smoke test. |
+| 2026-11-02 | Final authorized smoke test passed after Vercel deployment for merge `7584ad8` completed successfully at `https://vercel.com/shariachourasia-gmailcoms-projects/portfolio/CJJzxxSnFxkkwaDAqMENZWgAhCEm`: `/` 200, `/dsa` 200, `/blog` 200, `/dsa/hash-map/two-sum` 200 with `Online IDE is disabled` and `IDE preview` absent, and `/api/auth/session` 200 JSON `{}`. No rollback was needed. The PR #45 revert sequence is complete. |
