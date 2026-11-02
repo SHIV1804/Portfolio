@@ -4,17 +4,15 @@
 This handoff records the live repo state, the verified facts against the current checkout, and the exact remaining work for a Codex/IDE session. It is intentionally documentation-only and does not change app behavior.
 
 ## Repo facts
-- Remote base branch state recorded from `git fetch --all --prune`:
-  - `origin/main`: `64c0db73f17d37e3f029e5e805f50304dbda122e`
-  - `origin/dev`: `ebbec648505f998fb9b752929a8d24d3693d5e17`
-- `origin/dev` contains `origin/main`: yes (`git merge-base --is-ancestor origin/main origin/dev` returned exit code 0 / `dev_contains_main=1` in the shell output)
+- Remote base branch state recorded from `git fetch origin --prune`:
+  - `origin/main`: `c45006248050a08dc2e9e84dd55468485211226f`
+  - `origin/dev`: `7584ad81ad8d2f5bca70f00f0c5a82a5161b613b`
+- `origin/dev` contains `origin/main`: yes (`git merge-base --is-ancestor origin/main origin/dev` returned exit code 0 / `dev contains main` in the shell output)
 - Current working branch: `docs/codex-handoff` from `origin/dev`
 - Current `package.json` declares `next: 16.4.3`; the AGENTS note referencing `next@16.2.10` is stale.
-- Prisma generation succeeds in this environment after `npm ci`; the previous 403 issue is not reproducible here.
-- `npx tsc --noEmit` passes locally.
-- `npm run lint` passes locally.
-- The relevant Playwright suite does not complete in this Windows environment because the local installation is missing the native `lightningcss.win32-x64-msvc.node` binary required by Tailwind/Next; this is environmental, not a functional app regression.
-- `GITHUB_TOKEN` is set in CI GitHub Actions, but not in this local session (`<unset>` in the shell output), which makes live GitHub-backed DSA fetches and dashboard calls non-runnable without secrets.
+- `npm ci`, `npx prisma generate`, `npx tsc --noEmit`, and `npm run lint` all succeeded in this repo state.
+- Relevant Playwright E2E work remains blocked on this Windows machine because the local installation is missing the native `lightningcss.win32-x64-msvc.node` binary required by Tailwind/Next; this is environmental, not a functional app regression.
+- `GITHUB_TOKEN` is unset in this local session, which makes live GitHub-backed data fetches non-runnable without secrets.
 
 ## Rules / preamble
 The session began from the repo-level instructions and constraints in `AGENTS.md` and `CLAUDE.md`:
@@ -32,43 +30,39 @@ The session began from the repo-level instructions and constraints in `AGENTS.md
 11. `prisma generate` may fail in network-restricted or egress-blocked sandboxes; do not “fix” by removing Prisma code.
 12. Keep this task documentation-only and do not merge the branch.
 
-## Task list (T0-T15)
-- T0: Fetch latest repo state and confirm branch/base refs. Status: done.
-- T1: Confirm `origin/main` and `origin/dev` SHAs and whether `dev` contains `main`. Status: done.
-- T2: Install dependencies with `npm ci`. Status: done.
-- T3: Run `npx prisma generate`. Status: done locally; generated successfully.
-- T4: Run `npx tsc --noEmit`. Status: done; no TypeScript errors.
-- T5: Run `npm run lint`. Status: done; no ESLint errors.
-- T6: Run DSA and navigation E2E tests. Status: blocked by missing local native binary `lightningcss.win32-x64-msvc.node`; the web server never started.
-- T7: Audit GitHub-backed DSA sync and auth setup. Status: done via code review of `shared/lib/dsa-sync.ts`, `shared/lib/auth.ts`, and related files.
-- T8: Review DSA page rendering and flagship pages. Status: done via code review.
-- T9: Review `shared/lib/prisma.ts` and auth provider behavior. Status: done.
-- T10: Review `app/api/posts/route.ts`, Playwright helpers, CI config, env vars, and Next config. Status: done.
-- T11: Check section 1 of `CODEX_IDE_TASKS.md` against the actual repo. Status: done; the file is not present in this checkout, and the stale `next@16.2.10` note was confirmed wrong.
-- T12: Create handoff branch `docs/codex-handoff` and document repo state. Status: in progress / done in this branch.
-- T13: Push the branch to `origin/docs/codex-handoff` without merging. Status: done.
-- T14: Record branch SHA via `git ls-remote origin refs/heads/docs/codex-handoff`. Status: done.
-- T15: Next action. Status: pending; continue from this handoff with a clean machine or CI environment that has the required native dependencies and any secret-backed env vars.
+## Task list (REAL numbering from CODEX_IDE_TASKS.md)
+- T0: Bootstrap and reconnaissance / handoff creation. Status: done.
+- T1: Architecture Decision Record: execution backend (owner gate). Status: done in `DECISIONS.md`; owner approval required before T13. T2-T12 may proceed with the mock provider only.
+- T2: Mock provider contract and IDE gating (UI hidden unless `IDE_ENABLED=true`, login only on Run/Submit). Status: not started here.
+- T3: DSA repo sync and trace dataset review for execution metadata. Status: not started here.
+- T4: Add a provider abstraction and server route contract. Status: not started here.
+- T5: Add a safe mock execution endpoint and result normalization. Status: not started here.
+- T6: Add auth gate and login requirement only on Run/Submit. Status: not started here.
+- T7: Wire the IDE UI into `app/dsa/[pattern]/[slug]/page.tsx` behind `IDE_ENABLED`. Status: not started here.
+- T8: Add E2E coverage for idle/invisible state and the gated login flow. Status: not started here.
+- T9: Add regression tests for `IDE_ENABLED=false` behavior. Status: not started here.
+- T10: Add documentation and env var names in `.env.example` and `BUILD.md`. Status: not started here.
+- T11: Add a hidden feature flag and smoke test for the production gate. Status: not started here.
+- T12: Final security/accessibility review and release readiness. Status: not started here.
+- T13: Owner approval and backend implementation. Status: pending.
+- T14: Merge to dev and final release gating. Status: pending.
+- T15: Production release only by owner after the release gate passes. Status: pending.
 
-## Decisions
-- The repo is currently on `origin/dev` and the handoff branch was created off that base as requested.
-- This is a documentation-only step; no feature code has been altered.
+## Release gate
+Production release gate (owner policy, mandatory):
+- The Online IDE reaches production ONLY when ALL of these are true: (1) tasks T0-T14 are complete and merged into dev; (2) full CI is green on dev, including the E2E, accessibility and security tests and the regression test proving the site is unchanged when IDE_ENABLED=false; (3) the real sandbox is provisioned and its smoke test passed; (4) the owner tested Run and Submit manually on a Vercel Preview while signed in; (5) the owner explicitly approves.
+- Until then everything stays behind IDE_ENABLED=false (default) and must be invisible and inert in production: no UI, and the APIs return 404. Never set or suggest setting IDE_ENABLED=true in Production before the gate passes.
+- Releases dev -> main are done only by the owner. If dev must be released for another reason before the IDE is complete, first prove with the regression test that IDE_ENABLED=false makes the IDE completely invisible and inert.
+
+## Decisions so far
+- The repo is currently on `origin/dev` and the handoff branch was created from that base as requested.
+- This is a documentation-only step; no feature code has been altered in the handoff branch.
 - The previous `AGENTS.md` note on `next@16.2.10` is stale and should be treated as a documentation discrepancy, not a current repo fact.
 - The missing `lightningcss` native binding is a platform issue: the app code itself is not the failing cause.
-- `CODEX_IDE_TASKS.md` is not present in this checkout; the work here therefore validates the repo state and the known task preamble instead of a file-local checklist.
+- The execution backend decision is documented in `DECISIONS.md` as a required owner gate; a mock provider may be used for T2-T12 without production approval.
 
 ## NEXT ACTION
-Start from `docs/codex-handoff` in a clean environment with:
-1. a complete Node install matching the project’s Tailwind/Next toolchain,
-2. the required native dependency for the platform (`lightningcss` binary),
-3. the runtime env vars for GitHub auth and GitHub-backed DSA sync (`GITHUB_TOKEN`, `DSA_GITHUB_REPO`, `GITHUB_ID`, `GITHUB_SECRET`, etc.), and
-4. a runnable local PostgreSQL or CI database for Prisma-backed flows.
-
-After that, rerun:
-- `npm ci`
-- `npx prisma generate`
-- `npx tsc --noEmit`
-- `npm run lint`
-- `npx playwright test tests/dsa tests/assets/assets-and-console.spec.ts --grep "navigation does not create console errors|DSA" --reporter=line`
-
-Then continue with any remaining feature-specific work from the actual task list in the IDE environment.
+1. Complete the mock-provider execution abstraction and the hidden `IDE_ENABLED` gating while keeping the feature inert by default.
+2. Continue the task sequence from T2 through T12 using the mock provider, with no production flag enabled.
+3. Re-run the relevant Playwright checks in a machine with the required native dependency and the GitHub env vars that the DSA/auth flow expects.
+4. Stop when the owner approves the backend and the full release gate conditions are met; do not enable `IDE_ENABLED=true` in production before that approval.
