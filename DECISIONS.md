@@ -136,11 +136,3 @@ Technical decisions with evidence in code, config, or this project's own history
 **Decision:** Declare `prisma@7.10.1` and `dotenv@17.2.3` in `dependencies`, not `devDependencies`, and declare each package exactly once.
 **Reason:** The merge combined the Prisma branch's `devDependencies` entries with the predecessor branch's existing runtime `prisma` entry, leaving two Prisma declarations with incompatible ranges. The Prisma CLI is invoked by the `postinstall` script and `prisma.config.ts` imports `dotenv`; placing both in runtime dependencies avoids relying on whether the deployment platform installs development dependencies during its build.
 **Impact:** The manifest now has one exact Prisma 7 declaration, one `@prisma/client@7.10.1` declaration, and runtime `dotenv`. Vercel's exact install behavior for `devDependencies` in this project remains unverified and must not be assumed.
-
----
-**Decision:** DSA problem pages defer auth to the action boundary: the page renders with an editor and buttons, but GitHub sign-in is triggered only when the user clicks `Run` or `Submit`.
-**Context:** The DSA showcase is a read-only learning page by default; an online IDE should not force a login on initial page load or while browsing solutions.
-**Reason:** This keeps the experience low-friction for study and exploration while preserving a security gate before any code execution or submission flow is invoked. The auth prompt is provided through the existing GitHub OAuth session flow (`next-auth/react` `signIn('github')`) and returns the user to the current page after login.
-**Impact:** Any future judge/execution backend should continue to treat login as a precondition for actions rather than for viewing the page itself. The same pattern matches the existing `WritePostButton` behavior and avoids unnecessary auth friction for passive readers.
-
----

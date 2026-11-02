@@ -7,9 +7,6 @@ import { getDSAProblemBySlug, fetchDSAProblems, fetchDSATrace } from '@/shared/l
 import { mdxComponents } from '../../../blog/MdxComponents';
 import { Badge } from '@/shared/ui/Badge';
 import { PatternVisualizer } from '@/widgets/dsa/ui/PatternVisualizer';
-import { ProblemIDE } from '@/widgets/dsa/ui/ProblemIDE';
-
-const IDE_ENABLED = process.env.IDE_ENABLED === 'true';
 
 interface PageProps {
   params: Promise<{ pattern: string; slug: string }>;
@@ -161,11 +158,6 @@ export default async function DSAProblemPage({ params }: PageProps) {
               }}
             />
           </div>
-        </section>
-
-        <section className="mb-16">
-          <h2 className="text-sm font-mono text-foreground-faint uppercase tracking-widest mb-4">Practice</h2>
-          <ProblemIDE enabled={IDE_ENABLED} initialCode={problem.solution} problemTitle={problem.title} />
         </section>
       </div>
     </div>
