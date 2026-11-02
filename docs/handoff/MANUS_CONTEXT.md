@@ -210,7 +210,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: PR #47 (main → dev) is open at https://github.com/SHIV1804/Portfolio/pull/47. origin/dev is an ancestor of origin/main. Wait for PR #47 CI; if green, merge PR #47 with a merge commit. Then run the authorized HTTP-only Vercel production smoke tests and record the result here.
+NEXT ACTION: PR #47 CI run 41372441874 is green (all checks including E2E passed). Merge PR #47 into dev with a merge commit. Then wait for the resulting main/dev deployment and run the authorized HTTP-only smoke tests against the specified Vercel production URL.
 ```
 
 ---
