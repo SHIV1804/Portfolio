@@ -210,7 +210,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: PR #47 CI run 41372441874 is green (all checks including E2E passed). Merge PR #47 into dev with a merge commit. Then wait for the resulting main/dev deployment and run the authorized HTTP-only smoke tests against the specified Vercel production URL.
+NEXT ACTION: PR #47 was merged into dev with merge commit 7584ad8 after green CI. Wait for the Vercel status/deployment for the synchronized refs, then run the authorized HTTP-only smoke tests against https://portfolio-theta-ruby-31nqvqjqmc.vercel.app and record exact status codes/findings.
 ```
 
 ---
@@ -272,3 +272,4 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 | 2026-11-02 | Created `revert/pr-45-ide-stub` from `origin/main` and reverted merge `64c0db7` with commit `2d5ceb4`; exact seven-file diff verified. Pushed branch and opened PR [#46](https://github.com/SHIV1804/Portfolio/pull/46) to `main`; no merge taken. |
 | 2026-11-02 | PR [#46](https://github.com/SHIV1804/Portfolio/pull/46) merged into `main` with merge commit `c450062` after green CI. Source branch was not deleted. Next authorized action is the `main` → `dev` sync PR. |
 | 2026-11-02 | Opened authorized sync PR [#47](https://github.com/SHIV1804/Portfolio/pull/47) from `main` to `dev`; `origin/dev` is an ancestor of `origin/main`, so no conflict is present at creation. Waiting for PR #47 CI; no merge taken. |
+| 2026-11-02 | PR [#47](https://github.com/SHIV1804/Portfolio/pull/47) merged into `dev` with merge commit `7584ad8` after green CI. Main and dev now contain the PR #45 revert. Source branches were not deleted. Next action is the authorized HTTP-only Vercel smoke test. |
