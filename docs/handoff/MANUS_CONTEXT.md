@@ -98,6 +98,7 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 **Owner-authorized merge path (2026-10-31):** cancel workflow 40092064802 attempt 2 only if queued/waiting; retarget and merge #43 into `security/dependency-upgrades` with a merge commit; confirm #38/#40/#39/#41/#42 merged or report/close only ancestor heads; wait for #23 CI and merge #23 into `dev` with a merge commit only if green and protections allow; verify dev CI and smoke-test a publicly reachable preview over HTTP only; open `dev` → `main` with the required release notes and stop for explicit owner approval. Do not delete branches or touch Neon/production.
 
 ### Current scoped work (2026-11-02)
+- Revert branch `revert/pr-45-ide-stub` was created from `origin/main`; `git revert -m 1 64c0db7` produced commit `2d5ceb4` and PR #46 targets `main`. It has not been merged.
 - Read-only verification completed for the owner-authorized PR #45 revert task: PR #45 is merged at `64c0db7`; verify CI run `41244139487` is success; Vercel statuses for `701dc8f` and `64c0db7` are both success with deployment targets recorded in the progress log. No revert or merge action has been taken yet.
 
 ### Stage 1 (PR #23) — summary
@@ -209,7 +210,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: Read-only verification for the owner-authorized PR #45 revert completed. PR #45 CI and both requested Vercel commit statuses are success. Next: create branch revert/pr-45-ide-stub from origin/main and revert merge commit 64c0db7; do not merge until its PR CI is green.
+NEXT ACTION: PR #46 (revert/pr-45-ide-stub → main) is open at commit 2d5ceb4. Wait for its CI; if green, merge PR #46 with a merge commit. Then open main → dev and wait for green CI before merging that sync PR with a merge commit.
 ```
 
 ---
@@ -268,3 +269,4 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 3. Commit any WIP to the item's own branch (prefix `wip:`) and push; never leave uncommitted work.
 4. Report to the owner: branch, head commit, PR number, CI link, what is verified vs not, and the single NEXT ACTION.
 | 2026-11-02 | Read-only PR #45 verification completed: required section-12 checks passed; PR #45 is merged at `64c0db7`, CI run `41244139487` passed, and Vercel commit statuses for `701dc8f` and `64c0db7` are both `success` with deployment targets recorded above. No revert or merge action taken yet. |
+| 2026-11-02 | Created `revert/pr-45-ide-stub` from `origin/main` and reverted merge `64c0db7` with commit `2d5ceb4`; exact seven-file diff verified. Pushed branch and opened PR [#46](https://github.com/SHIV1804/Portfolio/pull/46) to `main`; no merge taken. |
