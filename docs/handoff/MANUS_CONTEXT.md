@@ -210,7 +210,7 @@ Never force-push, rewrite history, delete branches, access Neon/production data,
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: PR #46 CI run 41371937388 is green (all checks including E2E passed). Merge PR #46 with a merge commit. Then open main → dev and wait for green CI before merging that sync PR with a merge commit.
+NEXT ACTION: PR #46 was merged into main with merge commit c450062 after green CI. Open main → dev as the authorized sync PR, wait for green CI, then merge that sync PR with a merge commit.
 ```
 
 ---
@@ -270,3 +270,4 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 4. Report to the owner: branch, head commit, PR number, CI link, what is verified vs not, and the single NEXT ACTION.
 | 2026-11-02 | Read-only PR #45 verification completed: required section-12 checks passed; PR #45 is merged at `64c0db7`, CI run `41244139487` passed, and Vercel commit statuses for `701dc8f` and `64c0db7` are both `success` with deployment targets recorded above. No revert or merge action taken yet. |
 | 2026-11-02 | Created `revert/pr-45-ide-stub` from `origin/main` and reverted merge `64c0db7` with commit `2d5ceb4`; exact seven-file diff verified. Pushed branch and opened PR [#46](https://github.com/SHIV1804/Portfolio/pull/46) to `main`; no merge taken. |
+| 2026-11-02 | PR [#46](https://github.com/SHIV1804/Portfolio/pull/46) merged into `main` with merge commit `c450062` after green CI. Source branch was not deleted. Next authorized action is the `main` → `dev` sync PR. |
