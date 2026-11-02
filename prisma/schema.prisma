@@ -35,14 +35,15 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String      @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?     @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   posts         Post[]
   sessions      Session[]
+  submissions   Submission[]
 }
 
 model VerificationToken {
@@ -72,4 +73,54 @@ enum PostStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum SubmissionKind {
+  RUN
+  SUBMIT
+}
+
+enum SubmissionStatus {
+  QUEUED
+  RUNNING
+  DONE
+  FAILED
+}
+
+enum SubmissionVerdict {
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT
+  MEMORY_LIMIT
+  RUNTIME_ERROR
+  COMPILE_ERROR
+  INTERNAL_ERROR
+}
+
+model Submission {
+  id               String            @id @default(cuid())
+  userId           String
+  problemKey       String
+  language         String
+  kind             SubmissionKind
+  status           SubmissionStatus  @default(QUEUED)
+  verdict          SubmissionVerdict?
+  code             String            @db.Text
+  stdin            String?           @db.Text
+  testsPassed      Int               @default(0)
+  testsTotal       Int               @default(0)
+  timeMs           Int?
+  memoryKb         Int?
+  stdoutTrunc      String?           @db.Text
+  stderrTrunc      String?           @db.Text
+  compileOutputTrunc String?          @db.Text
+  providerRef      String?
+  clientRequestId  String
+  createdAt        DateTime          @default(now())
+  finishedAt       DateTime?
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, problemKey, createdAt])
+  @@unique([userId, clientRequestId])
 }
