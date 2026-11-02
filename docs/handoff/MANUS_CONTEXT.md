@@ -97,6 +97,9 @@ Test `navigation does not create console errors` in `tests/assets/assets-and-con
 
 **Owner-authorized merge path (2026-10-31):** cancel workflow 40092064802 attempt 2 only if queued/waiting; retarget and merge #43 into `security/dependency-upgrades` with a merge commit; confirm #38/#40/#39/#41/#42 merged or report/close only ancestor heads; wait for #23 CI and merge #23 into `dev` with a merge commit only if green and protections allow; verify dev CI and smoke-test a publicly reachable preview over HTTP only; open `dev` → `main` with the required release notes and stop for explicit owner approval. Do not delete branches or touch Neon/production.
 
+### Current scoped work (2026-11-02)
+- Read-only verification completed for the owner-authorized PR #45 revert task: PR #45 is merged at `64c0db7`; verify CI run `41244139487` is success; Vercel statuses for `701dc8f` and `64c0db7` are both success with deployment targets recorded in the progress log. No revert or merge action has been taken yet.
+
 ### Stage 1 (PR #23) — summary
 `next` 16.2.10 → 16.4.3, `react`/`react-dom` 19.2.4 → 19.3.1, `next-auth` 4.24.15, `@auth/prisma-adapter` 2.11.3, overrides for `gray-matter/js-yaml` (3.15.2) and `nanoid` (3.3.18), pnpm metadata removed, `useTerminal.ts` hydration fix, session observer + refactored tests.
 
@@ -197,13 +200,18 @@ Audit totals move as new advisories are published and as npm resolves lockfile t
 4. **Complete/blocked:** dev CI passed, but the exact `ebbec64` Vercel deployment is protected by Vercel Authentication; all requested HTTP smoke tests returned 401. Stop here; do not open the release PR until the owner provides a publicly reachable preview or verifies settings.
 5. Open `dev` → `main` with the required release description and stop for explicit owner approval; do not merge it.
 
+### Current owner authorization (2026-11-02)
+- Authorized sequence: revert PR #45 merge on `revert/pr-45-ide-stub` and open/merge its PR to `main` only after green CI; then open/merge `main` → `dev` only after green CI; then HTTP-only smoke test the specified Vercel production URL; finally log the event here and push this branch.
+- This supersedes the earlier release-stop state only for the exact actions listed above. No other merges, production migrations, Neon access, force-pushes, rewrites, or branch deletion are authorized.
+
 ### Persistent prohibitions
 Never force-push, rewrite history, delete branches, access Neon/production data, run or rerun the production migration workflow, approve production deployment, or bypass branch protection.
 ---
 ## 11. NEXT ACTION (keep current)
 ```text
-NEXT ACTION: Vercel production smoke test passed. No further release action is authorized. Remaining unverified items are database-backed pages beyond `/blog`, login flows, and the contact form.
+NEXT ACTION: Read-only verification for the owner-authorized PR #45 revert completed. PR #45 CI and both requested Vercel commit statuses are success. Next: create branch revert/pr-45-ide-stub from origin/main and revert merge commit 64c0db7; do not merge until its PR CI is green.
 ```
+
 ---
 ## 12. Re-verification checklist (run first, paste output)
 
@@ -259,3 +267,4 @@ Confirm in `package.json` on the branch you work from: `@playwright/test` is exa
 2. Commit and push this file to `docs/manus-handoff`; confirm with `git ls-remote`.
 3. Commit any WIP to the item's own branch (prefix `wip:`) and push; never leave uncommitted work.
 4. Report to the owner: branch, head commit, PR number, CI link, what is verified vs not, and the single NEXT ACTION.
+| 2026-11-02 | Read-only PR #45 verification completed: required section-12 checks passed; PR #45 is merged at `64c0db7`, CI run `41244139487` passed, and Vercel commit statuses for `701dc8f` and `64c0db7` are both `success` with deployment targets recorded above. No revert or merge action taken yet. |
